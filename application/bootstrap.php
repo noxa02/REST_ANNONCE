@@ -11,4 +11,6 @@ if (DEVELOPMENT_ENVIRONMENT == true) {
     ini_set('error_log', PATH_ROOT.'/tmp/logs/error.log');
 }  
 
+include_once APPLICATION_PATH.'/includes/template.php';
 include_once APPLICATION_PATH.'/includes/autoloader.php';
+include_once APPLICATION_PATH.'/includes/dispatcher_mvc.php';

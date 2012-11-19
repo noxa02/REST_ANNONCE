@@ -3,17 +3,9 @@
 
     $data = Rest::initProcess();
    
-    var_dump($data->getData());
-    switch($data->getMethod())
-    {
-            case 'get':
-
-                break;
-            case 'post':
-                    $user = new User();
-                    $user->setFirstName($data->getData()->first_name);  // just for example, this should be done cleaner
-                    $user->save();
-                    break;
+    print_logex($data);
+    
+    if(isset($controller_)) {
+  
+        include_once($controller_); 
     }
-
-    var_dump($data);
