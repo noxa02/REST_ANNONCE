@@ -72,7 +72,8 @@ class Rest {
             
         $obj->setMethod($requestMethod);
         $obj->setRequestVars($data);
-
+        
+        //print_logex($data);
         if(isset($data['data'])) {
                 $obj->setData(json_decode($data['data']));
         }
@@ -81,7 +82,7 @@ class Rest {
 
     public static function sendResponse($status = 200, $body = '', $content_type = 'text/html')
     {
-        $status_header = 'HTTP/1.1 ' . $status . ' ' . RestUtils::getStatusCodeMessage($status);
+        $status_header = 'HTTP/1.1 ' . $status . ' ' .Rest::getStatusCodeMessage($status);
         header($status_header);
         header('Content-type: ' . $content_type);
 
@@ -113,10 +114,10 @@ class Rest {
                 $body .= '<html>';
                 $body .= '  <head>';
                 $body .= '      <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">';
-                $body .= '      <title>' . $status . ' ' . RestUtils::getStatusCodeMessage($status) . '</title>';
+                $body .= '      <title>' . $status . ' ' . Rest::getStatusCodeMessage($status) . '</title>';
                 $body .= '  </head>';
                 $body .= '  <body>';
-                $body .= '      <h1>' . RestUtils::getStatusCodeMessage($status) . '</h1>';
+                $body .= '      <h1>' . Rest::getStatusCodeMessage($status) . '</h1>';
                 $body .= '      <p>' . $message . '</p>';
                 $body .= '      <hr />';
                 $body .= '      <address>' . $signature . '</address>';

@@ -12,5 +12,6 @@ if (DEVELOPMENT_ENVIRONMENT == true) {
 }  
 
 include_once APPLICATION_PATH.'/includes/template.php';
+include_once APPLICATION_PATH.'/library/symphony/functions.php';
 include_once APPLICATION_PATH.'/includes/autoloader.php';
 include_once APPLICATION_PATH.'/includes/dispatcher_mvc.php';

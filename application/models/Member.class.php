@@ -14,6 +14,7 @@ class Member {
         $this->SQL = PDO_Mysql::getInstance();
         $this->_login = $this->_password = '';
         $this->_name  = $this->_firstname  = $this->_email = '';
+        $this->_id;
     }
     
 /**
@@ -124,100 +125,19 @@ class Member {
  * Méthodes diverses
  */
     
-    public 
-    function initSession() 
-    {    
-        try {
-            if(isset($this->_login) && !empty($this->_login)
-                  && isset($this->_password) && !empty($this->_password)) {
-
-              $_SESSION['user']['login'] = $this->_login;
-              $_SESSION['user']['password'] = sha1_password($this->_password);
-            }          
-        } catch (Exception $exc) {
-            echo $exc->getTraceAsString();
-        }
-    }
-    
-    public 
-    function initCookies() 
-    {
-        try {
-            if(isset($this->_login) && !empty($this->_login)
-                  && isset($this->_password) && !empty($this->_password)) {
-
-              if(isset($_COOKIE['user_login'])) {
-                  unset($_COOKIE['user_login']);
-              }
-              if(isset($_COOKIE['user_password'])) {
-                  unset($_COOKIE['user_password']);
-              }
-              
-              setcookie('user_login', $this->_login);
-              setcookie('user_password', sha1_password($this->_password));
-            }          
-        } catch (Exception $exc) {
-            echo $exc->getTraceAsString();
-        }
-    }
-  
-    public 
-    function destroyCookies() 
-    {
-
-        if(isset($_COOKIE['user_login'])) {
-            unset($_COOKIE['user_login']);
-        }
-        if(isset($_COOKIE['user_password'])) {
-            unset($_COOKIE['user_password']);
-        }       
-    }
-    
 	public 
-    function existUser($login_) 
+    function getUserData() 
     {
 		try {
-			$this->SQL->beginTransaction();
-			$q = $this->SQL->prepare('SELECT id FROM user '.
-									 'WHERE login = :login');
-			$q->bindValue(':login', mysql_real_escape_string($login_));
-			$q->execute();
-			$this->SQL->commit();
-			
-			if($q->rowCount() > 0) {
-				return true;
-            }
-		} catch (PDOException $e) {
-			$this->SQL->rollback();
-		}
-	}
-    
-	public 
-    function getUserData($login_, $bool_ = false) 
-    {
-		try {
-				if($bool_) {
-					$this->SQL->beginTransaction();
-					$q = $this->SQL->prepare('SELECT * FROM user '.
-											 'WHERE login = :login');
-					$q->bindValue(':login', mysql_real_escape_string($login_));
-					$q->execute();
-					$this->SQL->commit();
-                    
-					return $q->fetch(PDO::FETCH_ASSOC);
-                } elseif(!$bool_) {
-					$this->SQL->beginTransaction();
-					$q = $this->SQL->prepare('SELECT login, password FROM user '.
-											 'WHERE login = :login');
-					$q->bindValue(':login', mysql_real_escape_string($login_));
-					$q->execute();
-					$this->SQL->commit();
-                    
-					return array(0 => array('login'    => $q->fetch(),
-										    'password' => $q->fetch(),
-                                      )
-                           );
-                }
+                $this->SQL->beginTransaction();
+                $q = $this->SQL->prepare('SELECT * FROM user '.
+                                         'WHERE id = :id');
+                $q->bindValue(':id', mysql_real_escape_string($this->id));
+                $q->execute();
+                $this->SQL->commit();
+
+                return $q->fetch(PDO::FETCH_ASSOC);
+                
 		} catch (PDOException $e) {
 			$this->SQL->rollback();
 		}		
