@@ -1,7 +1,8 @@
 <?php 
 class Rest {
 
-    public static function getStatusCodeMessage($status)
+    public static 
+    function getStatusCodeMessage($status)
     {
         $codes = Array(
             100 => 'Continue',
@@ -50,7 +51,8 @@ class Rest {
         return (isset($codes[$status])) ? $codes[$status] : '';
     }
     
-    public static function initProcess()
+    public static 
+    function initProcess()
     {
         $requestMethod      = strtolower($_SERVER['REQUEST_METHOD']);
         $obj                = new RestRequest();
@@ -73,32 +75,34 @@ class Rest {
         $obj->setMethod($requestMethod);
         $obj->setRequestVars($data);
         
-        //print_logex($data);
         if(isset($data['data'])) {
                 $obj->setData(json_decode($data['data']));
         }
         return $obj;
 }
 
-    public static function sendResponse($status = 200, $body = '', $content_type = 'text/html')
+    public static 
+    function sendResponse($status = 200, $body = '', $content_type = 'text/html', $charset = 'utf-8')
     {
         $status_header = 'HTTP/1.1 ' . $status . ' ' .Rest::getStatusCodeMessage($status);
         header($status_header);
-        header('Content-type: ' . $content_type);
+        header('Content-type: ' . $content_type.'; charset="'.$charset.'";');
 
         if($body != '') {
             print $body;
             exit;
         } else {
-
             $message = '';
 
                 switch($status) {
+                        case 204:
+                                $message = 'Il n\'y a aucun résultat.';
+                                break;
                         case 401:
                                 $message = 'Vous devez être autorisé à afficher cette page.';
                                 break;
                         case 404:
-                                $message = 'L\'url demandé :  ' . $_SERVER['REQUEST_URI'] . ' n\'a pas était trouvé.';
+                                $message = 'L\'url demandé :  ' . $_SERVER['REQUEST_URI'] . ' n\'a pas été trouvé.';
                                 break;
                         case 500:
                                 $message = 'Le serveur a rencontré une erreur lors du traitement de votre demande.';

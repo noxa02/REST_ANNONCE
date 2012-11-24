@@ -1,25 +1,4 @@
 <?php
-function parseUrl() {
-    
-    $path_parts = array();
-    $filename = basename($_SERVER['SCRIPT_FILENAME']);
-    $baseUrl = prepareBaseUrl();
-    if (empty($baseUrl)) {
-        return '';
-    }
-
-    if (basename($baseUrl) === $filename) {
-        $basePath = dirname($baseUrl);
-    } else {
-        $basePath = $baseUrl;
-    }
-
-    if ('\\' === DIRECTORY_SEPARATOR) {
-        $basePath = str_replace('\\', '/', $basePath);
-    }
-
-    return rtrim($basePath, '/');
-}
 
 function prepareBaseUrl()
 {

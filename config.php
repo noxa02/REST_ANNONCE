@@ -2,7 +2,7 @@
     /**
      * Set the environment application
      */
-    define ('DEVELOPMENT_ENVIRONMENT',true);
+    define ('DEVELOPMENT_ENVIRONMENT', false);
     /**
      * Constants variables to connect the database.
      */
