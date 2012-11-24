@@ -93,11 +93,8 @@ class Rest {
             exit;
         } else {
             $message = '';
-
+            
                 switch($status) {
-                        case 204:
-                                $message = 'Il n\'y a aucun résultat.';
-                                break;
                         case 401:
                                 $message = 'Vous devez être autorisé à afficher cette page.';
                                 break;

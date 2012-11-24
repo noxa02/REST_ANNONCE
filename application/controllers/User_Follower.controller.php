@@ -5,9 +5,9 @@
     {
             case 'get':
 
-                $user_follower= new User_Follower();
-                $user_follower_data_= $user_followers_->getUserFollower($url->getIdFirstPart());
-                
+                $user_follower_ = new User_Follower();
+                $user_follower_data_= $user_follower_->getUserFollower($url->getIdFirstPart(), $url->getIdSecondPart());
+          
                 if($data->getHttpAccept() == 'json')  {  
                     Rest::sendResponse(200, json_encode($user_follower_data_), 'application/json');  
                 }  
@@ -20,8 +20,12 @@
                         "defaultTagName"     => "user",
                     );  
                     
-                    $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($user_follower_data_), 'application/xml');  
+                    $serializer = new XML_Serializer($options);
+                    
+                    if(isset($user_follower_data_) && $user_follower_data_ != false) {
+
+                        Rest::sendResponse(200, $serializer->serialize($user_follower_data_), 'application/xml');
+                    }
                 }
                     break;
     }

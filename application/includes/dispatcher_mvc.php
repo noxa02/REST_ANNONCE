@@ -35,7 +35,6 @@
     }
     
     $model = constructRoute($url);
-    
     if(existModel($model) && existController($model)) {
         
         include_once APPLICATION_PATH . '/controllers/' . $model.'.controller.php';

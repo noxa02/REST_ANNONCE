@@ -1,13 +1,9 @@
 <?php 
     $data = Rest::initProcess();
-    
-    require_once 'XML/Util.php';
-    require_once 'XML/Serializer.php';
 
     switch($data->getMethod())
     {
             case 'get':
-
                 $user_followers_ = new User_Followers();
                 $users_followers_list_ = $user_followers_->getUsersFollowers($url->getIdFirstPart());
                 
@@ -23,8 +19,9 @@
                         "defaultTagName"     => "user",
                     );  
                     
-                    $serializer = new XML_Serializer($options);  
+                    $serializer = new XML_Serializer($options); 
                     Rest::sendResponse(200, $serializer->serialize($users_followers_list_), 'application/xml');  
+                
                 }
                     break;
     }

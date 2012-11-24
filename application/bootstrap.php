@@ -12,6 +12,8 @@ if (DEVELOPMENT_ENVIRONMENT == true) {
 }  
 require_once 'XML/Util.php';
 require_once 'XML/Serializer.php';
+require_once 'XML/Unserializer.php';
+
 include_once APPLICATION_PATH.'/includes/template.php';
 include_once APPLICATION_PATH.'/library/symphony/functions.php';
 include_once APPLICATION_PATH.'/includes/autoloader.php';
