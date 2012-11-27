@@ -1,11 +1,11 @@
-CREATE DATABASE asimpletrade;
+CREATE DATABASE asimpletrade CHARACTER SET utf8  ;
 USE asimpletrade;
 
 CREATE TABLE USER (
 id int(5) NOT NULL auto_increment,
 name VARCHAR(40) NOT NULL,
 firstname VARCHAR(40) NOT NULL,
-login VARCHAR(40) NOT NULL,
+login VARCHAR(40) NOT NULL UNIQUE,
 password VARCHAR(180) NOT NULL,
 mail VARCHAR(80) NOT NULL,
 address VARCHAR(120) NOT NULL,
@@ -14,7 +14,7 @@ portable VARCHAR(30) NOT NULL,
 subscription_date DATETIME NOT NULL,
 hash VARCHAR(180),
 newsletter BOOLEAN NOT NULL DEFAULT 0,
-admin BOOLEAN NOT NULL,
+role ENUM('administrator', 'user') NOT NULL,
 PRIMARY KEY(id)) ENGINE=InnoDB;
 
 CREATE TABLE ANNOUNCEMENT (
@@ -26,11 +26,6 @@ post_date DATETIME NOT NULL,
 conclued BOOLEAN NOT NULL DEFAULT 0,
 PRIMARY KEY(id)) ENGINE=InnoDB;
 
-CREATE TABLE ANNOUNCEMENT_TYPE (
-id INT(5) NOT NULL auto_increment,
-label VARCHAR(30),
-PRIMARY KEY(id)) ENGINE=InnoDB;
-
 CREATE TABLE PICTURE (
 id INT(5) NOT NULL auto_increment,
 title VARCHAR(80),
@@ -40,7 +35,7 @@ height VARCHAR(4),
 width VARCHAR(4),
 PRIMARY KEY(id)) ENGINE=InnoDB;
 
-CREATE TABLE NEWS (
+CREATE TABLE INCOMING (
 id INT(5) NOT NULL auto_increment,
 title VARCHAR(80) NOT NULL,
 subtitle VARCHAR(80),

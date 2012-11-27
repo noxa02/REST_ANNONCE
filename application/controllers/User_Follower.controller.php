@@ -28,4 +28,7 @@
                     }
                 }
                     break;
+            default :
+                Rest::sendResponse(501);
+                    break;
     }

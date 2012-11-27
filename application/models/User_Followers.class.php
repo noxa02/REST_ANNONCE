@@ -20,7 +20,7 @@ class User_Followers extends User {
     function getUsersFollowers($id_) {
         try {
                 $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('SELECT * FROM user '.
+                $q = $this->SQL->prepare('SELECT * FROM USER '.
                                          'WHERE id IN (SELECT id_user_follower '.
                                                       'FROM TO_FOLLOW WHERE id_user_followed = :id)');
                 $q->bindValue('id', $id_);

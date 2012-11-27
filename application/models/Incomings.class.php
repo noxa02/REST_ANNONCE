@@ -1,10 +1,10 @@
 <?php
 /**
- * Description of Users
+ * Description of Incomings
  *
  * @author Hait
  */
-class Users extends User {
+class Incomings extends Incoming {
     
     private $SQL;
     
@@ -14,13 +14,14 @@ class Users extends User {
     }
 
     /**
-     * GET list of Users
+     * GET list of Incoming
+     * @return Array Return an array of all the incomings.
      */
     public 
-    function getUsers() {
+    function getIncomings() {
         try {
                 $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('SELECT * FROM USER');
+                $q = $this->SQL->prepare('SELECT * FROM INCOMING');
                 $q->execute();
                 $this->SQL->commit();
 

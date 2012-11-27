@@ -1,10 +1,10 @@
 <?php
 /**
- * Description of Users
+ * Description of Announcements
  *
  * @author Hait
  */
-class Users extends User {
+class Announcements extends Announcement {
     
     private $SQL;
     
@@ -14,13 +14,14 @@ class Users extends User {
     }
 
     /**
-     * GET list of Users
+     * GET list of Announcements
+     * @return Array Return an array of all the announcements.
      */
     public 
-    function getUsers() {
+    function getAnnouncements() {
         try {
                 $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('SELECT * FROM USER');
+                $q = $this->SQL->prepare('SELECT * FROM ANNOUNCEMENT');
                 $q->execute();
                 $this->SQL->commit();
 
