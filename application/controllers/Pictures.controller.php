@@ -1,17 +1,14 @@
 <?php 
     $data = Rest::initProcess();
-    
-    require_once 'XML/Util.php';
-    require_once 'XML/Serializer.php';
 
     switch($data->getMethod())
     {
             case 'get':
-                $users_ = new Users();
-                $users_list_ = $users_->getUsers();
+                $pictures_ = new Pictures();
+                $pictures_list_ = $pictures_->getPictures();
 
                 if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($users_list_), 'application/json');  
+                    Rest::sendResponse(200, json_encode($pictures_list_), 'application/json');  
                 }  
                 else if ($data->getHttpAccept() == 'xml')  { 
                     
@@ -19,33 +16,36 @@
                         'indent' => '     ',  
                         'addDecl' => false,  
                         XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "user",
+                        "defaultTagName"     => "picture",
                     );  
                     
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($users_list_), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($pictures_list_), 'application/xml');  
                 }
                     break;
                     
             case 'post':
-                    $user_ = new User();
-                    $data_user_ = $data->getRequestVars();
+                    $pictures_ = new Picture();
+                    $data_picture_ = $data->getRequestVars();
+                   
+                    if(isset($data_picture_) && count($data_picture_) > 0) {
 
-                    if(isset($data_user_) && count($data_user_) > 0) {
-
-                        foreach ($data_user_ as $key => $value) {
+                        foreach ($data_picture_ as $key => $value) {
 
                             $_methodName = ucfirst($key);
                             $_method = 'set'.ucfirst($key);
                             
-                            if(method_exists($user_, 'set'.$_methodName)) {
+                            if(method_exists($pictures_, 'set'.$_methodName)) {
                                
-                                $user_->$_method($value);
+                                $pictures_->$_method($value);
                             }
                         }
                     }
-                  
-                    $user_->createUser();
+                    
+                    if($pictures_->createPicture()) {
+                        
+                        Rest::sendResponse(200);
+                    }
                     break;
             default :
                 Rest::sendResponse(501);

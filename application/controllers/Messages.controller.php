@@ -1,17 +1,14 @@
 <?php 
     $data = Rest::initProcess();
-    
-    require_once 'XML/Util.php';
-    require_once 'XML/Serializer.php';
 
     switch($data->getMethod())
     {
             case 'get':
-                $users_ = new Users();
-                $users_list_ = $users_->getUsers();
+                $messages_ = new Messages();
+                $messages_list_ = $messages_->getMessages();
 
                 if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($users_list_), 'application/json');  
+                    Rest::sendResponse(200, json_encode($messages_list_), 'application/json');  
                 }  
                 else if ($data->getHttpAccept() == 'xml')  { 
                     
@@ -19,33 +16,36 @@
                         'indent' => '     ',  
                         'addDecl' => false,  
                         XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "user",
+                        "defaultTagName"     => "message",
                     );  
                     
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($users_list_), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($messages_list_), 'application/xml');  
                 }
                     break;
                     
             case 'post':
-                    $user_ = new User();
-                    $data_user_ = $data->getRequestVars();
+                    $messages_ = new Message();
+                    $data_message_ = $data->getRequestVars();
+                   
+                    if(isset($data_message_) && count($data_message_) > 0) {
 
-                    if(isset($data_user_) && count($data_user_) > 0) {
-
-                        foreach ($data_user_ as $key => $value) {
+                        foreach ($data_message_ as $key => $value) {
 
                             $_methodName = ucfirst($key);
                             $_method = 'set'.ucfirst($key);
                             
-                            if(method_exists($user_, 'set'.$_methodName)) {
+                            if(method_exists($messages_, 'set'.$_methodName)) {
                                
-                                $user_->$_method($value);
+                                $messages_->$_method($value);
                             }
                         }
                     }
-                  
-                    $user_->createUser();
+                    
+                    if($messages_->createMessage()) {
+                        
+                        Rest::sendResponse(200);
+                    }
                     break;
             default :
                 Rest::sendResponse(501);
