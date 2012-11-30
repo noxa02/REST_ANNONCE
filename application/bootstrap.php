@@ -18,8 +18,7 @@ require_once 'PHPUnit.php';
 include_once APPLICATION_PATH.'/includes/template.php';
 include_once APPLICATION_PATH.'/includes/autoloader.php';
 
-
-if(!UNITARY_TEST) {
+if(UNITARY_TEST === false) {
     include_once APPLICATION_PATH.'/library/symphony/functions.php';
     include_once APPLICATION_PATH.'/includes/dispatcher_mvc.php';
 }
