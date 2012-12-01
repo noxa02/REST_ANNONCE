@@ -24,43 +24,43 @@ class User {
  * Méthodes GET
  */
     
-	public 
-    function getId()
-	{
-		return $this->_id;
-	}
+    public 
+    function getId() 
+    {
+            return $this->_id;
+    }
 
-	public 
+    public 
     function getName()
-	{
-		return $this->_name;
-	}
+    {
+            return $this->_name;
+    }
 
-	public 
+    public 
     function getFirstname()
 	{
 		return $this->_firstname;
 	}
 
-	public 
+    public 
     function getLogin()
-	{
-		return $this->_login;
-	}
+    {
+            return $this->_login;
+    }
 
-	public 
+    public 
     function getPassword()
-	{
-		return $this->_password;
-	}
+    {
+            return $this->_password;
+    }
     
-	public 
+    public 
     function getMail()
-	{
-		return $this->_mail;
-	}
+    {
+            return $this->_mail;
+    }
     
- 	public 
+    public 
     function getAddress()
 	{
 		return $this->_address;
@@ -74,90 +74,91 @@ class User {
     
     public 
     function getPortable()
-	{
-		return $this->_portable;
-	}
+    {
+            return $this->_portable;
+    }
     
     public 
     function getSubscriptionDate()
-	{
-		return $this->_subscriptionDate;
-	}
+    {
+            return $this->_subscriptionDate;
+    }
     
     public 
     function getHash()
-	{
-		return $this->_hash;
-	}
+    {
+            return $this->_hash;
+    }
     
     public 
     function getNewsletter()
-	{
-		return $this->_newsletter;
-	}
+    {
+            return $this->_newsletter;
+    }
     
     public 
     function getRole()
-	{
-		return $this->_role;
-	}
+    {
+            return $this->_role;
+    }
 
 /**
  * Méthodes SET
  */
 
-	public 
-    function setId($_id) {
-		$this->_id = $_id;
-	}
+    public 
+    function setId($_id) 
+    {
+            $this->_id = $_id;
+    }
 
-	public 
+    public 
     function setName($_name)
-	{
-		$this->_name = $_name;
-	}
+    {
+            $this->_name = $_name;
+    }
 
-	public 
+    public 
     function setFirstname($_firstname)
-	{
-		$this->_firstname = $_firstname;
-	}
+    {
+            $this->_firstname = $_firstname;
+    }
 
-	public 
+    public 
     function setLogin($_login)
-	{
-		$this->_login = $_login;
-	}
+    {
+            $this->_login = $_login;
+    }
 
-	public 
+    public 
     function setPassword($_password)
-	{
-		$this->_password = $_password;
-	}
+    {
+            $this->_password = $_password;
+    }
 
     public 
     function setMail($mail_)
-	{
-		$this->_mail = $mail_;
-	}
+    {
+            $this->_mail = $mail_;
+    }
     
- 	public 
+    public 
     function setAddress($address_)
-	{
-		$this->_address = $address_;
-	}
+    {
+            $this->_address = $address_;
+    }
     
     public 
     function setPhone($phone_)
-	{
-		$this->_phone = $phone_;
-	}
+    {
+            $this->_phone = $phone_;
+    }
     
     public 
     function setPortable($portable_)
-	{
-		$this->_portable = $portable_;
-	}
+    {
+            $this->_portable = $portable_;
+    }
     
     public 
     function setSubscriptionDate($subscriptionDate_)
@@ -167,21 +168,21 @@ class User {
     
     public 
     function setHash($hash_)
-	{
-		$this->_hash = $hash_;
-	}
+    {
+            $this->_hash = $hash_;
+    }
     
     public 
     function setNewsletter($newsletter_)
-	{
-		$this->_newsletter = $newsletter_;
-	}
+    {
+            $this->_newsletter = $newsletter_;
+    }
     
     public 
     function setRole($role_)
-	{
-		$this->_role = $role_;
-	}
+    {
+            $this->_role = $role_;
+    }
     
     /**
      * GET data of user

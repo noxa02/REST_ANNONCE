@@ -1,6 +1,5 @@
 <?php
     include_once dirname(__FILE__).'/config.php';
-    include_once dirname(__FILE__).'/../bootstrap.php';
     
     class UserTest extends PHPUnit_Framework_TestCase {
         public function setUp(){}
@@ -118,7 +117,11 @@
         public
         function testGetUser()
         {
-
+               //$user_ = new User();
+               //$user_->setName('Jean');
+               //$user_->setFirstname('Pierre');
+               
+               //$this->assertEquals($user_, $user_->getUser($id_));
         }
 
         /**
