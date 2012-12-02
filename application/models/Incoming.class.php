@@ -12,9 +12,6 @@ class Incoming {
     public 
     function __construct() {
         $this->SQL = PDO_Mysql::getInstance();
-        $this->_title = $this->_subtitle = '';
-        $this->_content  = $this->_post_date  = '';
-        $this->_id = $this->_id_administrator = '';
     }
     
 /**

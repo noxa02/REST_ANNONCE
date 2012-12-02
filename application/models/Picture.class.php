@@ -8,10 +8,6 @@ class Picture {
     public 
     function __construct() {
         $this->SQL = PDO_Mysql::getInstance();
-        $this->_title = $this->_alternative = '';
-        $this->_path = '';
-        $this->_height = $this->_width = '';
-        $this->_id = '';
     }
     
     /**

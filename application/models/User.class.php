@@ -13,11 +13,6 @@ class User {
     public 
     function __construct() {
         $this->SQL = PDO_Mysql::getInstance();
-        $this->_login = $this->_password = '';
-        $this->_name  = $this->_firstname  = $this->_mail = '';
-        $this->_address  = $this->_phone  = $this->_portable = '';
-        $this->_subscriptionDate  = $this->_hash  = $this->_newsletter = '';
-        $this->_id = $this->_role = '';
     }
     
 /**

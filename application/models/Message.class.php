@@ -8,9 +8,6 @@ class Message {
     public 
     function __construct() {
         $this->SQL = PDO_Mysql::getInstance();
-        $this->_subject = $this->_content = '';
-        $this->_date_post = '';
-        $this->_id = '';
     }
     
     /**

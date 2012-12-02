@@ -4,7 +4,7 @@
  *
  * @author Hait
  */
-class User_Followers extends User {
+class User_Followers {
     
     private $SQL;
     

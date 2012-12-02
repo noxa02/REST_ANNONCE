@@ -38,6 +38,10 @@
     if(existModel($model) && existController($model)) {
         
         include_once APPLICATION_PATH . '/controllers/' . $model.'.controller.php';
-    } else {
+    } elseif($model === '') {
+        
+        include_once APPLICATION_PATH . '/controllers/default.controller.php';
+    }
+      else {
         Rest::sendResponse(404);   
     }
