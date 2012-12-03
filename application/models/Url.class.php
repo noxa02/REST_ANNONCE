@@ -9,11 +9,7 @@ class Url {
     private $modelSecondPart;
     private $idFirstpart;
     private $idSecondpart;
-    
-    function __construct() {
-        $this->modelFirstPart = $this->modelSecondPart = null;
-        $this->idFirstpart = $this->idSecondpart     = null;
-    }
+    private $urlArguments;
     
     public 
     function getModelFirstPart() {
@@ -36,6 +32,10 @@ class Url {
     } 
     
     public 
+    function getUrlArguments() {
+        return $this->urlArguments;
+    }
+    public 
     function setModelFirstPart($modelFirstPart_) {
         $this->modelFirstPart = $modelFirstPart_;
     } 
@@ -54,6 +54,11 @@ class Url {
     function setIdSecondPart($idSecondpart_) {
         $this->idSecondpart = $idSecondpart_;
     } 
+    
+    public
+    function setUrlArguments($urlArguments_) {
+        $this->urlArguments = $urlArguments_;
+    }
 }
 
 ?>

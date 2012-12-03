@@ -5,40 +5,46 @@
     {
             case 'get':
                 $user_ = new User();
-                $user_data_ = $user_->getUser($url->getIdFirstPart()); 
-
-                if(!empty($user_data_)) {
+                $userMapper = new \UserMapper();
+                $where = $url->getUrlArguments();
+                $where['id'] = $url->getIdFirstPart();
+                $userObject = $userMapper->select($where);
+                $userArray = extractData($userObject);
+                if(!empty($userArray)) {
                     
                     if($data->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($user_data_), 'application/json');  
+                        Rest::sendResponse(200, json_encode($userArray), 'application/json');  
                     }  
                     else if ($data->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "user",
                             XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => "user",
+
                         );  
                         $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($user_data_), 'application/xml');   
+                        Rest::sendResponse(200, $serializer->serialize($userArray), 'application/xml');   
                     }               
                 }
                     break;
             case 'delete':
-                
                 $user_ = new User();
-                if($user_->deleteUser($url->getIdFirstPart())) {
-                    Rest::sendResponse(200);
-                } else {
-                    Rest::sendResponse(500);
-                }
-                break;
+                $userMapper = new \UserMapper();
+                $where = array('id' => $url->getIdFirstPart());
+                $userMapper->update($user_, $where);
+                    break;
              case 'put':
-                    $user_ = new User();
-                    $data_user_ = $data->getRequestVars();
-                    $user_->updateUser($data_user_, $url->getIdFirstPart());
-                    Rest::sendResponse(200);
+                $user_ = new User();
+                $data_user_ = $data->getRequestVars();
+                initObject($data_user_, $user_);
+
+                $userMapper = new \UserMapper();
+                $where = array('id' => $url->getIdFirstPart());
+                $userMapper->update($user_, $where);
+                Rest::sendResponse(200);
+
                     break;
             default :
                 Rest::sendResponse(501);

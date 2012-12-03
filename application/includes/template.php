@@ -77,3 +77,41 @@ function is_admin() {
   
   return $result;
 }
+
+function extractData($object_) {
+    $data = null;
+    foreach (get_class_methods($object_) as $key => $value) {
+        if(strpos($value, 'get') !== false) {
+            if(method_exists($object_, $value)) {
+                $method = $object_->$value();
+                if(!is_null($method)) {
+                    $key = strtolower(str_replace('get', '', $value));
+                    $data[$key] = $object_->$value(); 
+                }
+            }
+        }
+    }
+        return $data;
+}
+
+function initObject($data_, $object_, $return = false) {
+    $object_ = new $object_();
+    if(isset($data_) && count($data_) > 0) {
+       foreach ($data_ as $key => $value) {
+           $_methodName = ucfirst($key);
+           if(strpos($key, '_')) {
+               $beginMethod = strstr($key, '_', true);
+               $endMethod = ucfirst(str_replace('_', '', strstr($key, '_')));
+               $_methodName = $beginMethod.$endMethod;
+           }
+           $_method = 'set'.$_methodName;
+           if(method_exists($object_, $_method)) {
+               $object_->$_method($value);
+           }
+       }
+    }
+    
+    if($return) {
+        return $object_;
+    }
+}

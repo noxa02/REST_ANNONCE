@@ -1,31 +1,31 @@
--- CREATE DATABASE asimpletrade CHARACTER SET utf8  ;
--- USE asimpletrade;
+CREATE DATABASE asimpletrade CHARACTER SET utf8  ;
+USE asimpletrade;
 
--- CREATE TABLE USER (
--- id INTEGER NOT NULL auto_increment,
--- name VARCHAR(40) NOT NULL,
--- firstname VARCHAR(40) NOT NULL,
--- login VARCHAR(40) NOT NULL UNIQUE,
--- password VARCHAR(180) NOT NULL,
--- mail VARCHAR(80) NOT NULL,
--- address VARCHAR(120) NOT NULL,
--- phone VARCHAR(30) NOT NULL,
--- portable VARCHAR(30) NOT NULL,
--- subscription_date DATETIME NOT NULL,
--- hash VARCHAR(180),
--- newsletter BOOLEAN NOT NULL DEFAULT 0,
--- role ENUM('administrator', 'user') NOT NULL,
--- PRIMARY KEY(id)) ENGINE=InnoDB;
+CREATE TABLE USER (
+id INTEGER NOT NULL auto_increment,
+name VARCHAR(40) NOT NULL,
+firstname VARCHAR(40) NOT NULL,
+login VARCHAR(40) NOT NULL UNIQUE,
+password VARCHAR(180) NOT NULL,
+mail VARCHAR(80) NOT NULL,
+address VARCHAR(120) NOT NULL,
+phone VARCHAR(30) NOT NULL,
+portable VARCHAR(30) NOT NULL,
+subscription_date TIMESTAMP NOT NULL DEFAULT NOW() ,
+hash VARCHAR(180),
+newsletter BOOLEAN NOT NULL DEFAULT 0,
+role ENUM('administrator', 'user') NOT NULL,
+PRIMARY KEY(id)) ENGINE=InnoDB;
 
--- CREATE TABLE ANNOUNCEMENT (
--- id INTEGER NOT NULL auto_increment, 
--- title VARCHAR(80) NOT NULL,
--- subtitle VARCHAR(80),
--- content TEXT NOT NULL,
--- post_date DATETIME NOT NULL,
--- conclued BOOLEAN NOT NULL DEFAULT 0,
--- type ENUM('Service', 'Logement', 'Objet') NOT NULL, 
--- PRIMARY KEY(id)) ENGINE=InnoDB;
+CREATE TABLE ANNOUNCEMENT (
+id INTEGER NOT NULL auto_increment, 
+title VARCHAR(80) NOT NULL,
+subtitle VARCHAR(80),
+content TEXT NOT NULL,
+post_date TIMESTAMP NOT NULL DEFAULT NOW(),
+conclued BOOLEAN NOT NULL DEFAULT 0,
+type ENUM('Service', 'Logement', 'Objet') NOT NULL, 
+PRIMARY KEY(id)) ENGINE=InnoDB;
 
 CREATE TABLE PICTURE (
 id INTEGER NOT NULL auto_increment,
@@ -36,19 +36,19 @@ height VARCHAR(4),
 width VARCHAR(4),
 PRIMARY KEY(id)) ENGINE=InnoDB;
 
--- CREATE TABLE INCOMING (
--- id INTEGER NOT NULL auto_increment,
--- title VARCHAR(80) NOT NULL,
--- subtitle VARCHAR(80),
--- content TEXT NOT NULL,
--- post_date DATETIME NOT NULL,
--- PRIMARY KEY(id)) ENGINE=InnoDB;
+CREATE TABLE INCOMING (
+id INTEGER NOT NULL auto_increment,
+title VARCHAR(80) NOT NULL,
+subtitle VARCHAR(80),
+content TEXT NOT NULL,
+post_date TIMESTAMP NOT NULL DEFAULT NOW(),
+PRIMARY KEY(id)) ENGINE=InnoDB;
 
 CREATE TABLE MESSAGE (
 id INTEGER NOT NULL auto_increment,
 subject VARCHAR(80) NOT NULL,
 content TEXT NOT NULL,
-date_post DATETIME NOT NULL,
+date_post TIMESTAMP NOT NULL DEFAULT NOW(),
 id_sender INTEGER NOT NULL,
 id_receiver INTEGER NOT NULL,
 PRIMARY KEY(id),
@@ -88,7 +88,7 @@ FOREIGN KEY(id_announcement) REFERENCES ANNOUNCEMENT(id)) ENGINE=InnoDB;
 CREATE TABLE COMMENT (
 id INTEGER NOT NULL auto_increment,
 content TEXT NOT NULL, 
-post_date DATETIME NOT NULL,
+post_date TIMESTAMP NOT NULL DEFAULT NOW(),
 id_user INTEGER NOT NULL,
 id_announcement INTEGER NOT NULL, 
 PRIMARY KEY(id),

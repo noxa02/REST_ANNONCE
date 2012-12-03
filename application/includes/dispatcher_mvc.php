@@ -9,31 +9,35 @@
     $uri_args = explode('/', $uri_filtred);
     array_shift($uri_args);
     $last_occurence_ = substr(strrchr($uri_, "/"), 1);
-
     /**
      * Init route 
      */
     $url = new Url();
+    $args = explode('?', $uri_filtred);
+    if(count($args) > 1) {
+        $temp = explode('&', $args[1]);
+        $url->setUrlArguments($temp);
+    }
+ 
     foreach ($uri_args as $key => $value) {
-        
+        if(strpos($value, '?') !== false) {
+            $value = strstr($value, '?', true);
+        }
         if($key === 0 && !is_numeric($value)) { //Model
-            
             $url->setModelFirstPart($value);
         } elseif($key % 2 != 0) { //ID
-            
             if($key === 1 && is_numeric($value)) {
                 $url->setIdFirstPart($value);
             } elseif(is_numeric($value)) {
                 $url->setIdSecondPart($value);
             }
         } elseif($key % 2 == 0) {
-            
             if($key === 2 && !is_numeric($value)) {
                 $url->setModelSecondPart($value);
             }
         }
     }
-    
+
     $model = constructRoute($url);
     if(existModel($model) && existController($model)) {
         

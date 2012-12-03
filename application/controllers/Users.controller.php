@@ -1,17 +1,18 @@
 <?php 
     $data = Rest::initProcess();
-    
-    require_once 'XML/Util.php';
-    require_once 'XML/Serializer.php';
 
     switch($data->getMethod())
     {
             case 'get':
-                $users_ = new Users();
-                $users_list_ = $users_->getUsers();
-
+                $user_ = new User();
+                $userMapper = new \UserMapper();
+                $where = $url->getUrlArguments();
+                $usersObject = $userMapper->select(true);
+                foreach($usersObject as $userObject) {
+                    $usersArray[] = extractData($userObject);
+                }
                 if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($users_list_), 'application/json');  
+                    Rest::sendResponse(200, json_encode($usersArray), 'application/json');  
                 }  
                 else if ($data->getHttpAccept() == 'xml')  { 
                     
@@ -23,29 +24,18 @@
                     );  
                     
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($users_list_), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($usersArray), 'application/xml');  
                 }
                     break;
                     
             case 'post':
                     $user_ = new User();
                     $data_user_ = $data->getRequestVars();
-
-                    if(isset($data_user_) && count($data_user_) > 0) {
-
-                        foreach ($data_user_ as $key => $value) {
-
-                            $_methodName = ucfirst($key);
-                            $_method = 'set'.ucfirst($key);
-                            
-                            if(method_exists($user_, 'set'.$_methodName)) {
-                               
-                                $user_->$_method($value);
-                            }
-                        }
-                    }
-                  
-                    $user_->createUser();
+                    initObject($data_user_, $user_);
+  
+                    $userMapper = new \UserMapper();
+                    $userMapper->insert($user_);
+                    Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

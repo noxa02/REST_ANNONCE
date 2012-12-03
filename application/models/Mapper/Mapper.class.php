@@ -1,158 +1,172 @@
 <?php
-/**
- * Source : http://phpmaster.com/integrating-the-data-mappers/
- * Just for test
- * TODO personal mapper
- */
+
 class Mapper
 {
-    protected $config = array();
-    protected $connection;
     protected $statement;
-    protected $fetchMode = PDO::FETCH_ASSOC;  
 
-    public function getStatement() {
-        if ($this->statement === null) {
-            throw new PDOException("There is no PDOStatement object for use.");
-        } 
+    function __construct() {
+        $this->statement = PDO_Mysql::getInstance();
+    }
+
+    public  
+    function connect() {
+        if(!is_null($this->statement)) {
+            return $this->statement;
+        }
+        
+        return $this->statement = PDO_Mysql::getInstance();
+    }
+    
+    public  
+    function disconnect() {
+        if(!is_null($this->statement)) {
+            $this->statement = null;
+        }
+    }
+    
+    public
+    function getStatement() {
+        if(is_null($this->statement)) {
+            throw new PDOException('PDOStatement isn\'t initialized ! Currently null.');
+        }
         return $this->statement;
     }
     
-    public function connect() {
-        if ($this->connection) {
-            return;
-        }
- 
+    public 
+    function getlastInsertId($name_ = null) {
         try {
-            $this->connection = $this->SQL = PDO_Mysql::getInstance();
-        }
-        catch (\PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-    
-    public function disconnect() {
-        $this->connection = null;
-    }
-    
-    public function prepare($query_, array $options = array()) {
-        $this->connect();
-        try {
-            $this->statement = $this->connection->prepare($query_, $options);
-            return $this;
-        }
-        catch (PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-    
-    public function execute(array $parameters = array()) {
-        try {
-            $this->getStatement()->execute($parameters);
-            return $this;
-        }
-        catch (PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-    
-    public function countAffectedRows() {
-        try {
-            return $this->getStatement()->rowCount();
-        }
-        catch (\PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-
-    public function getLastInsertId($name = null) {
-        $this->connect();
-        return $this->connection->lastInsertId($name);
-    }
-    
-    public function fetch($fetchStyle = null,
-        $cursorOrientation = null, $cursorOffset = null) {
-        if ($fetchStyle === null) {
-            $fetchStyle = $this->fetchMode;
-        }
- 
-        try {
-            return $this->getStatement()->fetch($fetchStyle, 
-                $cursorOrientation, $cursorOffset);
-        }
-        catch (PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-     
-    public function fetchAll($fetchStyle = null, $column = 0) {
-        if ($fetchStyle === null) {
-            $fetchStyle = $this->fetchMode;
-        }
- 
-        try {
-            return $fetchStyle === PDO::FETCH_COLUMN
-               ? $this->getStatement()->fetchAll($fetchStyle, $column)
-               : $this->getStatement()->fetchAll($fetchStyle);
-        }
-        catch (PDOException $e) {
-            throw new RunTimeException($e->getMessage());
-        }
-    }
-    
-    public function select($table, array $bind = array(), 
-        $boolOperator = "AND") {
-        if ($bind) {
-            $where = array();
-            foreach ($bind as $col => $value) {
-                unset($bind[$col]);
-                $bind[":" . $col] = $value;
-                $where[] = $col . " = :" . $col;
+            if(!$this->statement instanceof PDO) {
+                throw new PDOException('$statement isn\'t a PDO Object !');
             }
+            if(!is_null($this->statement)) {
+                return $this->statement->lastInsertId();
+            }        
+        } catch (PDOException $e) {
+            print $e->getMessage();
         }
- 
-        $sql = "SELECT * FROM " . $table
-            . (($bind) ? " WHERE "
-            . implode(" " . $boolOperator . " ", $where) : " ");
-        $this->prepare($sql)
-            ->execute($bind);
-        return $this;
     }
     
-    public function insert($table, array $bind) {
-        $cols = implode(", ", array_keys($bind));
-        $values = implode(", :", array_keys($bind));
-        foreach ($bind as $col => $value) {
-            unset($bind[$col]);
-            $bind[":" . $col] = $value;
+    public
+    function insert($table_, $object_) {
+        $data = extractData($object_);
+        $stmt = $this->connect();
+        $columns = implode(', ', array_keys($data));
+        $values  = implode(', :', array_keys($data));
+        foreach ($data as $column => $value) {
+            unset($data[$column]);
+            $data[":" . $column] = $value;
         }
- 
-        $sql = "INSERT INTO " . $table
-            . " (" . $cols . ")  VALUES (:" . $values . ")";
-        return (int) $this->prepare($sql)
-            ->execute($bind)
-            ->getLastInsertId();
+        
+        $query = 'INSERT INTO '.$table_.' '.
+               '('.$columns.')  VALUES (:'.$values.')';
+        $this->statement->prepare($query)
+                        ->execute($data);
     }
     
-    public function update($table, array $bind, $where = "") {
+    public 
+    function update($table_, $object_, $where_ = null) {
         $set = array();
-        foreach ($bind as $col => $value) {
-            unset($bind[$col]);
-            $bind[":" . $col] = $value;
-            $set[] = $col . " = :" . $col;
+        $data = extractData($object_);
+        foreach ($data as $column => $value) {
+            unset($data[$column]);
+            $data[":" . $column] = $value;
+            $set[] = $column . " = :" . $column;
         }
- 
-        $sql = "UPDATE " . $table . " SET " . implode(", ", $set)
-            . (($where) ? " WHERE " . $where : " ");
-        return $this->prepare($sql)
-            ->execute($bind)
-            ->countAffectedRows();
+        $where = array();
+        foreach ($where_ as $column => $value) {
+            unset($where_[$column]);
+            $where_[':' . $column] = $value;
+            $where[] = $column . ' = ' . $value;
+        }
+        $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
+               (($where) ? ' WHERE '.implode('AND ', $where) : ' ');
+
+        $this->statement->prepare($query)
+                        ->execute($data);
     }
     
-    public function delete($table, $where = "") {
-        $sql = "DELETE FROM " . $table . (($where) ? " WHERE " . $where : " ");
-        return $this->prepare($sql)
-            ->execute()
-            ->countAffectedRows();
+    public 
+    function select($table_, $where_, $object, $all = false) {
+        $query = 'SELECT * FROM '.$table_;
+        $q = $this->statement->prepare($query);
+        $q->execute();
+        
+         if(!$all) {
+             $data = $q->fetch(PDO::FETCH_ASSOC);
+             $object_ = initObject($data, $object, true);
+        } else {
+             $datas = $q->fetchAll(PDO::FETCH_ASSOC);
+             foreach ($datas as $data) {
+                $object_[] = initObject($data, $object, true);
+             }
+        }
+        return $object_;
+    }
+    
+    public 
+    function delete($table_, $where_ = null) {
+        $where = array();
+        foreach ($where_ as $column => $value) {
+            unset($where_[$column]);
+            $where_[":" . $column] = $value;
+            $where[] = $column . " = " . $value;
+        }
+        $query = 'DELETE FROM '.$table_. (($where)) ? 'WHERE'.implode('AND ', $where) : '';
+    
+        $this->statement->prepare($query)
+                        ->execute();
     }
 }
+
+//
+//  public 
+//    function select($table_, $where_, $object, $all = false) {
+//        $where = ''; 
+//        $count = 0;
+//        foreach ($where_ as $column => $value) {
+//            if(strpos($value, 'operator') !== false) {
+//                $value = str_replace('operator=', '', $value);
+//                $operators = explode('+', urldecode($value));
+//                unset($where_[$column]);
+//            } 
+//        }
+//
+//        foreach ($where_ as $column => $value) {
+//            if($column !== 'id') {
+//                
+//                $temp = explode('=', $value);
+//                (!is_integer($temp[1])) ? $temp[1] = '"'.$temp[1].'"' : $temp[1];
+//                
+//                if($count !== count($where_) - 1) {
+//                    $where .= $temp[0]. ' = '. $temp[1] . ' ' . $operators[$count]. ' ';
+//                    $count++;
+//                } else {
+//                    $where .= $temp[0]. ' = '. $temp[1];        
+//                }  
+//            } else {
+//                
+//                if($count !== count($where_) - 1) {
+//                    $where .= $column. ' = '. $value .' ' . $operators[$count];  
+//                    $count++;
+//                } else {
+//                    $where .= $column. ' = '. $value;   
+//                }
+//                
+//            }
+//        }
+//        $query = 'SELECT * FROM '.$table_.' '.
+//                  (($where_) ? ' WHERE '. $where  : ' ');
+//        $q = $this->statement->prepare($query);
+//        $q->execute();
+//        
+//         if(!$all) {
+//             $data = $q->fetch(PDO::FETCH_ASSOC);
+//             $object_ = initObject($data, $object, true);
+//        } else {
+//             $datas = $q->fetchAll(PDO::FETCH_ASSOC);
+//             foreach ($datas as $data) {
+//                $object_[] = initObject($data, $object, true);
+//             }
+//        }
+//        return $object_;
+//    }
