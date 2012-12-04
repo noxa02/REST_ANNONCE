@@ -86,21 +86,22 @@ class Mapper
     }
     
     public 
-    function select($table_, $where_, $object, $all = false) {
-        $query = 'SELECT * FROM '.$table_;
+    function select($table_, $where_, $object_, $all_ = false) {
+        $query = 'SELECT * FROM '.$table_.
+                  (($where_) ? ' WHERE '. $where_  : '');
         $q = $this->statement->prepare($query);
         $q->execute();
         
-         if(!$all) {
+         if(!$all_) {
              $data = $q->fetch(PDO::FETCH_ASSOC);
-             $object_ = initObject($data, $object, true);
+             $object = initObject($data, $object_, true);
         } else {
              $datas = $q->fetchAll(PDO::FETCH_ASSOC);
              foreach ($datas as $data) {
-                $object_[] = initObject($data, $object, true);
+                $object[] = initObject($data, $object_, true);
              }
         }
-        return $object_;
+        return $object;
     }
     
     public 

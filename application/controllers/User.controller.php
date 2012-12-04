@@ -6,9 +6,7 @@
             case 'get':
                 $user_ = new User();
                 $userMapper = new \UserMapper();
-                $where = $url->getUrlArguments();
-                $where['id'] = $url->getIdFirstPart();
-                $userObject = $userMapper->select($where);
+                $userObject = $userMapper->select();
                 $userArray = extractData($userObject);
                 if(!empty($userArray)) {
                     
