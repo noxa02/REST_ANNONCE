@@ -1,7 +1,10 @@
 <?php 
-    $data = Rest::initProcess();
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
     
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
                 $user_ = new User();
@@ -10,10 +13,10 @@
                 $userArray = extractData($userObject);
                 if(!empty($userArray)) {
                     
-                    if($data->getHttpAccept() == 'json')  {  
+                    if($http->getHttpAccept() == 'json')  {  
                         Rest::sendResponse(200, json_encode($userArray), 'application/json');  
                     }  
-                    else if ($data->getHttpAccept() == 'xml')  {  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
                             'indent'         => '     ',  
@@ -35,7 +38,7 @@
                     break;
              case 'put':
                 $user_ = new User();
-                $data_user_ = $data->getRequestVars();
+                $data_user_ = $http->getRequestVars();
                 initObject($data_user_, $user_);
 
                 $userMapper = new \UserMapper();
