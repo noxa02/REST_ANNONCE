@@ -1,16 +1,19 @@
 <?php 
-    $data = Rest::initProcess();
-
-    switch($data->getMethod())
+    $http = Rest::initProcess();
+    
+    switch($http->getMethod())
     {
             case 'get':
-                $user_followers_ = new User_Followers();
-                $users_followers_list_ = $user_followers_->getUsersFollowers($url->getIdFirstPart());
-                
-                if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($users_followers_list_), 'application/json');  
+                $userMapper = new UserMapper();
+                $usersObject = $userMapper->getFollowers();
+
+                foreach($usersObject as $userObject) {
+                    $usersArray[] = extractData($userObject);
+                }
+                if($http->getHttpAccept() == 'json')  {  
+                    Rest::sendResponse(200, json_encode($usersArray), 'application/json');  
                 }  
-                else if ($data->getHttpAccept() == 'xml')  { 
+                else if ($http->getHttpAccept() == 'xml')  { 
                     
                     $options = array (  
                         'indent' => '     ',  
@@ -19,9 +22,8 @@
                         "defaultTagName"     => "user",
                     );  
                     
-                    $serializer = new XML_Serializer($options); 
-                    Rest::sendResponse(200, $serializer->serialize($users_followers_list_), 'application/xml');  
-                
+                    $serializer = new XML_Serializer($options);  
+                    Rest::sendResponse(200, $serializer->serialize($usersArray), 'application/xml');  
                 }
                     break;
             default :

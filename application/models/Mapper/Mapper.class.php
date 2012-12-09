@@ -80,7 +80,12 @@ class Mapper
     public
     function insert($table_, $object_, array $arrayFilter = array(), $return = false) 
     {
-        $data = extractData($object_, $arrayFilter);
+        if(is_a($object_, 'stdClass')) {
+            $data = (array) $object_;
+        } else {
+            $data = extractData($object_, $arrayFilter);
+        }
+        
         $stmt = $this->connect();
         foreach($data as $key => $value) {
             if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
@@ -96,6 +101,7 @@ class Mapper
         
         $query = 'INSERT INTO '.$table_.' '.
                '('.$columns.')  VALUES (:'.$values.')';
+        
         $this->statement->prepare($query)
                         ->execute($data);
         
@@ -152,7 +158,7 @@ class Mapper
     {
         $query = 'SELECT * FROM '.$table_.
                   (($where_) ? ' WHERE '. $where_  : '');
-
+        
         $q = $this->statement->prepare($query);
         $q->execute();
         

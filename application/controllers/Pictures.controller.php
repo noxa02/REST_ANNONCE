@@ -1,7 +1,7 @@
 <?php 
-    $data = Rest::initProcess();
+    $http = Rest::initProcess();
     
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
                 $pictureMapper = new \PictureMapper();
@@ -9,10 +9,10 @@
                 foreach($picturesObject as $pictureObject) {
                     $picturesArray[] = extractData($pictureObject);
                 }
-                if($data->getHttpAccept() == 'json')  {  
+                if($http->getHttpAccept() == 'json')  {  
                     Rest::sendResponse(200, json_encode($picturesArray), 'application/json');  
                 }  
-                else if ($data->getHttpAccept() == 'xml')  { 
+                else if ($http->getHttpAccept() == 'xml')  { 
                     
                     $options = array (  
                         'indent' => '     ',  
@@ -25,7 +25,6 @@
                     Rest::sendResponse(200, $serializer->serialize($picturesArray), 'application/xml');  
                 }
                     break;
-                    
             case 'post':
                     $picture = new Picture();
                     $data_picture = $http->getRequestVars();

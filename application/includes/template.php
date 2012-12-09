@@ -130,7 +130,7 @@ function extractData($object_, array $arrayFilter = array()) {
  */
 function initObject($data_, $object_, $return = false) {
     $object_ = new $object_();
-    if(isset($data_) && count($data_) > 0) {
+    if(isset($data_) && !empty($data_)) {
        foreach ($data_ as $key => $value) {
            $_methodName = ucfirst($key);
            if(strpos($key, '_')) {
