@@ -1,44 +1,53 @@
 <?php 
-    $data = Rest::initProcess();
-    
-    switch($data->getMethod())
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
+
+    switch($http->getMethod())
     {
             case 'get':
-                $announcement_ = new Announcement();
-                $announcement_data_ = $announcement_->getAnnouncement($url->getIdFirstPart()); 
+                $announcementMapper = new \AnnouncementMapper();
+                $announcementObject = $announcementMapper->select();
+                $announcementArray = extractData($announcementObject);
                 
-                if(!empty($announcement_data_)) {
+                if(!empty($announcementArray)) {
                     
-                    if($data->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($announcement_data_), 'application/json');  
+                    if($http->getHttpAccept() == 'json')  {  
+                        Rest::sendResponse(200, json_encode($announcementArray), 'application/json');  
                     }  
-                    else if ($data->getHttpAccept() == 'xml')  {  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "announcement",
                             XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => "announcement",
+
                         );  
                         $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($announcement_data_), 'application/xml');   
+                        Rest::sendResponse(200, $serializer->serialize($announcementArray), 'application/xml');   
                     }               
                 }
                     break;
             case 'delete':
-                
                 $announcement_ = new Announcement();
-                if($announcement_->deleteAnnouncement($url->getIdFirstPart())) {
+                $announcementMapper = new \AnnouncementMapper();
+                
+                if($announcementMapper->delete()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
                 }
-                break;
+                    break;
              case 'put':
-                    $announcement_ = new Announcement();
-                    $data_announcement_ = $announcement_->getRequestVars();
-                    $announcement_->updateAnnouncement($data_announcement_, $url->getIdFirstPart());
-                    Rest::sendResponse(200);
+                $announcement_ = new Announcement();
+                $data_announcement_ = $http->getRequestVars();
+                $announcement_ = initObject($data_announcement_, $announcement_, true);
+                $announcementMapper = new \AnnouncementMapper();
+                $announcementMapper->update($announcement_);
+                
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

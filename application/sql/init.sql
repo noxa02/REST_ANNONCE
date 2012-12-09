@@ -32,9 +32,10 @@ id INTEGER NOT NULL auto_increment,
 title VARCHAR(80),
 alternative VARCHAR(80),
 path VARCHAR(180) NOT NULL,
-height VARCHAR(4),
-width VARCHAR(4),
-PRIMARY KEY(id)) ENGINE=InnoDB;
+extension VARCHAR(20) NOT NULL,
+id_announcement INTEGER NOT NULL,
+PRIMARY KEY(id),
+FOREIGN KEY(id_announcement) REFERENCES ANNOUNCEMENT(id)) ENGINE=InnoDB;
 
 CREATE TABLE INCOMING (
 id INTEGER NOT NULL auto_increment,
@@ -94,3 +95,24 @@ id_announcement INTEGER NOT NULL,
 PRIMARY KEY(id),
 FOREIGN KEY(id_user) REFERENCES USER(id),
 FOREIGN KEY(id_announcement) REFERENCES ANNOUNCEMENT(id)) ENGINE=InnoDB;
+
+
+
+delimiter //
+CREATE TRIGGER DELETE_ON_ANNOUNCEMENT
+  BEFORE DELETE ON ANNOUNCEMENT
+    FOR EACH ROW 
+      BEGIN
+
+      SELECT COUNT(id) INTO @countPicture FROM PICTURE
+      WHERE id_announcement  = old.id;
+
+      IF @countPicture > 0
+        THEN 
+          DELETE FROM PICTURE WHERE id_announcement = old.id;
+      END IF;   
+
+      END;
+
+//
+delimiter ;

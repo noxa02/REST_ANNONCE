@@ -1,16 +1,21 @@
 <?php 
-    $data = Rest::initProcess();
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
 
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
-                $announcements_ = new Announcements();
-                $announcements_list_ = $announcements_->getAnnouncements();
-
-                if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($announcements_list_), 'application/json');  
+                $announcementMapper = new \AnnouncementMapper();
+                $announcementsObject = $announcementMapper->select(true);
+                foreach($announcementsObject as $announcementObject) {
+                    $announcementsArray[] = extractData($announcementObject);
+                }
+                if($http->getHttpAccept() == 'json')  {  
+                    Rest::sendResponse(200, json_encode($announcementsArray), 'application/json');  
                 }  
-                else if ($data->getHttpAccept() == 'xml')  { 
+                else if ($http->getHttpAccept() == 'xml')  { 
                     
                     $options = array (  
                         'indent' => '     ',  
@@ -20,29 +25,17 @@
                     );  
                     
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($announcements_list_), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($announcementsArray), 'application/xml');  
                 }
                     break;
                     
             case 'post':
                     $announcement_ = new Announcement();
-                    $data_announcement_ = $data->getRequestVars();
-                   
-                    if(isset($data_announcement_) && count($data_announcement_) > 0) {
-
-                        foreach ($data_announcement_ as $key => $value) {
-
-                            $_methodName = ucfirst($key);
-                            $_method = 'set'.ucfirst($key);
-                            
-                            if(method_exists($announcement_, 'set'.$_methodName)) {
-                               
-                                $announcement_->$_method($value);
-                            }
-                        }
-                    }
+                    $data_announcement_ = $http->getRequestVars();
+                    $announcement_ = initObject($data_announcement_, $announcement_, true);
                     
-                    $announcement_->createAnnouncement();
+                    $announcementMapper = new \AnnouncementMapper();
+                    $announcementMapper->insert($announcement_);
                     Rest::sendResponse(200);
                     break;
             default :

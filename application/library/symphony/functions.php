@@ -26,10 +26,9 @@ function prepareBaseUrl()
             ++$index;
         } while (($last > $index) && (false !== ($pos = strpos($path, $baseUrl))) && (0 != $pos));
     }
-
+    
     // Does the baseUrl have anything in common with the request_uri?
     $requestUri = prepareRequestUri();
-
     if ($baseUrl && false !== $prefix = getUrlencodedPrefix($requestUri, $baseUrl)) {
         // full $baseUrl matches
         return $prefix;
@@ -39,7 +38,6 @@ function prepareBaseUrl()
         // directory portion of $baseUrl matches
         return rtrim($prefix, '/');
     }
-
     $truncatedRequestUri = $requestUri;
     if (($pos = strpos($requestUri, '?')) !== false) {
         $truncatedRequestUri = substr($requestUri, 0, $pos);
@@ -57,7 +55,7 @@ function prepareBaseUrl()
     if ((strlen($requestUri) >= strlen($baseUrl)) && ((false !== ($pos = strpos($requestUri, $baseUrl))) && ($pos !== 0))) {
         $baseUrl = substr($requestUri, 0, $pos + strlen($baseUrl));
     }
-
+    
     return rtrim($baseUrl, '/');
  }
  
@@ -75,7 +73,6 @@ function prepareRequestUri()
            $requestUri = substr($requestUri, strlen($schemeAndHttpHost));
        }
    }
- 
    return $requestUri;
 }
 

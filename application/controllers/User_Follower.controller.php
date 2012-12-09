@@ -1,32 +1,56 @@
 <?php 
-    $data = Rest::initProcess();
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
 
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
+                $userMapper = new UserMapper();
+                $userFollowerObject = $userMapper->getFollower();
+                $userFollowerArray = extractData($userFollowerObject);
+                
+                if(!empty($userFollowerArray)) {
+                    
+                    if($http->getHttpAccept() == 'json')  {  
+                        
+                        Rest::sendResponse(200, json_encode($userFollowerArray), 'application/json');  
+                    }  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
-                $user_follower_ = new User_Follower();
-                $user_follower_data_= $user_follower_->getUserFollower($url->getIdFirstPart(), $url->getIdSecondPart());
-          
-                if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($user_follower_data_), 'application/json');  
-                }  
-                else if ($data->getHttpAccept() == 'xml')  { 
-                    
-                    $options = array (  
-                        'indent' => '     ',  
-                        'addDecl' => false,  
-                        XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "user",
-                    );  
-                    
-                    $serializer = new XML_Serializer($options);
-                    
-                    if(isset($user_follower_data_) && $user_follower_data_ != false) {
+                        $options = array (  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "user_follower",
+                            XML_SERIALIZER_OPTION_RETURN_RESULT => true,
 
-                        Rest::sendResponse(200, $serializer->serialize($user_follower_data_), 'application/xml');
-                    }
+                        );  
+                        $serializer = new XML_Serializer($options);  
+                        Rest::sendResponse(200, $serializer->serialize($userFollowerArray), 'application/xml');   
+                    }               
+                } else {
+                    Rest::sendResponse(204);
                 }
+                    break;
+            case 'delete':
+                $user_follower_ = new User();
+                $user_followerMapper = new \User_followerMapper();
+                
+                if($user_followerMapper->delete()) {
+                    Rest::sendResponse(200);
+                } else {
+                    Rest::sendResponse(500);
+                }
+                    break;
+             case 'put':
+                $user_follower_ = new User_follower();
+                $data_user_follower_ = $http->getRequestVars();
+                $user_follower_ = initObject($data_user_follower_, $user_follower_, true);
+                $user_followerMapper = new \User_followerMapper();
+                $user_followerMapper->update($user_follower_);
+                
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

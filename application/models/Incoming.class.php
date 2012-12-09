@@ -31,7 +31,7 @@ class Incoming {
 	}
 
 	public 
-    function getSubTitle()
+    function getSubtitle()
 	{
 		return $this->_subtitle;
 	}
@@ -69,7 +69,7 @@ class Incoming {
 	}
 
 	public 
-    function setSubTitle($_subtitle)
+    function setSubtitle($_subtitle)
 	{
 		$this->_subtitle = $_subtitle;
 	}

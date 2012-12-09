@@ -47,7 +47,7 @@ class Rest {
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported'
         );
-
+         
         return (isset($codes[$status])) ? $codes[$status] : '';
     }
     
@@ -57,6 +57,7 @@ class Rest {
         $requestMethod      = strtolower($_SERVER['REQUEST_METHOD']);
         $obj                = new RestRequest();
         $data               = array();
+        $files              = array();
         $_PUT_VARS          = null;
             
         switch ($requestMethod) {
@@ -65,6 +66,9 @@ class Rest {
                         break;
                 case 'post':
                         $data = $_POST;
+                        if(isset($_FILES) && !empty($_FILES)) {
+                            $files = $_FILES;
+                        }
                         break;
                 case 'put':
                         parse_str(file_get_contents('php://input'), $_PUT_VARS);
@@ -76,11 +80,22 @@ class Rest {
         $obj->setRequestVars($data);
         
         if(isset($data['data'])) {
-                $obj->setData(json_decode($data['data']));
+            $obj->setData(json_decode($data['data']));
         }
+        if(isset($files)) {
+            $obj->setFiles($files);
+        }
+        
         return $obj;
 }
 
+    /**
+     * 
+     * @param int $status
+     * @param string $body
+     * @param string $content_type
+     * @param string $charset
+     */
     public static 
     function sendResponse($status = 200, $body = '', $content_type = 'text/html', $charset = 'utf-8')
     {
@@ -88,12 +103,12 @@ class Rest {
         header($status_header);
         header('Content-type: ' . $content_type.'; charset="'.$charset.'";');
 
-        if($body != '') {
+        if($body != '' && $status == 200) {
             print $body;
             exit;
         } else {
             $message = '';
-            
+                       
                 switch($status) {
                         case 401:
                                 $message = 'Vous devez être autorisé à afficher cette page.';

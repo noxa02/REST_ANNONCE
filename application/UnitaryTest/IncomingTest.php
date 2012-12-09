@@ -22,11 +22,11 @@
 	}
 
 	public 
-        function testGetSetSubTitle()
+        function testGetSetSubtitle()
 	{
             $incoming_ = new Incoming();
-            $incoming_->setSubTitle('subtitle');
-            $this->assertEquals('subtitle', $incoming_->getSubTitle());
+            $incoming_->setSubtitle('subtitle');
+            $this->assertEquals('subtitle', $incoming_->getSubtitle());
 	}
 
 	public 

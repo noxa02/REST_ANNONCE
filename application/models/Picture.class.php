@@ -2,14 +2,16 @@
 
 class Picture {
     
-     private $_id, $_title ,$_alternative ,$_path ,$_height ,$_width;
-    
-    
-    public 
-    function __construct() {
-        $this->SQL = PDO_Mysql::getInstance();
-    }
-    
+     private $_id;
+     private $_title;
+     private $_alternative;
+     private $_path;
+     private $_extension;
+     private $_tmp_name;
+     private $_size;
+     private $_type;
+     private $_id_announcement;
+     
     /**
      * 
      * Méthodes GET
@@ -40,18 +42,32 @@ class Picture {
 	}
 
 	public 
-    function getHeight()
+    function getTmpName()
 	{
-		return $this->_height;
+		return $this->_tmp_name;
+	}
+
+    public 
+    function getSize()
+	{
+		return $this->_size;
 	}
     
 	public 
-    function getWidth()
+    function getType()
 	{
-		return $this->_width;
+		return $this->_type;
 	}
     
-
+    public
+    function getIdAnnouncement() {
+        return $this->_id_announcement;
+    }
+    
+    public
+    function getExtension() {
+        return $this->_extension;
+    }
 /**
  * Méthodes SET
  */
@@ -78,96 +94,32 @@ class Picture {
 	{
 		$this->_alternative = $_alternative;
 	}
-
-	public 
-    function setHeight($_height)
-	{
-		$this->_height = $_height;
-	}
-
-    public 
-    function setWidth($_width)
-	{
-		$this->_width = $_width;
-	}
    
-    
-    /**
-     * POST (Create) picture
-     */
-    public 
-    function createPicture() {
-        try {
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('INSERT INTO PICTURE '.
-                                         '(title, alternative, path, height, width) '.
-                                         'VALUES(:title, :alternative, :path, :height, :width)');
-                $q->bindValue('title', $this->_title, PDO::PARAM_STR);
-                $q->bindValue('alternative', $this->_alternative, PDO::PARAM_STR);
-                $q->bindValue('path', $this->_path,PDO::PARAM_STR);
-                $q->bindValue('height', $this->_height, PDO::PARAM_STR);
-                $q->bindValue('width', $this->_width, PDO::PARAM_STR);
-                $q->execute();
-                $this->SQL->commit();
-                
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
-    
-    /**
-     * PUT (Update) picture
-     */
-    public 
-    function updatePicture($data_, $id_) {
-        try {
-            $i = 0;
-            $q = 'UPDATE PICTURE SET ';
+	public 
+    function setTmpName($tmp_name_)
+	{
+		$this->_tmp_name = $tmp_name_;
+	}
 
-            if(is_array($data_)) { 
-                foreach ($data_ as $key => $value) {
-                    if(!empty($value)) {
-                        
-                        $_title = $data_['title'];
-                        if(sizeof($data_) == 1) {
-                            $q .= $key.' = "'.$value.'"';
-                        } elseif(sizeof($data_) > 1 && $i != (sizeof($data_) - 1)) {
-                            $q .= $key.' = "'.$value.'", ';
-                        } elseif($i == (sizeof($data_) - 1)) {
-                            $q .= $key.' = "'.$value.'" ';
-                        }
-                    }
-                    $i++;
-                }
-                $q .= ' WHERE id = '.$id_;
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare($q);
-                $q->execute();
-                $this->SQL->commit();
-            }
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
-    
-    /**
-     * POST (Delete) picture
-     */
     public 
-    function deletePicture($id_) {
-        try {
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('DELETE FROM Picture '.
-                                         'WHERE id = :id');
-                $q->bindValue('id', $id_, PDO::PARAM_INT);
-                $q->execute();
-                $this->SQL->commit();
-                
-                return true;
-                
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
+    function setSize($size_)
+	{
+		$this->_size = $size_;
+	}
+    
+	public 
+    function setType($type_)
+	{
+		$this->_type = $type_;
+	}
+    
+    public
+    function setIdAnnouncement($idAnnouncement_) {
+        $this->_id_announcement = $idAnnouncement_;
     }
     
+    public
+    function setExtension($extension_) {
+        $this->_extension = $extension_;
+    }
 }

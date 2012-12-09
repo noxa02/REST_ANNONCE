@@ -4,6 +4,7 @@ class RestRequest
 {
 	private $request_vars;
 	private $data;
+    private $files; 
 	private $http_accept;
 	private $method;
 
@@ -12,6 +13,7 @@ class RestRequest
 	{
 		$this->request_vars = array();
 		$this->data         = '';
+        $this->files        = '';
 		$this->http_accept  = (strpos($_SERVER['HTTP_ACCEPT'], 'json')) ? 'json' : 'xml';
 		$this->method       = '';
 	}
@@ -21,7 +23,13 @@ class RestRequest
 	{
 		$this->data = $data;
 	}
-
+    
+	public 
+    function setFiles($files)
+	{
+		$this->files = $files;
+	}
+    
 	public 
     function setMethod($method)
 	{
@@ -40,6 +48,12 @@ class RestRequest
 		return $this->data;
 	}
 
+    public 
+    function getFiles()
+	{
+		return $this->files;
+	}
+    
 	public 
     function getMethod()
 	{

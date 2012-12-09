@@ -22,11 +22,11 @@
         }
 
         public 
-        function testGetSetSubTitle()
+        function testGetSetSubtitle()
         {
             $announcement_ = new Announcement();
-            $announcement_->setSubTitle('Un échange');
-            $this->assertEquals('Un échange',$announcement_->getSubTitle());
+            $announcement_->setSubtitle('Un échange');
+            $this->assertEquals('Un échange',$announcement_->getSubtitle());
         }
 
         public 

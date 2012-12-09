@@ -1,4 +1,5 @@
 <?php
+
     /**
      * Parse the URL and clean it.
      */
@@ -12,6 +13,7 @@
      * Initializer object URL to get argument of the URL 
      * if their here.
      */
+
 try {
     $url = new Url();
     $args = explode('?', $uri_filtred);
@@ -36,9 +38,7 @@ try {
         if($key === 0 && !is_numeric($value)) { 
             $url->setModelFirstPart($value);
         } elseif($key % 2 != 0) { 
-            if(!empty($value) && !is_numeric($value)) {
-                throw new InvalidArgumentException('The second argument must be a integer "ID" !');
-            } elseif($key === 1 && is_numeric($value)) {
+            if($key === 1 && is_numeric($value)) {
                 $url->setIdFirstPart($value);
             } elseif(is_numeric($value)) {
                 $url->setIdSecondPart($value);
@@ -57,8 +57,10 @@ try {
      * Define the used model by analyze the object URL
      * and his attributes. After include the controller to use.
      */
+    
     $model = constructRoute($url);
-    if(existModel($model) && existController($model)) {
+  
+    if(existController($model)) {
         include_once APPLICATION_PATH . '/controllers/' . $model.'.controller.php';
     } elseif($model === '') {
         include_once APPLICATION_PATH . '/controllers/default.controller.php';

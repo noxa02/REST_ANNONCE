@@ -4,12 +4,18 @@ class Mapper
 {
     protected $statement;
 
-    function __construct() {
+    function __construct() 
+    {
         $this->statement = PDO_Mysql::getInstance();
     }
 
+    /**
+     * 
+     * @return PDOObject Initialize a PDO object
+     */
     public  
-    function connect() {
+    function connect() 
+    {
         if(!is_null($this->statement)) {
             return $this->statement;
         }
@@ -17,23 +23,40 @@ class Mapper
         return $this->statement = PDO_Mysql::getInstance();
     }
     
+    /**
+     * Destroy the current PDO statement
+     */
     public  
-    function disconnect() {
+    function disconnect() 
+    {
         if(!is_null($this->statement)) {
             $this->statement = null;
         }
     }
     
+    /**
+     * 
+     * @return PDOObject Return the current PDO statement
+     * @throws PDOException
+     */
     public
-    function getStatement() {
+    function getStatement() 
+    {
         if(is_null($this->statement)) {
             throw new PDOException('PDOStatement isn\'t initialized ! Currently null.');
         }
         return $this->statement;
     }
     
+    /**
+     * 
+     * @param string $name_
+     * @return string Last ID insert with the current statement PDO
+     * @throws PDOException
+     */
     public 
-    function getlastInsertId($name_ = null) {
+    function getlastInsertId($name_ = null) 
+    {
         try {
             if(!$this->statement instanceof PDO) {
                 throw new PDOException('$statement isn\'t a PDO Object !');
@@ -46,49 +69,90 @@ class Mapper
         }
     }
     
+    /**
+     * 
+     * @param string $table_
+     * @param stdClass $object_
+     * @param array $arrayFilter
+     * @param boolean $return
+     * @return boolean
+     */
     public
-    function insert($table_, $object_) {
-        $data = extractData($object_);
+    function insert($table_, $object_, array $arrayFilter = array(), $return = false) 
+    {
+        $data = extractData($object_, $arrayFilter);
         $stmt = $this->connect();
+        foreach($data as $key => $value) {
+            if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
+                unset($data[$key]);
+            }
+        }
         $columns = implode(', ', array_keys($data));
         $values  = implode(', :', array_keys($data));
         foreach ($data as $column => $value) {
             unset($data[$column]);
-            $data[":" . $column] = $value;
+                $data[":" . $column] = $value;
         }
         
         $query = 'INSERT INTO '.$table_.' '.
                '('.$columns.')  VALUES (:'.$values.')';
         $this->statement->prepare($query)
                         ->execute($data);
+        
+        if($return) {
+            return $this->getlastInsertId();
+        }
     }
     
+    /**
+     * 
+     * @param string $table_
+     * @param $object_
+     * @param array $where_
+     * @throws InvalidArgumentException
+     */
     public 
-    function update($table_, $object_, $where_ = null) {
-        $set = array();
-        $data = extractData($object_);
-        foreach ($data as $column => $value) {
-            unset($data[$column]);
-            $data[":" . $column] = $value;
-            $set[] = $column . " = :" . $column;
+    function update($table_, $object_, $where_ = null) 
+    {
+        try {
+            $set = array();
+            $data = extractData($object_);
+            
+            if(isset($data) && empty($data)) {
+                throw new InvalidArgumentException('Must 1 or more arguments to execute an update query !');
+            }
+            
+            foreach ($data as $column => $value) {
+                unset($data[$column]);
+                $data[":" . $column] = $value;
+                $set[] = $column . " = :" . $column;
+            }
+          
+            $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
+                   (($where_) ? ' WHERE '.$where_ : ' ');
+            
+            $this->statement->prepare($query)
+                            ->execute($data); 
+            
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        $where = array();
-        foreach ($where_ as $column => $value) {
-            unset($where_[$column]);
-            $where_[':' . $column] = $value;
-            $where[] = $column . ' = ' . $value;
-        }
-        $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
-               (($where) ? ' WHERE '.implode('AND ', $where) : ' ');
-
-        $this->statement->prepare($query)
-                        ->execute($data);
     }
     
+    /**
+     * 
+     * @param string $table_
+     * @param string $where_
+     * @param stdClass $object_
+     * @param boolean $all_
+     * @return stdClass
+     */
     public 
-    function select($table_, $where_, $object_, $all_ = false) {
+    function select($table_, $where_ = null, $object_, $all_ = false) 
+    {
         $query = 'SELECT * FROM '.$table_.
                   (($where_) ? ' WHERE '. $where_  : '');
+
         $q = $this->statement->prepare($query);
         $q->execute();
         
@@ -101,73 +165,142 @@ class Mapper
                 $object[] = initObject($data, $object_, true);
              }
         }
+        
         return $object;
     }
     
+    /**
+     * 
+     * @param string $table_
+     * @param string $where_
+     * @return boolean 
+     */
     public 
-    function delete($table_, $where_ = null) {
-        $where = array();
-        foreach ($where_ as $column => $value) {
-            unset($where_[$column]);
-            $where_[":" . $column] = $value;
-            $where[] = $column . " = " . $value;
+    function delete($table_, $where_ = null) 
+    {
+        try {
+            $query = 'DELETE FROM '.$table_. 
+                      (($where_) ? ' WHERE '. $where_  : '');
+
+            return $this->statement->prepare($query)
+                                   ->execute();     
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit; 
         }
-        $query = 'DELETE FROM '.$table_. (($where)) ? 'WHERE'.implode('AND ', $where) : '';
+
+    }
     
-        $this->statement->prepare($query)
-                        ->execute();
+    /**
+     * 
+     * @return string
+     * @throws Exception
+     */
+    public  
+    function getTable() 
+    {
+        try {
+            if(!isset($this->table)) {
+                throw new Exception('Missing attribut "table" to the Mapper !');
+            }
+            
+            return $this->table; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+    
+    /**
+     * 
+     * @return string
+     * @throws Exception
+     */
+    public  
+    function getId() 
+    {
+        try {
+            if(!isset($this->id)) {
+                throw new Exception('Missing attribut "id" to the Mapper !');
+            }
+            
+            return $this->id; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+   
+    /**
+     * 
+     * @return Picture
+     * @throws Exception
+     */
+    public  
+    function getFiles() 
+    {
+        try {
+            if(!isset($this->files)) {
+                throw new Exception('Missing attribut "files" to the Mapper !');
+            }
+            
+            return $this->files; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+   
+   /**
+    * 
+    * @param string $table_
+    * @throws Exception
+    */ 
+   public  
+   function setTable($table_) 
+   {
+        try {
+            if(!isset($this->table)) {
+                throw new Exception('Missing attribut "table" to the Mapper !');
+            }
+            
+            $this->table = $table_; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+    
+    /**
+     * 
+     * @param string $id_ 
+     * @throws Exception
+     */
+    public  
+    function setId($id_) 
+    {
+        try {
+            if(!isset($this->id)) {
+                throw new Exception('Missing attribut "id" to the Mapper !');
+            }
+            
+            $this->id = $id_; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+    
+    /**
+     * 
+     * @param Picture $files_ 
+     * @throws Exception
+     */
+    public  
+    function setFiles($files_) 
+    {
+        try {
+            if(!isset($this->files)) {
+                throw new Exception('Missing attribut "files" to the Mapper !');
+            }
+            
+            $this->files = $files_; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
     }
 }
-
-//
-//  public 
-//    function select($table_, $where_, $object, $all = false) {
-//        $where = ''; 
-//        $count = 0;
-//        foreach ($where_ as $column => $value) {
-//            if(strpos($value, 'operator') !== false) {
-//                $value = str_replace('operator=', '', $value);
-//                $operators = explode('+', urldecode($value));
-//                unset($where_[$column]);
-//            } 
-//        }
-//
-//        foreach ($where_ as $column => $value) {
-//            if($column !== 'id') {
-//                
-//                $temp = explode('=', $value);
-//                (!is_integer($temp[1])) ? $temp[1] = '"'.$temp[1].'"' : $temp[1];
-//                
-//                if($count !== count($where_) - 1) {
-//                    $where .= $temp[0]. ' = '. $temp[1] . ' ' . $operators[$count]. ' ';
-//                    $count++;
-//                } else {
-//                    $where .= $temp[0]. ' = '. $temp[1];        
-//                }  
-//            } else {
-//                
-//                if($count !== count($where_) - 1) {
-//                    $where .= $column. ' = '. $value .' ' . $operators[$count];  
-//                    $count++;
-//                } else {
-//                    $where .= $column. ' = '. $value;   
-//                }
-//                
-//            }
-//        }
-//        $query = 'SELECT * FROM '.$table_.' '.
-//                  (($where_) ? ' WHERE '. $where  : ' ');
-//        $q = $this->statement->prepare($query);
-//        $q->execute();
-//        
-//         if(!$all) {
-//             $data = $q->fetch(PDO::FETCH_ASSOC);
-//             $object_ = initObject($data, $object, true);
-//        } else {
-//             $datas = $q->fetchAll(PDO::FETCH_ASSOC);
-//             foreach ($datas as $data) {
-//                $object_[] = initObject($data, $object, true);
-//             }
-//        }
-//        return $object_;
-//    }

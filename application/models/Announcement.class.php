@@ -6,13 +6,13 @@
  */
 class Announcement {
     
-    private $_id, $_title, $_subtitle, $_content;
-    private $_post_date, $_conclued, $SQL;
-    
-    public 
-    function __construct() {
-        $this->SQL = PDO_Mysql::getInstance();
-    }
+    private $_id;
+    private $_title;
+    private $_subtitle;
+    private $_content;
+    private $_post_date;
+    private $_conclued;
+    private $_pictures; 
     
 /**
  * Méthodes GET
@@ -31,7 +31,7 @@ class Announcement {
 	}
 
 	public 
-    function getSubTitle()
+    function getSubtitle()
 	{
 		return $this->_subtitle;
 	}
@@ -53,7 +53,12 @@ class Announcement {
 	{
 		return $this->_conclued;
 	}
-    
+
+    public 
+    function getPictures()
+	{
+		return $this->_pictures;
+	}
 /**
  * Méthodes SET
  */
@@ -70,7 +75,7 @@ class Announcement {
 	}
 
 	public 
-    function setSubTitle($_subtitle)
+    function setSubtitle($_subtitle)
 	{
 		$this->_subtitle = $_subtitle;
 	}
@@ -93,102 +98,9 @@ class Announcement {
 		$this->_conclued = $conclued_;
 	}
  
-    
-    /**
-     * GET data of announcement
-     */
     public 
-    function getAnnouncement($id_) {
-        try {
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('SELECT * FROM ANNOUNCEMENT WHERE id = :id');
-                $q->bindValue('id', $id_);
-                $q->execute();
-                $this->SQL->commit();
-                
-                return $q->fetch(PDO::FETCH_ASSOC);
-
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
-    
-    /**
-     * POST (Create) Announcement
-     */
-    public 
-    function createAnnouncement() {
-        try {
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('INSERT INTO ANNOUNCEMENT '.
-                                         '(title, subtitle, content, post_date, conclued) '.
-                                         'VALUES(:title, :subtitle, :content, NOW(), :conlued)');
-                $q->bindValue('title', $this->_title, PDO::PARAM_STR);
-                $q->bindValue('subtitle', $this->_subtitle, PDO::PARAM_STR);
-                $q->bindValue('content', $this->_content,PDO::PARAM_STR);
-                $q->bindValue('conlued', $this->_conclued, PDO::PARAM_INT);
-
-                $q->execute();
-                $this->SQL->commit();
-                
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
-    
-    /**
-     * PUT (Update) Announcement
-     * @param Array $data_ Array of data announcement
-     * @param int $id_ Id of announcement
-     */
-    public 
-    function updateAnnouncement($data_, $id_) {
-        try {
-            $i = 0;
-            $q = 'UPDATE ANNOUNCEMENT SET ';
-
-            if(is_array($data_)) { 
-                foreach ($data_ as $key => $value) {
-                    if(!empty($value)) {
-                        if(sizeof($data_) == 1) {
-                            $q .= $key.' = "'.$value.'"';
-                        } elseif(sizeof($data_) > 1 && $i != (sizeof($data_) - 1)) {
-                            $q .= $key.' = "'.$value.'", ';
-                        } elseif($i == (sizeof($data_) - 1)) {
-                            $q .= $key.' = "'.$value.'" ';
-                        }
-                    }
-                    $i++;
-                }
-                $q .= ' WHERE id = '.$id_;
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare($q);
-                $q->execute();
-                $this->SQL->commit();
-            }
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
-    
-    /**
-     * POST (Delete) Announcement
-     * @param int $id_ Id of announcement 
-     */
-    public 
-    function deleteAnnouncement($id_) {
-        try {
-                $this->SQL->beginTransaction();
-                $q = $this->SQL->prepare('DELETE FROM ANNOUNCEMENT '.
-                                         'WHERE id = :id');
-                $q->bindValue('id', $id_, PDO::PARAM_INT);
-                $q->execute();
-                $this->SQL->commit();
-                
-                return true;
-                
-        } catch (PDOException $e) {
-            $this->SQL->rollback();
-        }	       
-    }
+    function setPictures($pictures_)
+	{
+		$this->_pictures = $pictures_;
+	}
 }

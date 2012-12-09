@@ -1,47 +1,56 @@
 <?php 
-    $data = Rest::initProcess();
+
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
     
-    require_once 'XML/Util.php';
-    require_once 'XML/Serializer.php';
-    
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
                 $picture_ = new Picture();
-                $picture_data_ = $picture_->getPicture($url->getIdFirstPart()); 
-
-                if(!empty($picture_data_)) {
+                $pictureMapper = new \PictureMapper();
+                $pictureObject = $pictureMapper->select();
+                $pictureArray = extractData($pictureObject);
+                if(!empty($pictureArray)) {
                     
-                    if($data->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($picture_data_), 'application/json');  
+                    if($http->getHttpAccept() == 'json')  {  
+                        Rest::sendResponse(200, json_encode($pictureArray), 'application/json');  
                     }  
-                    else if ($data->getHttpAccept() == 'xml')  {  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "picture",
                             XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => "picture",
+
                         );  
                         $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($picture_data_), 'application/xml');   
+                        Rest::sendResponse(200, $serializer->serialize($pictureArray), 'application/xml');   
                     }               
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
             case 'delete':
-                
                 $picture_ = new Picture();
-                if($picture_->deletePicture($url->getIdFirstPart())) {
+                $pictureMapper = new \PictureMapper();
+                
+                if($pictureMapper->delete()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
                 }
-                break;
+                    break;
              case 'put':
-                    $picture_ = new Picture();
-                    $data_picture_ = $data->getRequestVars();
-                    $picture_->updatePicture($data_picture_, $url->getIdFirstPart());
-                    Rest::sendResponse(200);
+                $picture_ = new Picture();
+                $data_picture_ = $http->getRequestVars();
+                $picture_ = initObject($data_picture_, $picture_, true);
+                $pictureMapper = new \PictureMapper();
+                $pictureMapper->update($picture_);
+                
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);
