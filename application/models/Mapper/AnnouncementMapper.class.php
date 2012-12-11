@@ -41,20 +41,21 @@ class AnnouncementMapper extends Mapper {
             }
             
             $announcement_->setPictures($pictures);
+            if(!is_null($announcement_->getPictures())) {
+                foreach ($announcement_->getPictures() as $key => $value) {
+                    $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
+                    $value->setIdAnnouncement($idAnnouncement);
+                    $value->setPath('/announcement/original/');
+                    $value->setTitle('announcement_'.$announcement_->getId().'_'.$key);
+                    $value->setExtension($pictureExt);
+                    move_uploaded_file(
+                        $value->getTmpName(), 
+                        UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
+                    );
 
-            foreach ($announcement_->getPictures() as $key => $value) {
-                $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
-                $value->setIdAnnouncement($idAnnouncement);
-                $value->setPath('/announcement/original/');
-                $value->setTitle('announcement_'.$announcement_->getId().'_'.$key);
-                $value->setExtension($pictureExt);
-                move_uploaded_file(
-                    $value->getTmpName(), 
-                    UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
-                );
-
-                $pictureMapper = new PictureMapper();
-                $pictureMapper->insert($value, array('tmp_name', 'size', 'type'));      
+                    $pictureMapper = new PictureMapper();
+                    $pictureMapper->insert($value, array('tmp_name', 'size', 'type'));      
+                }
             }   
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;

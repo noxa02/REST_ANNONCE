@@ -1,59 +1,56 @@
 <?php 
-    $data = Rest::initProcess();
+
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
     
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
                 $incoming_ = new Incoming();
-                $incoming_data_ = $incoming_->getIncoming($url->getIdFirstPart()); 
-
-                if(!empty($incoming_data_)) {
+                $incomingMapper = new \IncomingMapper();
+                $incomingObject = $incomingMapper->select();
+                $incomingArray = extractData($incomingObject);
+                if(!empty($incomingArray)) {
                     
-                    if($data->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($incoming_data_), 'application/json');  
+                    if($http->getHttpAccept() == 'json')  {  
+                        Rest::sendResponse(200, json_encode($incomingArray), 'application/json');  
                     }  
-                    else if ($data->getHttpAccept() == 'xml')  {  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "incoming",
                             XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => "incoming",
+
                         );  
                         $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($incoming_data_), 'application/xml');   
+                        Rest::sendResponse(200, $serializer->serialize($incomingArray), 'application/xml');   
                     }               
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
             case 'delete':
-                
                 $incoming_ = new Incoming();
-                if($incoming_->deleteIncoming($url->getIdFirstPart())) {
+                $incomingMapper = new \IncomingMapper();
+                
+                if($incomingMapper->delete()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
                 }
-                break;
+                    break;
              case 'put':
-                 
-                    $incoming_ = new Incoming();
-                    $data_incoming_ = $data->getRequestVars();
-                    
-                    if(isset($data_incoming_) && count($data_incoming_) > 0) {
-
-                        foreach ($data_incoming_ as $key => $value) {
-
-                            $_methodName = ucfirst($key);
-                            $_method = 'set'.ucfirst($key);
-                            
-                            if(method_exists($incoming_, 'set'.$_methodName)) {
-                               
-                                $incoming_->$_method($value);
-                            }
-                        }
-                    }
-                    $incoming_->updateIncoming($data_incoming_, $url->getIdFirstPart());
-                    Rest::sendResponse(200);
+                $incoming_ = new Incoming();
+                $data_incoming_ = $http->getRequestVars();
+                $incoming_ = initObject($data_incoming_, $incoming_, true);
+                $incomingMapper = new \IncomingMapper();
+                $incomingMapper->update($incoming_);
+                
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

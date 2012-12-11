@@ -30,13 +30,15 @@
                     break;
                     
             case 'post':
-                    $announcement_ = new Announcement();
-                    $data_announcement_ = $http->getRequestVars();
-                    $announcement_ = initObject($data_announcement_, $announcement_, true);
-                    
-                    $announcementMapper = new \AnnouncementMapper();
-                    $announcementMapper->insert($announcement_);
-                    Rest::sendResponse(200);
+                
+                exit;
+                $announcement = new Announcement();
+                $data_announcement = $http->getRequestVars();
+                $announcement = initObject($data_announcement, $announcement, true);
+
+                $announcementMapper = new \AnnouncementMapper();
+                $announcementMapper->insert($announcement_);
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

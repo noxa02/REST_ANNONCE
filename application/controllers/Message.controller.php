@@ -1,44 +1,56 @@
 <?php 
-    $data = Rest::initProcess();
+
+    /**
+     * Get the HTTP method and differents data.
+     */
+    $http = Rest::initProcess();
     
-    switch($data->getMethod())
+    switch($http->getMethod())
     {
             case 'get':
                 $message_ = new Message();
-                $message_data_ = $message_->getMessage($url->getIdFirstPart()); 
-
-                if(!empty($message_data_)) {
+                $messageMapper = new \MessageMapper();
+                $messageObject = $messageMapper->select();
+                $messageArray = extractData($messageObject);
+                if(!empty($messageArray)) {
                     
-                    if($data->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($message_data_), 'application/json');  
+                    if($http->getHttpAccept() == 'json')  {  
+                        Rest::sendResponse(200, json_encode($messageArray), 'application/json');  
                     }  
-                    else if ($data->getHttpAccept() == 'xml')  {  
+                    else if ($http->getHttpAccept() == 'xml')  {  
 
                         $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
+                            'indent'         => '     ',  
+                            'addDecl'        => false,  
+                            "defaultTagName" => "message",
                             XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => "message",
+
                         );  
                         $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($message_data_), 'application/xml');   
+                        Rest::sendResponse(200, $serializer->serialize($messageArray), 'application/xml');   
                     }               
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
             case 'delete':
-                
                 $message_ = new Message();
-                if($message_->deleteMessage($url->getIdFirstPart())) {
+                $messageMapper = new \MessageMapper();
+                
+                if($messageMapper->delete()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
                 }
-                break;
+                    break;
              case 'put':
-                    $message_ = new Message();
-                    $data_message_ = $data->getRequestVars();
-                    $message_->updateMessage($data_message_, $url->getIdFirstPart());
-                    Rest::sendResponse(200);
+                $message_ = new Message();
+                $data_message_ = $http->getRequestVars();
+                $message_ = initObject($data_message_, $message_, true);
+                $messageMapper = new \MessageMapper();
+                $messageMapper->update($message_);
+                
+                Rest::sendResponse(200);
                     break;
             default :
                 Rest::sendResponse(501);

@@ -101,7 +101,7 @@ class Mapper
         
         $query = 'INSERT INTO '.$table_.' '.
                '('.$columns.')  VALUES (:'.$values.')';
-        
+
         $this->statement->prepare($query)
                         ->execute($data);
         
@@ -205,7 +205,7 @@ class Mapper
     function getTable() 
     {
         try {
-            if(!isset($this->table)) {
+            if(!property_exists($this, 'table')) {
                 throw new Exception('Missing attribut "table" to the Mapper !');
             }
             
@@ -224,7 +224,7 @@ class Mapper
     function getId() 
     {
         try {
-            if(!isset($this->id)) {
+            if(!property_exists($this, 'id')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
             
@@ -243,7 +243,7 @@ class Mapper
     function getFiles() 
     {
         try {
-            if(!isset($this->files)) {
+            if(!property_exists($this, 'files')) {
                 throw new Exception('Missing attribut "files" to the Mapper !');
             }
             
@@ -262,7 +262,7 @@ class Mapper
    function setTable($table_) 
    {
         try {
-            if(!isset($this->table)) {
+            if(!property_exists($this, 'table')) {
                 throw new Exception('Missing attribut "table" to the Mapper !');
             }
             
@@ -281,7 +281,7 @@ class Mapper
     function setId($id_) 
     {
         try {
-            if(!isset($this->id)) {
+            if(!property_exists($this, 'id')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
             
@@ -300,7 +300,7 @@ class Mapper
     function setFiles($files_) 
     {
         try {
-            if(!isset($this->files)) {
+            if(!property_exists($this, 'files')) {
                 throw new Exception('Missing attribut "files" to the Mapper !');
             }
             
@@ -308,5 +308,16 @@ class Mapper
         } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
+    }
+    
+    public
+    function property_exists($class_, $property_)
+    {
+      if (!property_exists($class_, $property_)) {
+        $reflClass = new ReflectionClass($class);
+        return $reflClass->hasProperty($prop);
+      } else {
+          return property_exists($class_, $property_);
+      }
     }
 }

@@ -6,15 +6,20 @@
  */
 class User {
     
-    private $_id, $_login ,$_password ,$_name ,$_firstname ,$_mail;
-    private $_address ,$_phone ,$_portable ,$_subscriptionDate ,$_hash;
-    private $_newsletter, $_role, $SQL;
-    
-    public 
-    function __construct() {
-        $this->SQL = PDO_Mysql::getInstance();
-    }
-    
+    private $_id;
+    private $_login;
+    private $_password;
+    private $_name;
+    private $_firstname;
+    private $_mail;
+    private $_address;
+    private $_phone;
+    private $_portable;
+    private $_subscriptionDate;
+    private $_hash;
+    private $_newsletter;
+    private $_role;
+      
 /**
  * Méthodes GET
  */
@@ -178,113 +183,4 @@ class User {
     {
             $this->_role = $role_;
     }
-    
-//    /**
-//     * GET data of user
-//     */
-//    public 
-//    function getUser($id_) {
-//        try {
-//                $this->SQL->beginTransaction();
-//                $q = $this->SQL->prepare('SELECT * FROM USER WHERE id = :id');
-//                $q->bindValue('id', $id_);
-//                $q->execute();
-//                $this->SQL->commit();
-//                
-//                return $q->fetch(PDO::FETCH_ASSOC);
-//
-//        } catch (PDOException $e) {
-//            $this->SQL->rollback();
-//        }	       
-//    }
-////    
-////    /**
-////     * POST (Create) user
-////     */
-////    public 
-////    function createUser() {
-////        try {
-////                $this->SQL->beginTransaction();
-////                $q = $this->SQL->prepare('INSERT INTO USER '.
-////                                         '(name, firstname, login, password, mail, address, phone,  '.
-////                                         'portable, subscription_date, hash, newsletter, role) '.
-////                                         'VALUES(:name, :firstname, :login, :password, :mail, '.
-////                                         ':address , :phone, :portable, NOW(), :hash, '.
-////                                         ':newsletter, :role)');
-////                $q->bindValue('name', $this->_name, PDO::PARAM_STR);
-////                $q->bindValue('firstname', $this->_firstname, PDO::PARAM_STR);
-////                $q->bindValue('login', $this->_login,PDO::PARAM_STR);
-////                $q->bindValue('password', sha1_password($this->_password), PDO::PARAM_STR);
-////                $q->bindValue('mail', $this->_mail, PDO::PARAM_STR);
-////                $q->bindValue('address', $this->_address, PDO::PARAM_STR);
-////                $q->bindValue('phone', $this->_phone, PDO::PARAM_STR);
-////                $q->bindValue('portable', $this->_portable, PDO::PARAM_STR);
-////                $q->bindValue('hash', $this->_hash, PDO::PARAM_STR);
-////                $q->bindValue('newsletter', $this->_newsletter, PDO::PARAM_INT);
-////                $q->bindValue('role', $this->_role, PDO::PARAM_STR);
-////
-////                $q->execute();
-////                $this->SQL->commit();
-////                
-////        } catch (PDOException $e) {
-////            $this->SQL->rollback();
-////        }	       
-////    }
-//    
-//    /**
-//     * PUT (Update) user
-//     */
-//    public 
-//    function updateUser($data_, $id_) {
-//        try {
-//            $i = 0;
-//            $q = 'UPDATE USER SET ';
-//
-//            if(is_array($data_)) { 
-//                foreach ($data_ as $key => $value) {
-//                    if(!empty($value)) {
-//                        if($key === 'password') {
-//                            $value = sha1_password($value);
-//                        }
-//                        $_login = $data_['login'];
-//                        if(sizeof($data_) == 1) {
-//                            $q .= $key.' = "'.$value.'"';
-//                        } elseif(sizeof($data_) > 1 && $i != (sizeof($data_) - 1)) {
-//                            $q .= $key.' = "'.$value.'", ';
-//                        } elseif($i == (sizeof($data_) - 1)) {
-//                            $q .= $key.' = "'.$value.'" ';
-//                        }
-//                    }
-//                    $i++;
-//                }
-//                $q .= ' WHERE id = '.$id_;
-//                $this->SQL->beginTransaction();
-//                $q = $this->SQL->prepare($q);
-//                $q->execute();
-//                $this->SQL->commit();
-//            }
-//        } catch (PDOException $e) {
-//            $this->SQL->rollback();
-//        }	       
-//    }
-//    
-//    /**
-//     * POST (Delete) user
-//     */
-//    public 
-//    function deleteUser($id_) {
-//        try {
-//                $this->SQL->beginTransaction();
-//                $q = $this->SQL->prepare('DELETE FROM user '.
-//                                         'WHERE id = :id');
-//                $q->bindValue('id', $id_, PDO::PARAM_INT);
-//                $q->execute();
-//                $this->SQL->commit();
-//                
-//                return true;
-//                
-//        } catch (PDOException $e) {
-//            $this->SQL->rollback();
-//        }	       
-//    }
 }

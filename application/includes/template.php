@@ -138,8 +138,8 @@ function initObject($data_, $object_, $return = false) {
                $endMethod = ucfirst(str_replace('_', '', strstr($key, '_')));
                $_methodName = $beginMethod.$endMethod;
            }
+           
            $_method = 'set'.$_methodName;
-
            if(method_exists($object_, $_method)) {
                $object_->$_method($value);
            }

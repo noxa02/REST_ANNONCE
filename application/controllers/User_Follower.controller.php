@@ -51,12 +51,6 @@
 
             Rest::sendResponse(200);
                 break;
-         case 'post':
-            $userMapper = new UserMapper();
-            if($userMapper->goFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
-                Rest::sendResponse(200);   
-            }
-                break;
          default :
             Rest::sendResponse(501);
                     break;

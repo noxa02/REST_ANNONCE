@@ -59,7 +59,7 @@ try {
      */
     
     $model = constructRoute($url);
-  
+    
     if(existController($model)) {
         include_once APPLICATION_PATH . '/controllers/' . $model.'.controller.php';
     } elseif($model === '') {

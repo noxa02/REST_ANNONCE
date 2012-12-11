@@ -1,16 +1,18 @@
 <?php 
-    $data = Rest::initProcess();
-
-    switch($data->getMethod())
+    $http = Rest::initProcess();
+    
+    switch($http->getMethod())
     {
             case 'get':
-                $messages_ = new Messages();
-                $messages_list_ = $messages_->getMessages();
-
-                if($data->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($messages_list_), 'application/json');  
+                $messageMapper = new MessageMapper();
+                $messagesObject = $messageMapper->select(true);
+                foreach($messagesObject as $messageObject) {
+                    $messagesArray[] = extractData($messageObject);
+                }
+                if($http->getHttpAccept() == 'json')  {  
+                    Rest::sendResponse(200, json_encode($messagesArray), 'application/json');  
                 }  
-                else if ($data->getHttpAccept() == 'xml')  { 
+                else if ($http->getHttpAccept() == 'xml')  { 
                     
                     $options = array (  
                         'indent' => '     ',  
@@ -20,32 +22,19 @@
                     );  
                     
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($messages_list_), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($messagesArray), 'application/xml');  
                 }
                     break;
-                    
             case 'post':
-                    $messages_ = new Message();
-                    $data_message_ = $data->getRequestVars();
+                    $message = new Message();
+                    $data_message = $http->getRequestVars();
+                    $message = initObject($data_message, $message, true);
                    
-                    if(isset($data_message_) && count($data_message_) > 0) {
-
-                        foreach ($data_message_ as $key => $value) {
-
-                            $_methodName = ucfirst($key);
-                            $_method = 'set'.ucfirst($key);
-                            
-                            if(method_exists($messages_, 'set'.$_methodName)) {
-                               
-                                $messages_->$_method($value);
-                            }
-                        }
+                    $messageMapper = new MessageMapper();
+                    if($messageMapper->insert($message)) {
+                        Rest::sendResponse(200);   
                     }
                     
-                    if($messages_->createMessage()) {
-                        
-                        Rest::sendResponse(200);
-                    }
                     break;
             default :
                 Rest::sendResponse(501);
