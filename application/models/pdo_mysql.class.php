@@ -15,6 +15,7 @@ class PDO_Mysql
                     array(PDO::ATTR_PERSISTENT => true, 
                           PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'')
                     );
+            self::$_instancePDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch(PDOException $e) {
             print $e->getMessage(); exit;
         }

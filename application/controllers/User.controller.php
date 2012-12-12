@@ -31,21 +31,19 @@
                 }
                     break;
             case 'delete':
-                $user_ = new User();
+                $user_ = new \User();
                 $userMapper = new \UserMapper();
                 $where = array('id' => $url->getIdFirstPart());
                 $userMapper->update($user_, $where);
                     break;
              case 'put':
-                $user_ = new User();
-                $data_user_ = $http->getRequestVars();
-                initObject($data_user_, $user_);
-
+                $user = new \User();
+                $data_user = $http->getRequestVars();
+                $user = initObject($data_user, $user, true);
                 $userMapper = new \UserMapper();
-                $where = array('id' => $url->getIdFirstPart());
-                $userMapper->update($user_, $where);
+                $userMapper->update($user);
+                
                 Rest::sendResponse(200);
-
                     break;
             default :
                 Rest::sendResponse(501);

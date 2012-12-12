@@ -26,8 +26,8 @@ class UserMapper extends Mapper {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
-        
-        parent::insert($this->table, $user_);
+
+        return parent::insert($this->table, $user_);
     } 
     
     /**
@@ -118,7 +118,7 @@ class UserMapper extends Mapper {
           
             $user = $this->getFollower();
             if(is_null($user->getId())) {
-                 parent::insert('TO_FOLLOW', $userFollow);
+                 return parent::insert('TO_FOLLOW', $userFollow);
             } else {
                 throw new Exception('The user is already followed by this user !');
             }     

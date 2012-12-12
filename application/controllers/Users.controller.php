@@ -33,12 +33,14 @@
 
         case 'post':
             $user = new User();
-            $data_user_ = $http->getRequestVars();
-            $user = initObject($data_user_, $user);
-
-            $userMapper = new \UserMapper();
-            $userMapper->insert($user);
-            Rest::sendResponse(200);
+            $data_user = $http->getRequestVars();
+            $user = initObject($data_user, $user, true);
+            
+            $userMapper = new \UserMapper(); 
+            if($userMapper->insert($user)) {
+                Rest::sendResponse(200);
+            }
+            
                 break;
         default :
             Rest::sendResponse(501);

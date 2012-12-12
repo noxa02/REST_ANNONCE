@@ -31,7 +31,6 @@
                 }
                     break;
             case 'delete':
-                $announcement_ = new Announcement();
                 $announcementMapper = new \AnnouncementMapper();
                 
                 if($announcementMapper->delete()) {
@@ -41,11 +40,11 @@
                 }
                     break;
              case 'put':
-                $announcement_ = new Announcement();
-                $data_announcement_ = $http->getRequestVars();
-                $announcement_ = initObject($data_announcement_, $announcement_, true);
+                $announcement = new Announcement();
+                $data_announcement = $http->getRequestVars();
+                $announcement = initObject($data_announcement, $announcement, true);
                 $announcementMapper = new \AnnouncementMapper();
-                $announcementMapper->update($announcement_);
+                $announcementMapper->update($announcement);
                 
                 Rest::sendResponse(200);
                     break;

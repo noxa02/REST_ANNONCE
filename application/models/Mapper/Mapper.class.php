@@ -80,33 +80,34 @@ class Mapper
     public
     function insert($table_, $object_, array $arrayFilter = array(), $return = false) 
     {
-        if(is_a($object_, 'stdClass')) {
-            $data = (array) $object_;
-        } else {
-            $data = extractData($object_, $arrayFilter);
-        }
-        
-        $stmt = $this->connect();
-        foreach($data as $key => $value) {
-            if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
-                unset($data[$key]);
+        try {
+            if(is_a($object_, 'stdClass')) {
+                $data = (array) $object_;
+            } else {
+                $data = extractData($object_, $arrayFilter);
             }
-        }
-        $columns = implode(', ', array_keys($data));
-        $values  = implode(', :', array_keys($data));
-        foreach ($data as $column => $value) {
-            unset($data[$column]);
-                $data[":" . $column] = $value;
-        }
-        
-        $query = 'INSERT INTO '.$table_.' '.
-               '('.$columns.')  VALUES (:'.$values.')';
 
-        $this->statement->prepare($query)
-                        ->execute($data);
-        
-        if($return) {
-            return $this->getlastInsertId();
+            $stmt = $this->connect();
+            foreach($data as $key => $value) {
+                if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
+                    unset($data[$key]);
+                }
+            }
+            $columns = implode(', ', array_keys($data));
+            $values  = implode(', :', array_keys($data));
+            foreach ($data as $column => $value) {
+                unset($data[$column]);
+                    $data[":" . $column] = $value;
+            }
+
+            $query = 'INSERT INTO '.$table_.' '.
+                   '('.$columns.')  VALUES (:'.$values.')';
+
+            return $this->statement->prepare($query)
+                                   ->execute($data);
+            
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit;
         }
     }
     
@@ -142,6 +143,8 @@ class Mapper
             
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit;
         }
     }
     
@@ -156,23 +159,27 @@ class Mapper
     public 
     function select($table_, $where_ = null, $object_, $all_ = false) 
     {
-        $query = 'SELECT * FROM '.$table_.
-                  (($where_) ? ' WHERE '. $where_  : '');
-        
-        $q = $this->statement->prepare($query);
-        $q->execute();
-        
-         if(!$all_) {
-             $data = $q->fetch(PDO::FETCH_ASSOC);
-             $object = initObject($data, $object_, true);
-        } else {
-             $datas = $q->fetchAll(PDO::FETCH_ASSOC);
-             foreach ($datas as $data) {
-                $object[] = initObject($data, $object_, true);
-             }
+        try {
+            $query = 'SELECT * FROM '.$table_.
+                      (($where_) ? ' WHERE '. $where_  : '');
+
+            $q = $this->statement->prepare($query);
+            $q->execute();
+
+             if(!$all_) {
+                 $data = $q->fetch(PDO::FETCH_ASSOC);
+                 $object = initObject($data, $object_, true);
+            } else {
+                 $datas = $q->fetchAll(PDO::FETCH_ASSOC);
+                 foreach ($datas as $data) {
+                    $object[] = initObject($data, $object_, true);
+                 }
+            }
+
+            return $object;            
+        } catch(PDOException $e) {
+            $e->getMessage(); exit;
         }
-        
-        return $object;
     }
     
     /**

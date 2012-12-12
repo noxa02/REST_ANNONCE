@@ -37,8 +37,9 @@
                 $announcement = initObject($data_announcement, $announcement, true);
 
                 $announcementMapper = new \AnnouncementMapper();
-                $announcementMapper->insert($announcement_);
-                Rest::sendResponse(200);
+                if($announcementMapper->insert($announcement_)) {
+                    Rest::sendResponse(200);   
+                }
                     break;
             default :
                 Rest::sendResponse(501);
