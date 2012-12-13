@@ -128,7 +128,7 @@ function extractData($object_, array $arrayFilter = array()) {
  * @return object $object_
  * Extract array values to return an initialized object
  */
-function initObject($data_, $object_, $return = false) {
+function initObject($data_, $object_, $return = false, $opts_ = array()) {
     $object_ = new $object_();
     if(isset($data_) && !empty($data_)) {
        foreach ($data_ as $key => $value) {
@@ -141,6 +141,9 @@ function initObject($data_, $object_, $return = false) {
            
            $_method = 'set'.$_methodName;
            if(method_exists($object_, $_method)) {
+               if(in_array('password', $opts_)) {
+                   $object_->$_method($value, true);
+               }
                $object_->$_method($value);
            }
        }

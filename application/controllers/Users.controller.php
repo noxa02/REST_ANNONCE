@@ -34,7 +34,7 @@
         case 'post':
             $user = new User();
             $data_user = $http->getRequestVars();
-            $user = initObject($data_user, $user, true);
+            $user = initObject($data_user, $user, true, array('password'));
             
             $userMapper = new \UserMapper(); 
             if($userMapper->insert($user)) {

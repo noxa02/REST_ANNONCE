@@ -131,9 +131,13 @@ class User {
     }
 
     public 
-    function setPassword($_password)
+    function setPassword($_password, $encrypt = false)
     {
+        if($encrypt) {
             $this->_password = sha1_password($_password);
+        } else {
+            $this->_password = $_password;
+        }
     }
 
     public 
