@@ -5,7 +5,7 @@
     {
             case 'get':
                 $pictureMapper = new \PictureMapper();
-                $picturesObject = $pictureMapper->select(true);
+                $picturesObject = $pictureMapper->selectPicture(true);
                 foreach($picturesObject as $pictureObject) {
                     $picturesArray[] = extractData($pictureObject);
                 }
@@ -31,7 +31,7 @@
                     $picture = initObject($data_picture, $picture, true);
                     
                     $pictureMapper = new PictureMapper();
-                    if($pictureMapper->insert($picture)) {
+                    if($pictureMapper->insertPicture($picture)) {
                         Rest::sendResponse(200);   
                     }
                     

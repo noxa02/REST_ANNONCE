@@ -5,7 +5,7 @@
     {
             case 'get':
                 $incomingMapper = new \IncomingMapper();
-                $incomingsObject = $incomingMapper->select(true);
+                $incomingsObject = $incomingMapper->selectIncoming(true);
                 foreach($incomingsObject as $incomingObject) {
                     $incomingsArray[] = extractData($incomingObject);
                 }
@@ -31,7 +31,7 @@
                     $incoming = initObject($data_incoming, $incoming, true);
                     
                     $incomingMapper = new IncomingMapper();
-                    if($incomingMapper->insert($incoming)) {
+                    if($incomingMapper->insertIncoming($incoming)) {
                         Rest::sendResponse(200);   
                     }
                     

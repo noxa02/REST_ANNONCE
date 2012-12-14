@@ -25,16 +25,16 @@ class MessageMapper extends Mapper {
     * @throws InvalidArgumentException
     */
     public 
-    function insert(Message $message_, array $arrayFilter = array()) 
+    function insertMessage(Message $message_, array $arrayFilter = array()) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
         $userMapper = new UserMapper();
         $userMapper->setId($message_->getIdSender());
-        $user_sender = $userMapper->select();
+        $user_sender = $userMapper->selectUser();
         $userMapper->setId($message_->getIdReceiver());
-        $user_receiver = $userMapper->select();
+        $user_receiver = $userMapper->selectUser();
 
         if(!is_null($user_sender->getId()) && !is_null($user_receiver->getId())) {
             return parent::insert($this->table, $message_, $arrayFilter);
@@ -47,7 +47,7 @@ class MessageMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function update(Message $message_) 
+    function updateMessage(Message $message_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -66,7 +66,7 @@ class MessageMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function select($all_ = false) 
+    function selectMessage($all_ = false) 
     {
         $where = null;
         if(is_null($this->table)) {
@@ -89,7 +89,7 @@ class MessageMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function delete() 
+    function deleteMessage() 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');

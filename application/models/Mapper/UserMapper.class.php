@@ -21,7 +21,7 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function insert(User $user_) 
+    function insertUser(User $user_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -37,7 +37,7 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function update(User $user_, $where_) 
+    function updateUser(User $user_, $where_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -56,7 +56,7 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function select($all_ = false, $where_ = null) 
+    function selectUser($all_ = false, $where_ = null) 
     {
         $where = null;
         if(is_null($this->table)) {
@@ -78,7 +78,7 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function delete() {
+    function deleteUser($where_) {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
@@ -98,7 +98,7 @@ class UserMapper extends Mapper {
                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->id_user_followed.' '.
                        'AND id_user_follower = '.$this->id_user_follower.')';
         
-        return $this->select(false, $where);
+        return $this->selectUser(false, $where);
     }
     
     public
@@ -106,7 +106,7 @@ class UserMapper extends Mapper {
         $where = 'id IN (SELECT id_user_follower '.
                         'FROM TO_FOLLOW WHERE id_user_followed = '.$this->id_user_followed.')';
         
-        return $this->select(true, $where);
+        return $this->selectUser(true, $where);
     }
     
     public 

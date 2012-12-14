@@ -19,17 +19,17 @@ class IncomingMapper extends Mapper {
     * @throws InvalidArgumentException
     */
     public 
-    function insert(Incoming $incoming_, array $arrayFilter = array()) 
+    function insertIncoming(Incoming $incoming_, array $arrayFilter = array()) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
         $userMapper = new UserMapper();
         $userMapper->setId($incoming_->getIdUser());
-        $user = $userMapper->select();
+        $user = $userMapper->selectUser();
         $announcementMapper = new AnnouncementMapper();
         $announcementMapper->setId($incoming_->getIdAnnouncement());
-        $announcement = $announcementMapper->select();
+        $announcement = $announcementMapper->selectAnnouncement();
 
         if(!is_null($user->getId()) && !is_null($announcement->getId())) {
             return parent::insert($this->table, $incoming_, $arrayFilter);
@@ -42,7 +42,7 @@ class IncomingMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function update(Incoming $incoming_) 
+    function updateIncoming(Incoming $incoming_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -61,7 +61,7 @@ class IncomingMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function select($all_ = false) 
+    function selectIncoming($all_ = false) 
     {
         $where = null;
         if(is_null($this->table)) {
@@ -84,7 +84,7 @@ class IncomingMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function delete() 
+    function deleteIncoming() 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');

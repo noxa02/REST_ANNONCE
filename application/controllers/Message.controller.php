@@ -10,7 +10,7 @@
             case 'get':
                 $message_ = new Message();
                 $messageMapper = new \MessageMapper();
-                $messageObject = $messageMapper->select();
+                $messageObject = $messageMapper->selectMessage();
                 $messageArray = extractData($messageObject);
                 if(!empty($messageArray)) {
                     
@@ -37,7 +37,7 @@
                 $message_ = new Message();
                 $messageMapper = new \MessageMapper();
                 
-                if($messageMapper->delete()) {
+                if($messageMapper->deleteMessage()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
@@ -48,7 +48,7 @@
                 $data_message_ = $http->getRequestVars();
                 $message_ = initObject($data_message_, $message_, true);
                 $messageMapper = new \MessageMapper();
-                $messageMapper->update($message_);
+                $messageMapper->updateMessage($message_);
                 
                 Rest::sendResponse(200);
                     break;

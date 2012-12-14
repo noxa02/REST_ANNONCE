@@ -10,7 +10,7 @@
             case 'get':
                 $incoming_ = new Incoming();
                 $incomingMapper = new \IncomingMapper();
-                $incomingObject = $incomingMapper->select();
+                $incomingObject = $incomingMapper->selectIncoming();
                 $incomingArray = extractData($incomingObject);
                 if(!empty($incomingArray)) {
                     
@@ -37,7 +37,7 @@
                 $incoming_ = new Incoming();
                 $incomingMapper = new \IncomingMapper();
                 
-                if($incomingMapper->delete()) {
+                if($incomingMapper->deleteIncoming()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
@@ -48,7 +48,7 @@
                 $data_incoming_ = $http->getRequestVars();
                 $incoming_ = initObject($data_incoming_, $incoming_, true);
                 $incomingMapper = new \IncomingMapper();
-                $incomingMapper->update($incoming_);
+                $incomingMapper->updateIncoming($incoming_);
                 
                 Rest::sendResponse(200);
                     break;

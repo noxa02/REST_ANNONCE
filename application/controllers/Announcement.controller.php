@@ -8,7 +8,7 @@
     {
             case 'get':
                 $announcementMapper = new \AnnouncementMapper();
-                $announcementObject = $announcementMapper->select();
+                $announcementObject = $announcementMapper->selectAnnouncement();
                 $announcementArray = extractData($announcementObject);
                 
                 if(!empty($announcementArray)) {
@@ -33,7 +33,7 @@
             case 'delete':
                 $announcementMapper = new \AnnouncementMapper();
                 
-                if($announcementMapper->delete()) {
+                if($announcementMapper->deleteAnnouncement()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
@@ -44,7 +44,7 @@
                 $data_announcement = $http->getRequestVars();
                 $announcement = initObject($data_announcement, $announcement, true);
                 $announcementMapper = new \AnnouncementMapper();
-                $announcementMapper->update($announcement);
+                $announcementMapper->updateAnnouncement($announcement);
                 
                 Rest::sendResponse(200);
                     break;

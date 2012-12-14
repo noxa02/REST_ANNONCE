@@ -9,146 +9,105 @@
         public 
         function testGetSetId() 
         {
-            $user_ = new User();
-            $user_->setId(1);
-            $this->assertEquals(1,$user_->getId());
+            $user = new User();
+            $user->setId(1);
+            $this->assertEquals(1,$user->getId());
         }
 
         public 
         function testGetSetName()
         {
-            $user_ = new User();
-            $user_->setName('Pierre');
-            $this->assertEquals('Pierre',$user_->getName());
+            $user = new User();
+            $user->setName('Pierre');
+            $this->assertEquals('Pierre',$user->getName());
         }
 
         public 
         function testGetSetFirstname()
         {
-            $user_ = new User();
-            $user_->setFirstname('Jean');
-            $this->assertEquals('Jean',$user_->getFirstname());
+            $user = new User();
+            $user->setFirstname('Jean');
+            $this->assertEquals('Jean',$user->getFirstname());
         }
 
         public 
         function testGetSetLogin()
         {
-            $user_ = new User();
-            $user_->setFirstname('Jean');
-            $this->assertEquals('Jean',$user_->getFirstname());
+            $user = new User();
+            $user->setFirstname('Jean');
+            $this->assertEquals('Jean',$user->getFirstname());
         }
 
         public 
         function testGetSetPassword()
         {
-            $user_ = new User();
-            $user_->setPassword('monmotdepasse');
-            $this->assertEquals('monmotdepasse',$user_->getPassword());
+            $user = new User();
+            $user->setPassword('monmotdepasse', true);
+            $this->assertEquals(sha1_password('monmotdepasse'),$user->getPassword());
         }
 
         public 
         function testGetSetMail()
         {
-            $user_ = new User();
-            $user_->setMail('jeanpierre@gmail.com');
-            $this->assertEquals('jeanpierre@gmail.com',$user_->getMail());
+            $user = new User();
+            $user->setMail('jeanpierre@gmail.com');
+            $this->assertEquals('jeanpierre@gmail.com',$user->getMail());
         }
 
         public 
         function testGetSetAddress()
         {
-            $user_ = new User();
-            $user_->setAddress('9 rue de la pochette');
-            $this->assertEquals('9 rue de la pochette',$user_->getAddress());
+            $user = new User();
+            $user->setAddress('9 rue de la pochette');
+            $this->assertEquals('9 rue de la pochette',$user->getAddress());
         }
 
         public 
         function testGetSetPhone()
         {
-            $user_ = new User();
-            $user_->setPhone('0143523213');
-            $this->assertEquals('0143523213',$user_->getPhone());
+            $user = new User();
+            $user->setPhone('0143523213');
+            $this->assertEquals('0143523213',$user->getPhone());
         }
 
         public 
         function testGetSetPortable()
         {
-            $user_ = new User();
-            $user_->setPortable('0624523213');
-            $this->assertEquals('0624523213',$user_->getPortable());
+            $user = new User();
+            $user->setPortable('0624523213');
+            $this->assertEquals('0624523213',$user->getPortable());
         }
 
         public 
         function testGetSetSubscriptionDate()
         {
-            $user_ = new User();
-            $user_->setSubscriptionDate('2012-11-29 11:11:11');
-            $this->assertEquals('2012-11-29 11:11:11',$user_->getSubscriptionDate());
+            $user = new User();
+            $user->setSubscriptionDate('2012-11-29 11:11:11');
+            $this->assertEquals('2012-11-29 11:11:11',$user->getSubscriptionDate());
         }
 
         public 
         function testGetSetHash()
         {
-            $user_ = new User();
-            $user_->setHash('ec457d0a974c48d5685a7efa03d137dc8bbde7e3');
-            $this->assertEquals('ec457d0a974c48d5685a7efa03d137dc8bbde7e3',$user_->getHash());
+            $user = new User();
+            $user->setHash('ec457d0a974c48d5685a7efa03d137dc8bbde7e3');
+            $this->assertEquals('ec457d0a974c48d5685a7efa03d137dc8bbde7e3',$user->getHash());
         }
 
         public 
         function testGetSetNewsletter()
         {
-            $user_ = new User();
-            $user_->setNewsletter(0);
-            $this->assertEquals(0,$user_->getNewsletter());
+            $user = new User();
+            $user->setNewsletter(0);
+            $this->assertEquals(0,$user->getNewsletter());
         }
 
         public 
         function testGetSetRole()
         {
-            $user_ = new User();
-            $user_->setRole('user');
-            $this->assertEquals('user',$user_->getRole());
-        }
-
-        
-        /**
-         * 
-         */
-        public
-        function testGetUser()
-        {
-               //$user_ = new User();
-               //$user_->setName('Jean');
-               //$user_->setFirstname('Pierre');
-               
-               //$this->assertEquals($user_, $user_->getUser($id_));
-        }
-
-        /**
-         * 
-         */
-        public
-        function testCreateUser() 
-        {
-
-        }
-        
-        /**
-         * 
-         */
-        public
-        function testUpdateUser() 
-        {
-
-        }
-        
-        /**
-         * 
-         */
-        public
-        function testDeleteUser() 
-        {
-
-        }
+            $user = new User();
+            $user->setRole('user');
+            $this->assertEquals('user',$user->getRole());
+        }      
     }
 ?>

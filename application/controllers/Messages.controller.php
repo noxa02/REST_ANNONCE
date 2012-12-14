@@ -5,7 +5,7 @@
     {
             case 'get':
                 $messageMapper = new MessageMapper();
-                $messagesObject = $messageMapper->select(true);
+                $messagesObject = $messageMapper->selectMessage(true);
                 foreach($messagesObject as $messageObject) {
                     $messagesArray[] = extractData($messageObject);
                 }
@@ -31,7 +31,7 @@
                     $message = initObject($data_message, $message, true);
                    
                     $messageMapper = new MessageMapper();
-                    if($messageMapper->insert($message)) {
+                    if($messageMapper->insertMessage($message)) {
                         Rest::sendResponse(200);   
                     }
                     

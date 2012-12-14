@@ -8,72 +8,42 @@
         public 
         function testGetSetId()
 	{
-            $incoming_ = new Incoming();
-            $incoming_->setId(1);
-            $this->assertEquals(1, $incoming_->getId());
+            $incoming = new Incoming();
+            $incoming->setId(1);
+            $this->assertEquals(1, $incoming->getId());
 	}
 
 	public 
         function testGetSetTitle()
 	{
-            $incoming_ = new Incoming();
-            $incoming_->setTitle('Titre incoming');
-            $this->assertEquals('Titre incoming', $incoming_->getTitle());
+            $incoming = new Incoming();
+            $incoming->setTitle('Titre incoming');
+            $this->assertEquals('Titre incoming', $incoming->getTitle());
 	}
 
 	public 
         function testGetSetSubtitle()
 	{
-            $incoming_ = new Incoming();
-            $incoming_->setSubtitle('subtitle');
-            $this->assertEquals('subtitle', $incoming_->getSubtitle());
+            $incoming = new Incoming();
+            $incoming->setSubtitle('subtitle');
+            $this->assertEquals('subtitle', $incoming->getSubtitle());
 	}
 
 	public 
         function testGetSetContent()
 	{
-            $incoming_ = new Incoming();
-            $incoming_->setContent('Incoming content');
-            $this->assertEquals('Incoming content', $incoming_->getContent());
+            $incoming = new Incoming();
+            $incoming->setContent('Incoming content');
+            $this->assertEquals('Incoming content', $incoming->getContent());
 	}
 
 	public 
         function testGetSetPostDate()
 	{
-            $incoming_ = new Incoming();
-            $incoming_->setPostDate('2012-12-01 12:00:00');
-            $this->assertEquals('2012-12-01 12:00:00', $incoming_->getPostDate());
-	}
-    
-	public 
-        function testGetSetIdAdministrator()
-	{
-            $incoming_ = new Incoming();
-            $incoming_->setIdAdministrator(1);
-            $this->assertEquals(1, $incoming_->getIdAdministrator());
+            $incoming = new Incoming();
+            $incoming->setPostDate('2012-12-01 12:00:00');
+            $this->assertEquals('2012-12-01 12:00:00', $incoming->getPostDate());
 	}
         
-        public 
-        function testGetIncoming() 
-        {
-            
-        }
-    
-   
-        public 
-        function testCreateIncoming() 
-        {
-       	}
-    
-        public 
-        function testUpdateIncoming() 
-        {
-        }
-    
-   
-        public 
-        function testDeleteIncoming() 
-        {
-        }
     }
 ?>

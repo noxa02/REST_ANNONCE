@@ -10,7 +10,7 @@
             $user_ = new User();
             $userMapper = new \UserMapper();
             $where = $url->getUrlArguments();
-            $usersObject = $userMapper->select(true);
+            $usersObject = $userMapper->selectUser(true);
             foreach($usersObject as $userObject) {
                 $usersArray[] = extractData($userObject);
             }
@@ -37,7 +37,7 @@
             $user = initObject($data_user, $user, true, array('password'));
             
             $userMapper = new \UserMapper(); 
-            if($userMapper->insert($user)) {
+            if($userMapper->insertUser($user)) {
                 Rest::sendResponse(200);
             }
             

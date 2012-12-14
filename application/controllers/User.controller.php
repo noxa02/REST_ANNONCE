@@ -9,7 +9,7 @@
             case 'get':
                 $user_ = new User();
                 $userMapper = new \UserMapper();
-                $userObject = $userMapper->select();
+                $userObject = $userMapper->selectUser();
                 $userArray = extractData($userObject);
                 if(!empty($userArray)) {
                     
@@ -34,14 +34,14 @@
                 $user_ = new \User();
                 $userMapper = new \UserMapper();
                 $where = array('id' => $url->getIdFirstPart());
-                $userMapper->update($user_, $where);
+                $userMapper->updateUser($user_, $where);
                     break;
              case 'put':
                 $user = new \User();
                 $data_user = $http->getRequestVars();
                 $user = initObject($data_user, $user, true);
                 $userMapper = new \UserMapper();
-                $userMapper->update($user);
+                $userMapper->updateUser($user);
                 
                 Rest::sendResponse(200);
                     break;

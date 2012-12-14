@@ -10,7 +10,7 @@
             case 'get':
                 $picture_ = new Picture();
                 $pictureMapper = new \PictureMapper();
-                $pictureObject = $pictureMapper->select();
+                $pictureObject = $pictureMapper->selectPicture();
                 $pictureArray = extractData($pictureObject);
                 if(!empty($pictureArray)) {
                     
@@ -37,7 +37,7 @@
                 $picture_ = new Picture();
                 $pictureMapper = new \PictureMapper();
                 
-                if($pictureMapper->delete()) {
+                if($pictureMapper->deletePicture()) {
                     Rest::sendResponse(200);
                 } else {
                     Rest::sendResponse(500);
@@ -48,7 +48,7 @@
                 $data_picture_ = $http->getRequestVars();
                 $picture_ = initObject($data_picture_, $picture_, true);
                 $pictureMapper = new \PictureMapper();
-                $pictureMapper->update($picture_);
+                $pictureMapper->updatePicture($picture_);
                 
                 Rest::sendResponse(200);
                     break;

@@ -8,7 +8,7 @@
     {
             case 'get':
                 $announcementMapper = new \AnnouncementMapper();
-                $announcementsObject = $announcementMapper->select(true);
+                $announcementsObject = $announcementMapper->selectAnnouncement(true);
                 foreach($announcementsObject as $announcementObject) {
                     $announcementsArray[] = extractData($announcementObject);
                 }
@@ -37,7 +37,7 @@
                 $announcement = initObject($data_announcement, $announcement, true);
 
                 $announcementMapper = new \AnnouncementMapper();
-                if($announcementMapper->insert($announcement_)) {
+                if($announcementMapper->insertAnnouncement($announcement_)) {
                     Rest::sendResponse(200);   
                 }
                     break;

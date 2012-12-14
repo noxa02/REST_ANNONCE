@@ -21,7 +21,7 @@ class AnnouncementMapper extends Mapper {
      * on the Upload/announcement/original/ folder
      */
     public 
-    function insert(Announcement $announcement_) 
+    function insertAnnouncement(Announcement $announcement_) 
     {
         try {
             $pictures = array();
@@ -54,7 +54,7 @@ class AnnouncementMapper extends Mapper {
                     );
 
                     $pictureMapper = new PictureMapper();
-                    $pictureMapper->insert($value, array('tmp_name', 'size', 'type'));      
+                    $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'));      
                 }
             }   
         } catch(InvalidArgumentException $e) {
@@ -69,7 +69,7 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function update(Announcement $announcement_, $where_) 
+    function updateAnnouncement(Announcement $announcement_, $where_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -88,7 +88,7 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function select($all_ = false) 
+    function selectAnnouncement($all_ = false) 
     {
         $where = null;
         if(is_null($this->table)) {
@@ -107,7 +107,7 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function delete() 
+    function deleteAnnouncement() 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -117,7 +117,7 @@ class AnnouncementMapper extends Mapper {
         }
         
         $pictureMapper = new PictureMapper($this);
-        $pictures = $pictureMapper->select(true);
+        $pictures = $pictureMapper->selectPicture(true);
 
         if(isset($pictures) && !empty($pictures)) {
             foreach ($pictures as $key => $value) {
@@ -130,7 +130,7 @@ class AnnouncementMapper extends Mapper {
                 //Remove to database
                 $pictureMapper = new PictureMapper();
                 $pictureMapper->setId($idPicture);
-                $pictureMapper->delete();
+                $pictureMapper->deletePicture();
             }
         }
         

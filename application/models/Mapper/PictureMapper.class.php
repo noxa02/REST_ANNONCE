@@ -23,7 +23,7 @@ class PictureMapper extends Mapper {
     * @throws InvalidArgumentException
     */
     public 
-    function insert(Picture $picture_, array $arrayFilter = array()) 
+    function insertPicture(Picture $picture_, array $arrayFilter = array()) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -38,7 +38,7 @@ class PictureMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function update(Picture $picture_) 
+    function updatePicture(Picture $picture_) 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -57,7 +57,7 @@ class PictureMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function select($all_ = false) 
+    function selectPicture($all_ = false) 
     {
         $where = null;
         if(is_null($this->table)) {
@@ -80,7 +80,7 @@ class PictureMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function delete() 
+    function deletePicture() 
     {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -90,7 +90,7 @@ class PictureMapper extends Mapper {
             $where = 'id = '.$this->id;
         }
         
-        $picture = $this->select();
+        $picture = $this->selectPicture();
         $path = $picture->getPath(); 
         $title = $picture->getTitle();
         $ext = $picture->getExtension();
