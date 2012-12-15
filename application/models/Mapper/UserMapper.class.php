@@ -178,7 +178,9 @@ class UserMapper extends Mapper {
     }
     
     public 
-    function getMessages() {
-        
+    function getMessages(MessageMapper $messageMapper_) {
+        $where = 'id_sender = '.$messageMapper_->getId();
+        $messagesObjects = $messageMapper_->selectMessage(true, $where);
+        return $messagesObjects;
     }
 }

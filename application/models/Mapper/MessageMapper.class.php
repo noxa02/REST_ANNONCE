@@ -75,15 +75,17 @@ class MessageMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function selectMessage($all_ = false) 
+    function selectMessage($all_ = false, $where_ = '') 
     {
         try {
             $where = null;
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-
-            if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
+            
+            if(isset($where_) && !empty($where_)) {
+                $where = $where_;
+            } elseif(isset($this->foreignTable) && !is_null($this->foreignTable)) {
                 $fkName = 'id_'.strtolower($this->foreignTable->getTable());
                 $where  = $fkName.' = '.$this->foreignTable->getId();
             } elseif(isset($this->id) && !is_null($this->id)) {

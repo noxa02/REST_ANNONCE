@@ -155,8 +155,7 @@ class AnnouncementMapper extends Mapper {
     
     public
     function getPictures(PictureMapper $pictureMapper_) {
-        print_log($pictureMapper_); exit;
         $picturesObjects = $pictureMapper_->selectPicture(true);
-        print_log($picturesObjects); exit;
+        return $picturesObjects;
     }
 }

@@ -62,7 +62,7 @@ try {
      * and his attributes. After include the controller to use.
      */
     
-    $model = constructRoute($url);
+    $model = constructRoute($url); 
 
     if(existController($model)) {
         include_once APPLICATION_PATH . '/controllers/' . $model.'.controller.php';

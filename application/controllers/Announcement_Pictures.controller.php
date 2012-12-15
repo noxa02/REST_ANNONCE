@@ -13,18 +13,17 @@
             }
            
             $result = true;
-            exit;
             if(is_array($picturesObject) && !is_null($picturesObject)) {
                 foreach($picturesObject as $pictureObject) {
-                    $result = emptyObject($userObject);
+                    $result = emptyObject($pictureObject);
                 }     
             }
             if(!$result) {
-                foreach($usersObject as $userObject) {
-                    $usersArray[] = extractData($userObject);
+                foreach($picturesObject as $pictureObject) {
+                    $picturesArray[] = extractData($pictureObject);
                 }
                 if($http->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($usersArray), 'application/json');  
+                    Rest::sendResponse(200, json_encode($picturesArray), 'application/json');  
                 }  
                 else if ($http->getHttpAccept() == 'xml')  { 
 
@@ -36,7 +35,7 @@
                     );  
 
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($usersArray), 'application/xml');  
+                    Rest::sendResponse(200, $serializer->serialize($picturesArray), 'application/xml');  
                 }
             } else {
                 Rest::sendResponse(204);
