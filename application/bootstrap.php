@@ -2,10 +2,9 @@
 include_once dirname(__FILE__).'/../config.php';
 
 if (DEVELOPMENT_ENVIRONMENT == true) {
-    error_reporting(E_ALL);
     ini_set('display_errors','On');
+    error_reporting(E_ALL & ~(E_DEPRECATED | E_STRICT));
 } else {
-    error_reporting(E_ALL);
     ini_set('display_errors','Off');
     ini_set('log_errors', 'On');
     ini_set('error_log', PATH_ROOT.'/tmp/logs/error.log');

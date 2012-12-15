@@ -97,7 +97,7 @@ class Rest {
      * @param string $charset
      */
     public static 
-    function sendResponse($status = 200, $body = '', $content_type = 'text/html', $charset = 'utf-8')
+    function sendResponse($status = 200, $body = '', $content_type = 'text/', $charset = 'utf-8')
     {
         $status_header = 'HTTP/1.1 ' . $status . ' ' .Rest::getStatusCodeMessage($status);
         header($status_header);

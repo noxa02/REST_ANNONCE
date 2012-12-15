@@ -35,10 +35,14 @@ try {
          * Use the object URL and set the different parts of the URL 
          * to associate attributes.
          */
-        if($key === 0 && !is_numeric($value)) { 
+        if(!is_string($value) && is_numeric($value) || !is_string($value)) {
+          throw new InvalidArgumentException('First Argument must be a string !');  
+        } elseif($key === 0 && !is_numeric($value)) { 
             $url->setModelFirstPart($value);
         } elseif($key % 2 != 0) { 
-            if($key === 1 && is_numeric($value)) {
+            if(!empty($value) && !is_numeric($value)) {
+                throw new InvalidArgumentException('Second Argument must be an integer !');
+            } elseif($key === 1 && is_numeric($value)) {
                 $url->setIdFirstPart($value);
             } elseif(is_numeric($value)) {
                 $url->setIdSecondPart($value);

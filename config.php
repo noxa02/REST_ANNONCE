@@ -2,7 +2,7 @@
     /**
      * Set the environment application
      */
-    define ('DEVELOPMENT_ENVIRONMENT', false);
+    define ('DEVELOPMENT_ENVIRONMENT', true);
     defined('UNITARY_TEST') or define('UNITARY_TEST', false);
     
     /**
