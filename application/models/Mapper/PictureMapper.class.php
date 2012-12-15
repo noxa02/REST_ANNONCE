@@ -13,6 +13,7 @@ class PictureMapper extends Mapper {
         if(func_num_args() == 1 && is_object(func_get_arg(0))) {
             $object_ = func_get_arg(0);
             $this->foreignTable =  $object_;
+            print_log($this->foreignTable); exit;
         }
     }
     
@@ -25,11 +26,14 @@ class PictureMapper extends Mapper {
     public 
     function insertPicture(Picture $picture_, array $arrayFilter = array()) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            return parent::insert($this->table, $picture_, $arrayFilter);      
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        return parent::insert($this->table, $picture_, $arrayFilter);
     } 
     
     /**
@@ -85,7 +89,6 @@ class PictureMapper extends Mapper {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
-        
         if(isset($this->id) && !is_null($this->id)) {
             $where = 'id = '.$this->id;
         }

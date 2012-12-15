@@ -43,11 +43,11 @@
                 try {
                     $announcement = new Announcement();
                     $data_announcement = $http->getRequestVars();
-                    $announcement = initObject($data_announcement, $announcement, true);
+                    $announcementsObject = initObject($data_announcement, $announcement, true);
 
                     if(!emptyObject($announcementsObject)) {
                         $announcementMapper = new \AnnouncementMapper();
-                        if($announcementMapper->insertAnnouncement($announcement)) {
+                        if($announcementMapper->insertAnnouncement($announcementsObject)) {
                             Rest::sendResponse(200);   
                         }             
                     } else {

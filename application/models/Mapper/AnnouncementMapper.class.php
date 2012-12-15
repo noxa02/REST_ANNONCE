@@ -29,34 +29,38 @@ class AnnouncementMapper extends Mapper {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
 
-            $idAnnouncement = parent::insert($this->table, $announcement_, array(), true);
-            $announcement_->setId($idAnnouncement);
+            if(parent::insert($this->table, $announcement_, array(), true)) {
+                $idAnnouncement = parent::getlastInsertId(); 
+                $announcement_->setId($idAnnouncement);
 
-            if(isset($this->files) && !empty($this->files)) {
-                foreach($this->files as $file) {
-                    $picture = new Picture();
-                    $picture = initObject($file, $picture, true);
-                    $pictures[] = $picture;
+                if(isset($this->files) && !empty($this->files)) {
+                    foreach($this->files as $file) {
+                        $picture = new Picture();
+                        $picture = initObject($file, $picture, true);
+                        $pictures[] = $picture;
+                    }
                 }
+
+                $announcement_->setPictures($pictures);
+                if(!is_null($announcement_->getPictures())) {
+                    foreach ($announcement_->getPictures() as $key => $value) {
+                        $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
+                        $value->setIdAnnouncement($idAnnouncement);
+                        $value->setPath('/announcement/original/');
+                        $value->setTitle('announcement_'.$announcement_->getId().'_'.$key);
+                        $value->setExtension($pictureExt);
+                        move_uploaded_file(
+                            $value->getTmpName(), 
+                            UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
+                        );
+
+                        $pictureMapper = new PictureMapper();
+                        $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'));      
+                    }
+                }   
+                
+                return true;
             }
-            
-            $announcement_->setPictures($pictures);
-            if(!is_null($announcement_->getPictures())) {
-                foreach ($announcement_->getPictures() as $key => $value) {
-                    $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
-                    $value->setIdAnnouncement($idAnnouncement);
-                    $value->setPath('/announcement/original/');
-                    $value->setTitle('announcement_'.$announcement_->getId().'_'.$key);
-                    $value->setExtension($pictureExt);
-                    move_uploaded_file(
-                        $value->getTmpName(), 
-                        UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
-                    );
-
-                    $pictureMapper = new PictureMapper();
-                    $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'));      
-                }
-            }   
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }

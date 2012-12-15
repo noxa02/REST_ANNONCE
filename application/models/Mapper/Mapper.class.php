@@ -99,10 +99,10 @@ class Mapper
                 unset($data[$column]);
                     $data[":" . $column] = $value;
             }
-
+        
             $query = 'INSERT INTO '.$table_.' '.
                    '('.$columns.')  VALUES (:'.$values.')';
-
+            
             return $this->statement->prepare($query)
                                    ->execute($data);
             
