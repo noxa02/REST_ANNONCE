@@ -5,14 +5,16 @@ class UserMapper extends Mapper {
     protected $id;
     protected $id_user_follower;
     protected $id_user_followed;
+    protected $id_user_sender;
+    protected $id_user_receiver;
     
     function __construct() 
     {
         global $url;
         parent::__construct();
         $this->id = $url->getIdFirstPart();
-        $this->id_user_followed = $url->getIdFirstPart();
-        $this->id_user_follower = $url->getIdSecondPart();
+        $this->id_user_followed = $this->id_user_sender = $url->getIdFirstPart();
+        $this->id_user_follower = $this->id_user_receiver = $url->getIdSecondPart();
     }
     
     /**
@@ -159,5 +161,24 @@ class UserMapper extends Mapper {
                  'id_user_follower = '.$id_follower_;
         
         return parent::delete('TO_FOLLOW', $where);
+    }
+    
+    public
+    function sendMessage(Message $messageObject_) {
+
+        if(!emptyObject($messageObject_)) {
+            new UserMapper;
+            $messageMapper = new MessageMapper();
+            $messageObject_->setIdSender($this->id_user_sender);
+            $messageObject_->setIdReceiver($this->id_user_receiver);
+            if($messageMapper->insertMessage($messageObject_)) {
+                return true;
+            } 
+        } 
+    }
+    
+    public 
+    function getMessages() {
+        
     }
 }

@@ -13,7 +13,6 @@ class PictureMapper extends Mapper {
         if(func_num_args() == 1 && is_object(func_get_arg(0))) {
             $object_ = func_get_arg(0);
             $this->foreignTable =  $object_;
-            print_log($this->foreignTable); exit;
         }
     }
     
@@ -68,6 +67,7 @@ class PictureMapper extends Mapper {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
         
+        print_log(get_class_methods($this->foreignTable));
         if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
             $fkName = 'id_'.strtolower($this->foreignTable->getTable());
             $where  = $fkName.' = '.$this->foreignTable->getId();

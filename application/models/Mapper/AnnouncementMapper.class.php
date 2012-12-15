@@ -151,5 +151,11 @@ class AnnouncementMapper extends Mapper {
         } catch(InvalidArgumentException $e) {
             $e->getMessage(); exit;
         }
-    }    
+    } 
+    
+    public
+    function getPictures(PictureMapper $pictureMapper_) {
+        $picturesObjects = $pictureMapper_->selectPicture(true);
+        print_log($picturesObjects); exit;
+    }
 }

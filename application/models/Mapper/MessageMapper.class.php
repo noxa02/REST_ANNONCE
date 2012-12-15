@@ -27,17 +27,27 @@ class MessageMapper extends Mapper {
     public 
     function insertMessage(Message $message_, array $arrayFilter = array()) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
-        $userMapper = new UserMapper();
-        $userMapper->setId($message_->getIdSender());
-        $user_sender = $userMapper->selectUser();
-        $userMapper->setId($message_->getIdReceiver());
-        $user_receiver = $userMapper->selectUser();
-
-        if(!is_null($user_sender->getId()) && !is_null($user_receiver->getId())) {
-            return parent::insert($this->table, $message_, $arrayFilter);
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            $userMapper = new UserMapper();
+            $userMapper->setId($message_->getIdSender());
+            $user_sender = $userMapper->selectUser();
+            $userMapper->setId($message_->getIdReceiver());
+            $user_receiver = $userMapper->selectUser();
+            
+            if(!is_null($user_sender->getId()) && !is_null($user_receiver->getId())) {
+                return parent::insert($this->table, $message_, $arrayFilter);
+            } elseif(is_null($user_sender->getId())) {
+                throw new Exception('User sender is inexistant !');
+            } elseif(is_null($user_receiver->getId())) {
+                throw new Exception('User receiver is inexistant !');
+            }
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         }
     } 
     
@@ -62,7 +72,6 @@ class MessageMapper extends Mapper {
     /**
      * 
      * @param boolean $all_
-     * @return stdClass
      * @throws InvalidArgumentException
      */
     public
