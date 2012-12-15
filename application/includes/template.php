@@ -148,7 +148,6 @@ function initObject($data_, $object_, $return = false, $opts_ = array()) {
            }
        }
     }
-    
     if($return) {
         return $object_;
     }

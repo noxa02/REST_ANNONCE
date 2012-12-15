@@ -62,12 +62,13 @@ class PictureMapper extends Mapper {
     public
     function selectPicture($all_ = false) 
     {
+        try {
         $where = null;
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
         
-        print_log(get_class_methods($this->foreignTable));
+        print_log($this->foreignTable);
         if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
             $fkName = 'id_'.strtolower($this->foreignTable->getTable());
             $where  = $fkName.' = '.$this->foreignTable->getId();
@@ -75,7 +76,10 @@ class PictureMapper extends Mapper {
             $where = 'id = '.$this->id;
         }
         
-        return parent::select($this->table, $where, $object = new Picture(), $all_);
+        return parent::select($this->table, $where, $object = new Picture(), $all_);   
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        }
     }
     
     /**

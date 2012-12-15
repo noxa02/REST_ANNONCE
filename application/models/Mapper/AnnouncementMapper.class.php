@@ -73,7 +73,7 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function updateAnnouncement(Announcement $announcement_, $where_) 
+    function updateAnnouncement(Announcement $announcement_) 
     {
         try {
             if(is_null($this->table)) {
@@ -83,7 +83,7 @@ class AnnouncementMapper extends Mapper {
                 $where_ = 'id = '.$this->id;
             }
 
-            parent::update($this->table, $announcement_, $where_);            
+            return parent::update($this->table, $announcement_, $where_);            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -155,6 +155,7 @@ class AnnouncementMapper extends Mapper {
     
     public
     function getPictures(PictureMapper $pictureMapper_) {
+        print_log($pictureMapper_); exit;
         $picturesObjects = $pictureMapper_->selectPicture(true);
         print_log($picturesObjects); exit;
     }

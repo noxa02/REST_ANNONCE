@@ -137,7 +137,7 @@ class Mapper
           
             $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
                    (($where_) ? ' WHERE '.$where_ : ' ');
-            
+
             return $this->statement->prepare($query)
                                    ->execute($data); 
             

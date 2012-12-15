@@ -43,7 +43,6 @@
                     $announcement = new Announcement();
                     $data_announcement = $http->getRequestVars();
                     $announcementObject = initObject($data_announcement, $announcement, true);
-
                     if(!emptyObject($announcementObject)) {
                         $announcementMapper = new \AnnouncementMapper();
                         if($announcementMapper->updateAnnouncement($announcementObject)) {

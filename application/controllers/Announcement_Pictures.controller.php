@@ -6,8 +6,12 @@
         case 'get':
             $announcementMapper = new AnnouncementMapper();
             $announcementObject = $announcementMapper->selectAnnouncement();
-            $pictureMapper = new PictureMapper($announcementObject);
-            $picturesObject = $announcementMapper->getPictures($pictureMapper);
+            
+            if(!emptyObject($announcementObject)) {
+                $pictureMapper = new PictureMapper($announcementMapper);
+                $picturesObject = $announcementMapper->getPictures($pictureMapper);
+            }
+           
             $result = true;
             exit;
             if(is_array($picturesObject) && !is_null($picturesObject)) {
