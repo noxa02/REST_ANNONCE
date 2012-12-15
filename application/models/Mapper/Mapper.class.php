@@ -175,7 +175,6 @@ class Mapper
                     $object[] = initObject($data, $object_, true);
                  }
             }
-
             return $object;            
         } catch(PDOException $e) {
             $e->getMessage(); exit;

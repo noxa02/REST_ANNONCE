@@ -7,7 +7,7 @@
 class Tag {
     
     private $_id;
-    private $_libelle;
+    private $_title;
       
 /**
  * Méthodes GET
@@ -20,9 +20,9 @@ class Tag {
     }
 
     public 
-    function getLibelle()
+    function getTitle()
     {
-            return $this->_libelle;
+            return $this->_title;
     }
 
 /**
@@ -36,9 +36,9 @@ class Tag {
     }
 
     public 
-    function setLibelle($libelle_)
+    function setTitle($title_)
     {
-            $this->_libelle = $libelle_;
+            $this->_title = $title_;
     }
 
 }

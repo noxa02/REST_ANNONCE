@@ -12,11 +12,6 @@ class TagMapper extends Mapper {
         parent::__construct();
         global $url;
         $this->id = $url->getIdFirstPart();
-        
-        if(func_num_args() == 1 && is_object(func_get_arg(0))) {
-            $object_ = func_get_arg(0);
-            $this->foreignTable =  $object_;
-        }
     }
     
    /**
@@ -28,17 +23,14 @@ class TagMapper extends Mapper {
     public 
     function insertTag(Tag $tag_, array $arrayFilter = array()) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
-        $userMapper = new UserMapper();
-        $userMapper->setId($tag_->getIdSender());
-        $user_sender = $userMapper->selectUser();
-        $userMapper->setId($tag_->getIdReceiver());
-        $user_receiver = $userMapper->selectUser();
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
 
-        if(!is_null($user_sender->getId()) && !is_null($user_receiver->getId())) {
             return parent::insert($this->table, $tag_, $arrayFilter);
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
     } 
     
@@ -50,14 +42,18 @@ class TagMapper extends Mapper {
     public 
     function updateTag(Tag $tag_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::update($this->table, $tag_, $where);
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        parent::update($this->table, $tag_, $where);
     } 
     
     /**
@@ -68,20 +64,20 @@ class TagMapper extends Mapper {
      */
     public
     function selectTag($all_ = false) 
-    {
-        $where = null;
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+    {   
+        try {
+            $where = null;
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::select($this->table, $where, $object = new Tag(), $all_);        
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
-            $fkName = 'id_'.strtolower($this->foreignTable->getTable());
-            $where  = $fkName.' = '.$this->foreignTable->getId();
-        } elseif(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        return parent::select($this->table, $where, $object = new Tag(), $all_);
     }
     
     /**
@@ -92,14 +88,19 @@ class TagMapper extends Mapper {
     public
     function deleteTag() 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::delete($this->table, $where);        
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-       
-        return parent::delete($this->table, $where);
+
     }    
 }

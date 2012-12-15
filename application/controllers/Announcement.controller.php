@@ -28,6 +28,8 @@
                         $serializer = new XML_Serializer($options);  
                         Rest::sendResponse(200, $serializer->serialize($announcementArray), 'application/xml');   
                     }               
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
             case 'delete':

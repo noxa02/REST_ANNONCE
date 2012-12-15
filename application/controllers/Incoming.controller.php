@@ -12,6 +12,7 @@
                 $incomingMapper = new \IncomingMapper();
                 $incomingObject = $incomingMapper->selectIncoming();
                 $incomingArray = extractData($incomingObject);
+                
                 if(!empty($incomingArray)) {
                     
                     if($http->getHttpAccept() == 'json')  {  

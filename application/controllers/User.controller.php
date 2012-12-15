@@ -11,6 +11,7 @@
                 $userMapper = new \UserMapper();
                 $userObject = $userMapper->selectUser();
                 $userArray = extractData($userObject);
+                
                 if(!empty($userArray)) {
                     if($http->getHttpAccept() == 'json')  {  
                         Rest::sendResponse(200, json_encode($userArray), 'application/json');  
@@ -27,6 +28,8 @@
                         $serializer = new XML_Serializer($options);  
                         Rest::sendResponse(200, $serializer->serialize($userArray), 'application/xml');   
                     }               
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
             case 'delete':

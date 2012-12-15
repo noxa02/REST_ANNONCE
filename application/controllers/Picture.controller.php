@@ -12,6 +12,7 @@
                 $pictureMapper = new \PictureMapper();
                 $pictureObject = $pictureMapper->selectPicture();
                 $pictureArray = extractData($pictureObject);
+                
                 if(!empty($pictureArray)) {
                     if($http->getHttpAccept() == 'json')  {  
                         Rest::sendResponse(200, json_encode($pictureArray), 'application/json');  

@@ -12,6 +12,7 @@
                 $messageMapper = new \MessageMapper();
                 $messageObject = $messageMapper->selectMessage();
                 $messageArray = extractData($messageObject);
+                
                 if(!empty($messageArray)) {
                     
                     if($http->getHttpAccept() == 'json')  {  
