@@ -23,11 +23,15 @@ class UserMapper extends Mapper {
     public 
     function insertUser(User $user_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
 
-        return parent::insert($this->table, $user_);
+            return parent::insert($this->table, $user_);            
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        }
     } 
     
     /**
@@ -39,14 +43,28 @@ class UserMapper extends Mapper {
     public 
     function updateUser(User $user_, $where_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id) && empty($where_)) {
+                $where_ = 'id = '.$this->id;
+            } elseif(isset($where_) && !empty($where_)) {
+                $where_ = 'id = '.$user_->getId();
+            }
+
+            $userObject = $userMapper->selectUser($where_);
+            $userArray = extractData($userObject);
+            if(!empty($userArray)) {
+                parent::update($this->table, $user_, $where_);
+            } else {
+                throw new Exception('Inexistant user !');
+            }          
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where_ = 'id = '.$this->id;
-        }
-        
-        parent::update($this->table, $user_, $where_);
     } 
     
     /**
@@ -58,18 +76,22 @@ class UserMapper extends Mapper {
     public
     function selectUser($all_ = false, $where_ = null) 
     {
-        $where = null;
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            $where = null;
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+
+            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
+                $where = 'id = '.$this->id;
+            } elseif(isset($where_) && !is_null($where_)) {
+                $where = $where_;
+            }
+
+            return parent::select($this->table, $where, $object = new User(), $all_);        
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-            $where = 'id = '.$this->id;
-        } elseif(isset($where_) && !is_null($where_)) {
-            $where = $where_;
-        }
-        
-        return parent::select($this->table, $where, $object = new User(), $all_);
     }
     
     /**
@@ -79,17 +101,21 @@ class UserMapper extends Mapper {
      */
     public 
     function deleteUser($where_) {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+
+            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
+                $where = 'id = '.$this->id;
+            } else {
+                $where = $where_;
+            }
+
+            return parent::delete($this->table, $where);     
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-            $where = 'id = '.$this->id;
-        } else {
-            $where = $where_;
-        }
-        
-        return parent::delete($this->table, $where);
     }
     
     public

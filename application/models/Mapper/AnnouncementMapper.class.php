@@ -71,14 +71,18 @@ class AnnouncementMapper extends Mapper {
     public 
     function updateAnnouncement(Announcement $announcement_, $where_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where_ = 'id = '.$this->id;
+            }
+
+            parent::update($this->table, $announcement_, $where_);            
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where_ = 'id = '.$this->id;
-        }
-        
-        parent::update($this->table, $announcement_, $where_);
     } 
     
     /**
@@ -90,15 +94,19 @@ class AnnouncementMapper extends Mapper {
     public
     function selectAnnouncement($all_ = false) 
     {
-        $where = null;
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            $where = null;
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::select($this->table, $where, $object = new Announcement(), $all_);
+        } catch(InvalidArgumentException $e) {
+            $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        return parent::select($this->table, $where, $object = new Announcement(), $all_);
     }
     
     /**
@@ -109,31 +117,35 @@ class AnnouncementMapper extends Mapper {
     public
     function deleteAnnouncement() 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        $pictureMapper = new PictureMapper($this);
-        $pictures = $pictureMapper->selectPicture(true);
-
-        if(isset($pictures) && !empty($pictures)) {
-            foreach ($pictures as $key => $value) {
-                $idPicture = $value->getId();
-                $path = $value->getPath(); 
-                $title = $value->getTitle();
-                $ext = $value->getExtension();
-                //Remove to the pictures folders
-                unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
-                //Remove to database
-                $pictureMapper = new PictureMapper();
-                $pictureMapper->setId($idPicture);
-                $pictureMapper->deletePicture();
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            $pictureMapper = new PictureMapper($this);
+            $pictures = $pictureMapper->selectPicture(true);
+
+            if(isset($pictures) && !empty($pictures)) {
+                foreach ($pictures as $key => $value) {
+                    $idPicture = $value->getId();
+                    $path = $value->getPath(); 
+                    $title = $value->getTitle();
+                    $ext = $value->getExtension();
+                    //Remove to the pictures folders
+                    unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+                    //Remove to database
+                    $pictureMapper = new PictureMapper();
+                    $pictureMapper->setId($idPicture);
+                    $pictureMapper->deletePicture();
+                }
+            }
+
+            return parent::delete($this->table, $where);      
+        } catch(InvalidArgumentException $e) {
+            $e->getMessage(); exit;
         }
-        
-        return parent::delete($this->table, $where);
     }    
 }

@@ -44,13 +44,22 @@
                 }
                     break;
              case 'put':
-                $message_ = new Message();
-                $data_message_ = $http->getRequestVars();
-                $message_ = initObject($data_message_, $message_, true);
-                $messageMapper = new \MessageMapper();
-                $messageMapper->updateMessage($message_);
-                
-                Rest::sendResponse(200);
+                try {
+                    $message_ = new Message();
+                    $data_message_ = $http->getRequestVars();
+                    $messageObject = initObject($data_message_, $message_, true);
+
+                    if(!emptyObject($messageObject)) {
+                        $messageMapper = new \MessageMapper();
+                        if($messageMapper->updateMessage($messageObject)) {
+                            Rest::sendResponse(200);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Need arguments to UPDATE data !');
+                    }
+                } catch(InvalidArgumentException $e) {
+                    print $e->getMessage(); exit;
+                }
                     break;
             default :
                 Rest::sendResponse(501);

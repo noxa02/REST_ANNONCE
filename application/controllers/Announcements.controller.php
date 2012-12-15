@@ -9,36 +9,52 @@
             case 'get':
                 $announcementMapper = new \AnnouncementMapper();
                 $announcementsObject = $announcementMapper->selectAnnouncement(true);
-                foreach($announcementsObject as $announcementObject) {
-                    $announcementsArray[] = extractData($announcementObject);
+                $result = true;
+                if(is_array($announcementsObject) && !is_null($announcementsObject)) {
+                    foreach($announcementsObject as $announcementObject) {
+                        $result = emptyObject($announcementObject);
+                    }     
                 }
-                if($http->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($announcementsArray), 'application/json');  
-                }  
-                else if ($http->getHttpAccept() == 'xml')  { 
-                    
-                    $options = array (  
-                        'indent' => '     ',  
-                        'addDecl' => false,  
-                        XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "announcement",
-                    );  
-                    
-                    $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($announcementsArray), 'application/xml');  
+                if(!$result) {
+                    foreach($announcementsObject as $announcementObject) {
+                        $announcementsArray[] = extractData($announcementObject);
+                    }
+                    if($http->getHttpAccept() == 'json')  {  
+                        Rest::sendResponse(200, json_encode($announcementsArray), 'application/json');  
+                    }  
+                    else if ($http->getHttpAccept() == 'xml')  { 
+
+                        $options = array (  
+                            'indent' => '     ',  
+                            'addDecl' => false,  
+                            XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+                            "defaultTagName"     => "announcement",
+                        );  
+
+                        $serializer = new XML_Serializer($options);  
+                        Rest::sendResponse(200, $serializer->serialize($announcementsArray), 'application/xml');  
+                    }     
+                } else {
+                    Rest::sendResponse(204);
                 }
                     break;
                     
             case 'post':
-                
-                exit;
-                $announcement = new Announcement();
-                $data_announcement = $http->getRequestVars();
-                $announcement = initObject($data_announcement, $announcement, true);
+                try {
+                    $announcement = new Announcement();
+                    $data_announcement = $http->getRequestVars();
+                    $announcement = initObject($data_announcement, $announcement, true);
 
-                $announcementMapper = new \AnnouncementMapper();
-                if($announcementMapper->insertAnnouncement($announcement_)) {
-                    Rest::sendResponse(200);   
+                    if(!emptyObject($announcementsObject)) {
+                        $announcementMapper = new \AnnouncementMapper();
+                        if($announcementMapper->insertAnnouncement($announcement)) {
+                            Rest::sendResponse(200);   
+                        }             
+                    } else {
+                        throw new InvalidArgumentException('Need arguments to POST data !');
+                    }
+                } catch(InvalidArgumentException $e) {
+                    $e->getMessage(); exit;
                 }
                     break;
             default :

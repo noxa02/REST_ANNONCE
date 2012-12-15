@@ -12,7 +12,6 @@
                 $userObject = $userMapper->selectUser();
                 $userArray = extractData($userObject);
                 if(!empty($userArray)) {
-                    
                     if($http->getHttpAccept() == 'json')  {  
                         Rest::sendResponse(200, json_encode($userArray), 'application/json');  
                     }  
@@ -33,17 +32,27 @@
             case 'delete':
                 $user_ = new \User();
                 $userMapper = new \UserMapper();
-                $where = array('id' => $url->getIdFirstPart());
-                $userMapper->updateUser($user_, $where);
+                if($userMapper->delete()) {
+                    Rest::sendResponse(200);
+                }
                     break;
              case 'put':
-                $user = new \User();
-                $data_user = $http->getRequestVars();
-                $user = initObject($data_user, $user, true);
-                $userMapper = new \UserMapper();
-                $userMapper->updateUser($user);
-                
-                Rest::sendResponse(200);
+                try {
+                    $user = new \User();
+                    $data_user = $http->getRequestVars();
+                    $userObject = initObject($data_user, $user, true);
+
+                    if(!emptyObject($userObject)) {
+                        $userMapper = new \UserMapper();
+                        if($userMapper->updateUser($userObject)) {
+                            Rest::sendResponse(200);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Need arguments to UPDATE data !');
+                    }
+                } catch(InvalidArgumentException $e) {
+                    print $e->getMessage(); exit;
+                }
                     break;
             default :
                 Rest::sendResponse(501);

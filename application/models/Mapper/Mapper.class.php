@@ -138,8 +138,8 @@ class Mapper
             $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
                    (($where_) ? ' WHERE '.$where_ : ' ');
             
-            $this->statement->prepare($query)
-                            ->execute($data); 
+            return $this->statement->prepare($query)
+                                   ->execute($data); 
             
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
@@ -165,7 +165,7 @@ class Mapper
 
             $q = $this->statement->prepare($query);
             $q->execute();
-
+            $object = null;
              if(!$all_) {
                  $data = $q->fetch(PDO::FETCH_ASSOC);
                  $object = initObject($data, $object_, true);

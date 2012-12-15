@@ -170,3 +170,17 @@ function str_replace_limit($search,$replace,$subject,$limit,&$count = null)
     $substring = str_replace($search,$replace,$substring,$count);
     return substr_replace($subject,$substring,0,$position+1);
 }
+
+function emptyObject($object_) {
+    $ref = new ReflectionObject($object_);
+    $properties = $ref->getProperties();
+   
+    if(isset($object_) && is_object($object_) && !empty($properties)) {
+        $methods = get_class_methods($object_);
+
+        if(!empty($methods) && !empty($properties)) {
+            return false;
+        }
+    }
+    return true;
+}

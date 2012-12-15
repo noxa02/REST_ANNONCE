@@ -13,7 +13,6 @@
                 $pictureObject = $pictureMapper->selectPicture();
                 $pictureArray = extractData($pictureObject);
                 if(!empty($pictureArray)) {
-                    
                     if($http->getHttpAccept() == 'json')  {  
                         Rest::sendResponse(200, json_encode($pictureArray), 'application/json');  
                     }  
@@ -36,21 +35,27 @@
             case 'delete':
                 $picture_ = new Picture();
                 $pictureMapper = new \PictureMapper();
-                
                 if($pictureMapper->deletePicture()) {
                     Rest::sendResponse(200);
-                } else {
-                    Rest::sendResponse(500);
-                }
+                } 
                     break;
              case 'put':
-                $picture_ = new Picture();
-                $data_picture_ = $http->getRequestVars();
-                $picture_ = initObject($data_picture_, $picture_, true);
-                $pictureMapper = new \PictureMapper();
-                $pictureMapper->updatePicture($picture_);
-                
-                Rest::sendResponse(200);
+                try {
+                    $picture_ = new Picture();
+                    $data_picture_ = $http->getRequestVars();
+                    $pictureObject = initObject($data_picture_, $picture_, true);
+
+                    if(!emptyObject($pictureObject)) {
+                        $pictureMapper = new \PictureMapper();
+                        if($pictureMapper->updatePicture($pictureObject)) {
+                            Rest::sendResponse(200);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Need arguments to UPDATE data !');
+                    }
+                } catch(InvalidArgumentException $e) {
+                    print $e->getMessage(); exit;
+                }
                     break;
             default :
                 Rest::sendResponse(501);

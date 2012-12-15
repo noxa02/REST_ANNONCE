@@ -10,7 +10,7 @@
             $userMapper = new UserMapper();
             $userFollowerObject = $userMapper->getFollower();
             $userFollowerArray = extractData($userFollowerObject);
-
+            
             if(!empty($userFollowerArray)) {
 
                 if($http->getHttpAccept() == 'json')  {  
@@ -35,23 +35,29 @@
                 break;
         case 'delete':
             $userMapper = new UserMapper();
-
             if($userMapper->stopFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
                 Rest::sendResponse(200);
-            } else {
-                Rest::sendResponse(500);
             }
                break;
          case 'put':
-            $user_follower_ = new User_follower();
-            $data_user_follower_ = $http->getRequestVars();
-            $user_follower_ = initObject($data_user_follower_, $user_follower_, true);
-            $user_followerMapper = new \User_followerMapper();
-            $user_followerMapper->update($user_follower_);
+            try {
+                $user_follower_ = new User_follower();
+                $data_user_follower_ = $http->getRequestVars();
+                $user_follower_ = initObject($data_user_follower_, $user_follower_, true);
 
-            Rest::sendResponse(200);
+                if(!emptyObject($user_follower_)) {
+                    $user_followerMapper = new \User_followerMapper();
+                    if($user_followerMapper->update($user_follower_)) {
+                        Rest::sendResponse(200);      
+                    }
+                } else {
+                    throw new InvalidArgumentException('Need arguments to UPDATA data !');
+                }  
+            } catch(InvalidArgumentException $e) {
+                print $e->getMessage(); exit;
+            }
                 break;
          default :
             Rest::sendResponse(501);
-                    break;
+                break;
     }

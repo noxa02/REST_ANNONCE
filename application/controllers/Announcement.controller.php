@@ -32,21 +32,27 @@
                     break;
             case 'delete':
                 $announcementMapper = new \AnnouncementMapper();
-                
                 if($announcementMapper->deleteAnnouncement()) {
                     Rest::sendResponse(200);
-                } else {
-                    Rest::sendResponse(500);
                 }
                     break;
              case 'put':
-                $announcement = new Announcement();
-                $data_announcement = $http->getRequestVars();
-                $announcement = initObject($data_announcement, $announcement, true);
-                $announcementMapper = new \AnnouncementMapper();
-                $announcementMapper->updateAnnouncement($announcement);
-                
-                Rest::sendResponse(200);
+                try {
+                    $announcement = new Announcement();
+                    $data_announcement = $http->getRequestVars();
+                    $announcementObject = initObject($data_announcement, $announcement, true);
+
+                    if(!emptyObject($announcementObject)) {
+                        $announcementMapper = new \AnnouncementMapper();
+                        if($announcementMapper->updateAnnouncement($announcementObject)) {
+                            Rest::sendResponse(200);
+                        }
+                    } else {
+                        throw new InvalidArgumentException('Need arguments to UPDATE data !');
+                    }
+                } catch(InvalidArgumentException $e) {
+                    print $e->getMessage(); exit;
+                }
                     break;
             default :
                 Rest::sendResponse(501);
