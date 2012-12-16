@@ -5,8 +5,7 @@
     {
         case 'get':
             $userMapper = new UserMapper();
-            $messageMapper = new MessageMapper($userMapper);
-            $messagesObject = $userMapper->getMessages($messageMapper);
+            $messagesObject = $userMapper->getMessages();
            
             $result = true;
             if(is_array($messagesObject) && !is_null($messagesObject)) {
@@ -27,7 +26,7 @@
                         'indent' => '     ',  
                         'addDecl' => false,  
                         XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "user",
+                        "defaultTagName"     => "message",
                     );  
 
                     $serializer = new XML_Serializer($options);  

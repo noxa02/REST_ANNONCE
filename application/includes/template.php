@@ -129,25 +129,35 @@ function extractData($object_, array $arrayFilter = array()) {
  * Extract array values to return an initialized object
  */
 function initObject($data_, $object_, $return = false, $opts_ = array()) {
+    if(is_a($object_, 'stdClass')) {
+        $object_ = new stdClass();
+        if(isset($data_) && !empty($data_)) {
+           foreach ($data_ as $key => $value) { 
+               $object_->$key = $value;
+           }
+        }
+    } else {
     $object_ = new $object_();
-    if(isset($data_) && !empty($data_)) {
-       foreach ($data_ as $key => $value) {
-           $_methodName = ucfirst($key);
-           if(strpos($key, '_')) {
-               $beginMethod = ucfirst(strstr($key, '_', true));
-               $endMethod = ucfirst(str_replace('_', '', strstr($key, '_')));
-               $_methodName = $beginMethod.$endMethod;
-           }
-           
-           $_method = 'set'.$_methodName;
-           if(method_exists($object_, $_method)) {
-               if(in_array('password', $opts_)) {
-                   $object_->$_method($value, true);
+        if(isset($data_) && !empty($data_)) {
+           foreach ($data_ as $key => $value) {
+               $_methodName = ucfirst($key);
+               if(strpos($key, '_')) {
+                   $beginMethod = ucfirst(strstr($key, '_', true));
+                   $endMethod = ucfirst(str_replace('_', '', strstr($key, '_')));
+                   $_methodName = $beginMethod.$endMethod;
                }
-               $object_->$_method($value);
+
+               $_method = 'set'.$_methodName;
+               if(method_exists($object_, $_method)) {
+                   if(in_array('password', $opts_)) {
+                       $object_->$_method($value, true);
+                   }
+                   $object_->$_method($value);
+               }
            }
-       }
+        }     
     }
+
     if($return) {
         return $object_;
     }
@@ -173,13 +183,9 @@ function str_replace_limit($search,$replace,$subject,$limit,&$count = null)
 function emptyObject($object_) {
     $ref = new ReflectionObject($object_);
     $properties = $ref->getProperties();
-   
-    if(isset($object_) && is_object($object_) && !empty($properties)) {
-        $methods = get_class_methods($object_);
 
-        if(!empty($methods) && !empty($properties)) {
+    if(isset($object_) && is_object($object_) && !empty($properties)) {
             return false;
-        }
     }
     return true;
 }

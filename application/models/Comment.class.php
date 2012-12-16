@@ -1,6 +1,6 @@
 <?php
 
-class Message {
+class Comment {
     
      private $_id;
      private $_content; 
@@ -64,7 +64,7 @@ class Message {
 	}
 
 	public 
-    function setIdSender($id_user_)
+    function setIdUser($id_user_)
 	{
 		$this->_id_user = $id_user_;
 	}

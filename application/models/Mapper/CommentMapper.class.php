@@ -10,12 +10,8 @@ class CommentMapper extends Mapper {
     function __construct() {
         parent::__construct();
         global $url;
-        $this->id = $url->getIdFirstPart();
-        
-        if(func_num_args() == 1 && is_object(func_get_arg(0))) {
-            $object_ = func_get_arg(0);
-            $this->foreignTable =  $object_;
-        }
+        $this->id = $this->id_user = $url->getIdFirstPart();
+        $this->id_announcement = $url->getIdSecondPart();
     }
     
    /**
@@ -32,15 +28,21 @@ class CommentMapper extends Mapper {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
             $userMapper = new UserMapper();
+            $announcementMapper = new AnnouncementMapper(); 
             $userMapper->setId($comment_->getIdUser());
             $user = $userMapper->selectUser();
-            $userMapper->setId($comment_->getIdAnnouncement());
-            $announcement = $userMapper->selectUser();
-
+            $announcementMapper->setId($comment_->getIdAnnouncement());
+            $announcement = $announcementMapper->selectAnnouncement();
             if(!is_null($user->getId()) && !is_null($announcement->getId())) {
                 return parent::insert($this->table, $comment_, $arrayFilter);
-            }         
+            } elseif(is_null($user->getId())) {
+                throw new Exception('User is inexistant !');
+            } elseif(is_null($announcement->getId())) {
+                throw new Exception('Announcement is inexistant !');
+            } 
         } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
@@ -74,18 +76,16 @@ class CommentMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function selectComment($all_ = false) 
+    function selectComment($all_ = false, $where_ = null) 
     {
         try {
             $where = null;
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-
-            if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
-                $fkName = 'id_'.strtolower($this->foreignTable->getTable());
-                $where  = $fkName.' = '.$this->foreignTable->getId();
-            } elseif(isset($this->id) && !is_null($this->id)) {
+            if(isset($where_) && !empty($where_)) {
+                $where = $where_;
+            } elseif(isset($this->id) && !is_null($this->id) && empty($where_)) {
                 $where = 'id = '.$this->id;
             }
 

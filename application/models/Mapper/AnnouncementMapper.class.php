@@ -158,4 +158,46 @@ class AnnouncementMapper extends Mapper {
         $picturesObjects = $pictureMapper_->selectPicture(true);
         return $picturesObjects;
     }
+    
+    public 
+    function getTags() {
+        $tag = new Tag();
+        $where = 'id_announcement = '.$this->getFirstId();
+        return parent::select('TO_ASSOCIATE', $where, $tag);
+        
+    }
+    
+    public
+    function goAssociate(stdClass $object_) {
+        try {
+            if(isset($object_) && !emptyObject($object_)) {
+                $announcementMapper = new AnnouncementMapper();
+                $announcementMapper->setId($object_->id_announcement);
+                $announcement = $announcementMapper->selectAnnouncement();
+                $tagMapper = new TagMapper();
+                $tagMapper->setId($object_->id_tag);
+                $tag = $tagMapper->selectTag();
+
+                if(!is_null($announcement->getId()) && !is_null($tag->getId())) {
+                    return parent::insert($this->table, $message_, $arrayFilter);
+                } elseif(is_null($announcement->getId())) {
+                    throw new Exception('Announcement is inexistant !');
+                } elseif(is_null($tag->getId())) {
+                    throw new Exception('Tag is inexistant !');
+                }
+                if(is_null($user->getId())) {
+                     return parent::insert('TO_ASSOCIATE', $object_);
+                } else {
+                    throw new Exception('The user is already followed by this user !');
+                }    
+                
+            } elseif(empty ($id_announcement_)) {
+                throw new Exception('Id announcement is required !');
+            } elseif(empty ($id_tag_)) {
+                throw new Exception('Id tag is required !');
+            }
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        } 
+    }
 }

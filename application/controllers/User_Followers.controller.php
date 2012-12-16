@@ -35,25 +35,6 @@
                 Rest::sendResponse(204);
             }
                 break;
-                
-         case 'post':
-            try {
-                $user = new User();
-                $data_user = $http->getRequestVars();
-                $user = initObject($data_user, $user, true);
-                
-                if(!emptyObject($user)) {
-                    $userMapper = new UserMapper();
-                    if($userMapper->goFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
-                        Rest::sendResponse(200);   
-                    }       
-                } else {
-                    throw new InvalidArgumentException('Need arguments to POST data !');
-                }
-            } catch(InvalidArgumentException $e) {
-                print $e->getMessage(); exit;
-            }
-                break;
             default :
                 Rest::sendResponse(501);
                     break;

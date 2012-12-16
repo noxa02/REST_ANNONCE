@@ -163,14 +163,19 @@ class UserMapper extends Mapper {
         return parent::delete('TO_FOLLOW', $where);
     }
     
+    /**
+     * POST a User Message
+     * @param Message $messageObject_
+     * @return boolean
+     */
     public
     function sendMessage(Message $messageObject_) {
 
         if(!emptyObject($messageObject_)) {
             new UserMapper;
             $messageMapper = new MessageMapper();
-            $messageObject_->setIdSender($this->id_user_sender);
-            $messageObject_->setIdReceiver($this->id_user_receiver);
+            $messageObject_->setIdSender($this->getFirstId());
+            $messageObject_->setIdReceiver($this->getSecondId());
             if($messageMapper->insertMessage($messageObject_)) {
                 return true;
             } 
@@ -178,9 +183,40 @@ class UserMapper extends Mapper {
     }
     
     public 
-    function getMessages(MessageMapper $messageMapper_) {
-        $where = 'id_sender = '.$messageMapper_->getId();
-        $messagesObjects = $messageMapper_->selectMessage(true, $where);
+    function getMessages() {
+        $messageMapper = new MessageMapper();
+        $where = 'id_sender = '.$this->getFirstId();
+        $messagesObjects = $messageMapper->selectMessage(true, $where);
+        
         return $messagesObjects;
+    }
+    
+    /**
+     * 
+     * @return array 
+     */
+    public 
+    function getMessage() {
+        $messageMapper = new MessageMapper();
+        $where = 'id_sender = '.$this->getFirstId();
+        $messagesObjects = $messageMapper->selectMessage(false, $where);
+        
+        return $messagesObjects;
+    }  
+    
+    public
+    function getComments() {
+        $commentMapper = new CommentMapper();
+        $where = 'id_user = '.$this->getFirstId();
+        $commentsObjects = $commentMapper->selectComment(true, $where);
+        return $commentsObjects;
+    }
+    
+    public
+    function getComment() {
+        $commentMapper = new CommentMapper();
+        $where = 'id_user = '.$this->getFirstId().' AND id = '.$this->getSecondId();
+        $commentsObjects = $commentMapper->selectComment(false, $where);
+        return $commentsObjects;
     }
 }

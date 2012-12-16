@@ -3,9 +3,14 @@
 class Mapper
 {
     protected $statement;
-
+    protected $firstId; 
+    protected $secondId;
+    
     function __construct() 
     {
+        global $url;
+        $this->firstId = $url->getIdFirstPart();
+        $this->secondId = $url->getIdSecondPart();
         $this->statement = PDO_Mysql::getInstance();
     }
 
@@ -102,7 +107,7 @@ class Mapper
             
             $query = 'INSERT INTO '.$table_.' '.
                    '('.$columns.')  VALUES (:'.$values.')';
-            
+
             return $this->statement->prepare($query)
                                    ->execute($data);
             
@@ -165,6 +170,7 @@ class Mapper
 
             $q = $this->statement->prepare($query);
             $q->execute();
+            
             $object = null;
              if(!$all_) {
                  $data = $q->fetch(PDO::FETCH_ASSOC);
@@ -175,6 +181,7 @@ class Mapper
                     $object[] = initObject($data, $object_, true);
                  }
             }
+            
             return $object;            
         } catch(PDOException $e) {
             $e->getMessage(); exit;
@@ -193,7 +200,7 @@ class Mapper
         try {
             $query = 'DELETE FROM '.$table_. 
                       (($where_) ? ' WHERE '. $where_  : '');
-
+            
             return $this->statement->prepare($query)
                                    ->execute();     
         } catch(PDOException $e) {
@@ -239,7 +246,43 @@ class Mapper
             print $e->getMessage(); exit;
         }
     }
-   
+ 
+    /**
+     * 
+     * @return type
+     * @throws Exception
+     */
+    public
+    function getFirstId() {
+        try {
+            if(!property_exists($this, 'firstId')) {
+                throw new Exception('Missing attribut "id" to the Mapper !');
+            }
+            
+            return $this->firstId; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }    
+    }
+
+    /**
+     * 
+     * @return string
+     * @throws Exception
+     */
+    public
+    function getSecondId() {
+        try {
+            if(!property_exists($this, 'secondId')) {
+                throw new Exception('Missing attribut "id" to the Mapper !');
+            }
+            
+            return $this->secondId; 
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }    
+    }
+    
     /**
      * 
      * @return Picture

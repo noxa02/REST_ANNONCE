@@ -62,11 +62,12 @@ class MessageMapper extends Mapper {
         if(is_null($this->table)) {
             throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
+        $id = $this->getFirstId();
+        if(isset($id) && !is_null($id)) {
+            $where = 'id = '.$id;
         }
         
-        parent::update($this->table, $message_, $where);
+        return parent::update($this->table, $message_, $where);
     } 
     
     /**
@@ -111,7 +112,7 @@ class MessageMapper extends Mapper {
         }
         
         if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
+            $where = 'id = '.$this->getFirstId();
         }
        
         return parent::delete($this->table, $where);

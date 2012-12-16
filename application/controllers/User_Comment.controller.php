@@ -8,26 +8,26 @@
     {
         case 'get':
             $userMapper = new UserMapper();
-            $userFollowerObject = $userMapper->getFollower();
-            $userFollowerArray = extractData($userFollowerObject);
+            $userCommentObject = $userMapper->getComment();
+            $userCommentArray = extractData($userCommentObject);
             
-            if(!empty($userFollowerArray)) {
+            if(!empty($userCommentArray)) {
 
                 if($http->getHttpAccept() == 'json')  {  
 
-                    Rest::sendResponse(200, json_encode($userFollowerArray), 'application/json');  
+                    Rest::sendResponse(200, json_encode($userCommentArray), 'application/json');  
                 }  
                 else if ($http->getHttpAccept() == 'xml')  {  
 
                     $options = array (  
                         'indent'         => '     ',  
                         'addDecl'        => false,  
-                        "defaultTagName" => "user_follower",
+                        "defaultTagName" => "user_comment",
                         XML_SERIALIZER_OPTION_RETURN_RESULT => true,
 
                     );  
                     $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($userFollowerArray), 'application/xml');   
+                    Rest::sendResponse(200, $serializer->serialize($userCommentArray), 'application/xml');   
                 }               
             } else {
                 Rest::sendResponse(204);
@@ -41,13 +41,13 @@
                break;
          case 'put':
             try {
-                $user_follower_ = new User_follower();
-                $data_user_follower_ = $http->getRequestVars();
-                $user_follower_ = initObject($data_user_follower_, $user_follower_, true);
+                $user_comment_ = new User_comment();
+                $data_user_comment_ = $http->getRequestVars();
+                $user_comment_ = initObject($data_user_comment_, $user_comment_, true);
 
-                if(!emptyObject($user_follower_)) {
-                    $user_followerMapper = new \User_followerMapper();
-                    if($user_followerMapper->update($user_follower_)) {
+                if(!emptyObject($user_comment_)) {
+                    $user_commentMapper = new \User_commentMapper();
+                    if($user_commentMapper->update($user_comment_)) {
                         Rest::sendResponse(200);      
                     }
                 } else {
@@ -59,13 +59,13 @@
                 break;
          case 'post':
             try {
-                $user = new User();
-                $data_user = $http->getRequestVars();
-                $user = initObject($data_user, $user, true);
+                $comment = new Comment();
+                $data_comment = $http->getRequestVars();
+                $commentObject = initObject($data_comment, $comment, true);
                 
-                if(!emptyObject($user)) {
+                if(!emptyObject($commentObject)) {
                     $userMapper = new UserMapper();
-                    if($userMapper->goFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
+                    if($userMapper->sendComment($commentObject)) {
                         Rest::sendResponse(200);   
                     }       
                 } else {
