@@ -35,7 +35,7 @@
             case 'delete':
                 $user_ = new \User();
                 $userMapper = new \UserMapper();
-                if($userMapper->delete()) {
+                if($userMapper->deleteUser()) {
                     Rest::sendResponse(200);
                 }
                     break;

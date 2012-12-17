@@ -102,7 +102,7 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function deleteUser($where_) {
+    function deleteUser($where_ = null) {
         try {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -110,7 +110,7 @@ class UserMapper extends Mapper {
 
             if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
                 $where = 'id = '.$this->id;
-            } else {
+            } elseif(isset($where_) && !empty ($where_)) {
                 $where = $where_;
             }
 
