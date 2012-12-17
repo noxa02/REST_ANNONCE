@@ -102,10 +102,10 @@ class PictureMapper extends Mapper {
         $ext = $picture->getExtension();
         //Remove to the pictures folders
         if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-            if(unlink(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-                 return parent::delete($this->table, $where);
-            }       
+            unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
         }
+        
+        return parent::delete($this->table, $where);
     }    
 }
 

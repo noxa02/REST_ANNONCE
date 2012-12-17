@@ -114,7 +114,7 @@ class AnnouncementMapper extends Mapper {
     }
     
     /**
-     * 
+     * Triggered 
      * @return Boolean If True -> Success Query / False -> Fail Query
      * @throws InvalidArgumentException
      */
@@ -131,15 +131,17 @@ class AnnouncementMapper extends Mapper {
 
             $pictureMapper = new PictureMapper($this);
             $pictures = $pictureMapper->selectPicture(true);
-
-            if(isset($pictures) && !empty($pictures)) {
+            
+            if(isset($pictures) && !empty($pictures) && is_array($pictures)) {
                 foreach ($pictures as $key => $value) {
                     $idPicture = $value->getId();
                     $path = $value->getPath(); 
                     $title = $value->getTitle();
                     $ext = $value->getExtension();
                     //Remove to the pictures folders
-                    unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+                    if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
+                        unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+                    }
                     //Remove to database
                     $pictureMapper = new PictureMapper();
                     $pictureMapper->setId($idPicture);
@@ -179,17 +181,17 @@ class AnnouncementMapper extends Mapper {
                 $tag = $tagMapper->selectTag();
 
                 if(!is_null($announcement->getId()) && !is_null($tag->getId())) {
+                if(is_null($user->getId())) {
+                     return parent::insert('TO_ASSOCIATE', $object_);
+                } else {
+                    throw new Exception('The user is already followed by this user !');
+                }   
                     return parent::insert($this->table, $message_, $arrayFilter);
                 } elseif(is_null($announcement->getId())) {
                     throw new Exception('Announcement is inexistant !');
                 } elseif(is_null($tag->getId())) {
                     throw new Exception('Tag is inexistant !');
-                }
-                if(is_null($user->getId())) {
-                     return parent::insert('TO_ASSOCIATE', $object_);
-                } else {
-                    throw new Exception('The user is already followed by this user !');
-                }    
+                } 
                 
             } elseif(empty ($id_announcement_)) {
                 throw new Exception('Id announcement is required !');

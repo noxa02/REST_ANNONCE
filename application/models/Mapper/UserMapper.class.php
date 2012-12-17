@@ -43,22 +43,22 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function updateUser(User $user_, $where_) 
+    function updateUser(User $user_, $where_ = null) 
     {
         try {
+            $where = null;
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id) && empty($where_)) {
-                $where_ = 'id = '.$this->id;
-            } elseif(isset($where_) && !empty($where_)) {
-                $where_ = 'id = '.$user_->getId();
+            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
+                $where = $where_;
+            } elseif(isset($where_) && empty($where_)) {
+                $where = 'id = '.$user_->getId();
             }
-
-            $userObject = $userMapper->selectUser($where_);
+            $userObject = $this->selectUser($where_);
             $userArray = extractData($userObject);
             if(!empty($userArray)) {
-                parent::update($this->table, $user_, $where_);
+                parent::update($this->table, $user_, $where);
             } else {
                 throw new Exception('Inexistant user !');
             }          

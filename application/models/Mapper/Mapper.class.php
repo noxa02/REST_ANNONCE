@@ -129,8 +129,8 @@ class Mapper
         try {
             $set = array();
             $data = extractData($object_);
-            
-            if(isset($data) && empty($data)) {
+
+            if(isset($data) && empty($data) || is_null($data)) {
                 throw new InvalidArgumentException('Must 1 or more arguments to execute an update query !');
             }
             

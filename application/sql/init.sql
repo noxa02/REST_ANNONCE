@@ -108,14 +108,37 @@ CREATE TRIGGER DELETE_ON_ANNOUNCEMENT
     FOR EACH ROW 
       BEGIN
 
-      SELECT COUNT(id) INTO @countPicture FROM PICTURE
+      SELECT COUNT(id_announcement) INTO @countAnnouncementTA FROM TO_ASSOCIATE
       WHERE id_announcement  = old.id;
 
-      IF @countPicture > 0
+      SELECT COUNT(id) INTO @countComment FROM COMMENT
+      WHERE id_announcement  = old.id;
+
+      SELECT COUNT(id_announcement) INTO @countAnnouncementTAP FROM TO_APPLY
+      WHERE id_announcement  = old.id;
+
+      SELECT COUNT(id_announcement) INTO @countAnnouncementTE FROM TO_EVALUATE
+      WHERE id_announcement  = old.id;
+
+      IF @countAnnouncementTA > 0
         THEN 
-          DELETE FROM PICTURE WHERE id_announcement = old.id;
+          DELETE FROM TO_ASSOCIATE WHERE id_announcement = old.id;
       END IF;   
 
+      IF @countComment > 0
+        THEN 
+          DELETE FROM COMMENT WHERE id_announcement = old.id;
+      END IF;  
+
+      IF @countAnnouncementTAP > 0
+        THEN 
+          DELETE FROM TO_APPLY WHERE id_announcement = old.id;
+      END IF; 
+
+      IF @countAnnouncementTE > 0
+        THEN 
+          DELETE FROM TO_EVALUATE WHERE id_announcement = old.id;
+      END IF; 
       END;
 
 //
