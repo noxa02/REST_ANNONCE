@@ -20,17 +20,15 @@ class CommentMapper extends Mapper {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            $userMapper = new UserMapper();
-            $announcementMapper = new AnnouncementMapper(); 
-            $userMapper->setId($comment_->getIdUser());
-            $user = $userMapper->selectUser();
-            $announcementMapper->setId($comment_->getIdAnnouncement());
-            $announcement = $announcementMapper->selectAnnouncement();
-            if(!is_null($user->getId()) && !is_null($announcement->getId())) {
+            
+            $user = parent::exist('USER', 'User', 'userMapper', 'id = '.$comment_->getIdUser());
+            $announcement = parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 'id = '.$comment_->getIdUser());
+            
+            if($user && $announcement) {
                 return parent::insert($this->table, $comment_, $arrayFilter);
-            } elseif(is_null($user->getId())) {
+            } elseif(!$user) {
                 throw new Exception('User is inexistant !');
-            } elseif(is_null($announcement->getId())) {
+            } elseif(!$announcement) {
                 throw new Exception('Announcement is inexistant !');
             } 
         } catch(InvalidArgumentException $e) {
@@ -52,13 +50,13 @@ class CommentMapper extends Mapper {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+            if(!is_null($this->getId())) {
+                $where = 'id = '.$this->getId();
             }
             
             $comment = $this->selectComment();
             if(!emptyObjectMethod($comment)) {
-                return parent::update($this->table, $comment_, $where);   
+                return parent::update($this->getTable(), $comment_, $where);   
             } else {
                 throw new Exception('Comment doesn\'t exist !');
             }

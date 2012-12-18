@@ -74,7 +74,12 @@ function constructRoute($url_) {
     if($url_->getModelSecondPart() != null) {
 
         if($url_->getIdSecondPart() != null) {
-            $model .= '_'.ucfirst(substr_replace($url_->getModelSecondPart() , '', -1));
+            if(strrchr($url_->getModelSecondPart(), 's')) {
+                $model .= '_'.ucfirst(substr_replace($url_->getModelSecondPart() , '', -1));
+            } else { 
+                $model .= '_'.ucfirst($url_->getModelSecondPart());
+            }
+            
         } else {
             $model .= '_'.ucfirst($url_->getModelSecondPart()); 
         }
@@ -98,10 +103,10 @@ function is_admin() {
 }
 /**
  * 
- * @param object $object_
+ * @param class $object_
  * @param array $arrayFilter
+ * @param boolean $multiple
  * @return array
- * Extract object data to return an array
  */
 function extractData($object_, array $arrayFilter = array(), $multiple = false) {
 $data = null;
@@ -137,7 +142,6 @@ $data = null;
         }
     }
         
-    
         return $data;
 }
 /**

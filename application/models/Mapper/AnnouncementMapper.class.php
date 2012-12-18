@@ -8,11 +8,10 @@ class AnnouncementMapper extends Mapper {
     }
     
     /**
-     * 
+     * Allow to create an announcement / if sereval pictures are upload, they're moved on 
+     * the Upload/announcement/original/ folder.
      * @param Announcement $announcement_
      * @throws InvalidArgumentException
-     * Insert an announcement and if some pictures are upload they're upload 
-     * on the Upload/announcement/original/ folder
      */
     public 
     function insertAnnouncement(Announcement $announcement_) 
@@ -52,7 +51,8 @@ class AnnouncementMapper extends Mapper {
                         )) {
                             
                             $pictureMapper = new PictureMapper();
-                            $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);                    
+                            $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);          
+                            
                         } else {
                             throw new Exception('A problem occurred during the picture upload');
                         }
@@ -69,9 +69,9 @@ class AnnouncementMapper extends Mapper {
     } 
     
     /**
-     * 
+     * Allow to modify an announcement
      * @param Announcement $announcement_
-     * @param string $where
+     * @param string $where Query condition 
      * @throws InvalidArgumentException
      */
     public 
@@ -92,9 +92,9 @@ class AnnouncementMapper extends Mapper {
     } 
     
     /**
-     * 
-     * @param boolean $all Set True to return all values of the table
-     * @return boolean If True -> Success Query / False -> Fail Query
+     * Allow to get an announcement or several announcements if defined true
+     * @param boolean $all Set TRUE to return all table values
+     * @return boolean True the query is executed | False
      * @throws InvalidArgumentException
      */
     public
@@ -116,14 +116,16 @@ class AnnouncementMapper extends Mapper {
     }
     
     /**
+     * Allows to delete an announcement and images 
      * Triggered 
-     * @return Boolean If True -> Success Query / False -> Fail Query
+     * @return boolean True the query is executed | False
      * @throws InvalidArgumentException
      */
     public
     function deleteAnnouncement() 
     {
         try {
+            
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
@@ -165,51 +167,94 @@ class AnnouncementMapper extends Mapper {
         }
     } 
     
+    /**
+     * Allows to get all pictures
+     * @param PictureMapper $pictureMapper_
+     * @return array Returns an array of objects
+     */
     public
     function getPictures(PictureMapper $pictureMapper_) {
+        
         $picturesObjects = $pictureMapper_->selectPicture(true);
+        
         return $picturesObjects;
     }
     
+    /**
+     * Allows to get all Tag
+     * @return boolean True the query is executed | False
+     * @throws Exception
+     */
     public 
     function getTags() {
-        $tag = new Tag();
-        $where = 'id_announcement = '.$this->getFirstId();
-        return parent::select('TO_ASSOCIATE', $where, $tag);
-        
-    }
-    
-    public
-    function goAssociate(stdClass $object_) {
         try {
-            if(isset($object_) && !emptyObject($object_)) {
-                $announcementMapper = new AnnouncementMapper();
-                $announcementMapper->setId($object_->id_announcement);
-                $announcement = $announcementMapper->selectAnnouncement();
-                $tagMapper = new TagMapper();
-                $tagMapper->setId($object_->id_tag);
-                $tag = $tagMapper->selectTag();
-
-                if(!is_null($announcement->getId()) && !is_null($tag->getId())) {
-                if(is_null($user->getId())) {
-                     return parent::insert('TO_ASSOCIATE', $object_);
-                } else {
-                    throw new Exception('The user is already followed by this user !');
-                }   
-                    return parent::insert($this->table, $message_, $arrayFilter);
-                } elseif(is_null($announcement->getId())) {
-                    throw new Exception('Announcement is inexistant !');
-                } elseif(is_null($tag->getId())) {
-                    throw new Exception('Tag is inexistant !');
-                } 
-                
-            } elseif(empty ($id_announcement_)) {
-                throw new Exception('Id announcement is required !');
-            } elseif(empty ($id_tag_)) {
-                throw new Exception('Id tag is required !');
+            
+            if(is_null($this->getFirstId())) {
+                throw new Exception('ID Announcement musn\'t be null !');
             }
+            
+            $tag = new Tag();
+            $where = 'id_announcement = '.$this->getFirstId();
+            
+            return parent::select('TO_ASSOCIATE', $where, $tag);
+            
         } catch(Exception $e) {
             print $e->getMessage(); exit;
-        } 
+        }
     }
+    
+    /**
+     * Allows to apply an ad
+     * @param stdClass $object_
+     * @throws Exception
+     */
+    public
+    function goApply(stdClass $object_) {
+        try {
+            
+            if(!parent::exist('USER', 'User', 'userMapper', 'id = '.$object_->id_user)) {
+                throw new Exception('User doesn\'t exist !');
+            }
+            
+            if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 'id = '.$this->getFirstId())) {
+                throw new Exception('Announcement doesn\'t exist !');
+            }
+            
+            $object_->id_announcement = $this->getFirstId();
+            return parent::insert('TO_APPLY', $object_);
+            
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+    }
+//    public
+//    function goAssociate(stdClass $object_) {
+//        try {
+//            
+//            if(isset($object_) && !emptyObjectMethod($object_)) {
+//                
+//                $announcementMapper = new AnnouncementMapper();
+//                $announcementMapper->setId($object_->id_announcement);
+//                $announcement = $announcementMapper->selectAnnouncement();
+//                $tagMapper = new TagMapper();
+//                $tagMapper->setId($object_->id_tag);
+//                $tag = $tagMapper->selectTag();
+//
+//                if(!is_null($announcement->getId()) && !is_null($tag->getId())) {
+//                     parent::insert('TO_ASSOCIATE', $object_);
+//                } elseif(is_null($announcement->getId())) {
+//                    throw new Exception('Announcement is inexistant !');
+//                } elseif(is_null($tag->getId())) {
+//                    throw new Exception('Tag is inexistant !');
+//                } 
+//                
+//            } elseif(empty ($id_announcement_)) {
+//                throw new Exception('Id announcement is required !');
+//            } elseif(empty ($id_tag_)) {
+//                throw new Exception('Id tag is required !');
+//            }
+//        } catch(Exception $e) {
+//            print $e->getMessage(); exit;
+//        } 
+//    }
 }

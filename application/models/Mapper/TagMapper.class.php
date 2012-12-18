@@ -9,7 +9,7 @@ class TagMapper extends Mapper {
     }
     
    /**
-    * 
+    * Allow to create a tag.
     * @param Tag $tag_
     * @param array $arrayFilter
     * @throws InvalidArgumentException
@@ -31,7 +31,7 @@ class TagMapper extends Mapper {
     } 
     
     /**
-     * 
+     * Allow to update a tag.
      * @param Tag $tag_
      * @throws InvalidArgumentException
      */
@@ -39,20 +39,17 @@ class TagMapper extends Mapper {
     function updateTag(Tag $tag_) 
     {
         try {
-            if(is_null($this->table)) {
+            
+            if(is_null($this->getTable())) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+            if(!is_null($this->getFirstId())) {
+                $where = 'id = '.$this->getFirstId();
             }
             
-            $tagMapper = new TagMapper();
-            $tagMapper->setId($this->getFirstId());
-            $tag = $tagMapper->selectTag();
-            
-            if(!is_null($tag->getId())) {
-                return parent::update($this->table, $tag_, $where);
-            } elseif(is_null($tag->getId())) {
+            if(parent::exist('TAG', 'Tag', 'tagMapper', $where)) {
+                return parent::update($this->getTable(), $tag_, $where);
+            } else {
                 throw new Exception('Tag does not exist !');
             }
             
@@ -74,14 +71,14 @@ class TagMapper extends Mapper {
     {   
         try {
             $where = null;
-            if(is_null($this->table)) {
+            if(is_null($this->getTable())) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+            if(!is_null($this->getFirstId())) {
+                $where = 'id = '.$this->getFirstId();
             }
 
-            return parent::select($this->table, $where, $object = new Tag(), $all_);        
+            return parent::select($this->getTable(), $where, $object = new Tag(), $all_);        
             
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
@@ -97,15 +94,15 @@ class TagMapper extends Mapper {
     function deleteTag() 
     {
         try {
-            if(is_null($this->table)) {
+            if(is_null($this->getTable())) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
 
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+            if(!is_null($this->getFirstId())) {
+                $where = 'id = '.$this->getFirstId();
             }
 
-            return parent::delete($this->table, $where);  
+            return parent::delete($this->getTable(), $where);  
             
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;

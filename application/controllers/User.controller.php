@@ -44,8 +44,8 @@
                     $user = new \User();
                     $data_user = $http->getRequestVars();
                     $userObject = initObject($data_user, $user, true);
-
-                    if(!emptyObject($userObject)) {
+                    
+                    if(!emptyObjectMethod($userObject)) {
                         $userMapper = new \UserMapper();
                         if($userMapper->updateUser($userObject)) {
                             Rest::sendResponse(200);

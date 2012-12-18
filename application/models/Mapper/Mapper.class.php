@@ -57,10 +57,18 @@ class Mapper
     public
     function getStatement() 
     {
-        if(is_null($this->statement)) {
-            throw new PDOException('PDOStatement isn\'t initialized ! Currently null.');
+        try {
+            
+            if(is_null($this->statement)) {
+                throw new PDOException('PDOStatement isn\'t initialized ! Currently null.');
+            }
+            
+            return $this->statement;      
+            
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit;
         }
-        return $this->statement;
+
     }
     
     /**
@@ -73,12 +81,14 @@ class Mapper
     function getlastInsertId($name_ = null) 
     {
         try {
+            
             if(!$this->statement instanceof PDO) {
                 throw new PDOException('$statement isn\'t a PDO Object !');
             }
-            if(!is_null($this->statement)) {
+            if(!is_null($this->getStatement())) {
                 return $this->statement->lastInsertId();
-            }        
+            }    
+            
         } catch (PDOException $e) {
             print $e->getMessage();
         }
@@ -96,6 +106,7 @@ class Mapper
     function insert($table_, $object_, array $arrayFilter = array(), $return = false) 
     {
         try {
+            
             if(is_a($object_, 'stdClass')) {
                 $data = (array) $object_;
             } else {
@@ -139,6 +150,7 @@ class Mapper
     function update($table_, $object_, $where_ = null) 
     {
         try {
+            
             $set = array();
             $data = extractData($object_);
 
@@ -371,6 +383,12 @@ class Mapper
         }
     }
     
+    /**
+     * Allow to check if the propertie exist in the class.
+     * @param class $class_
+     * @param string $property_
+     * @return boolean 
+     */
     public
     function property_exists($class_, $property_)
     {
@@ -380,5 +398,33 @@ class Mapper
       } else {
           return property_exists($class_, $property_);
       }
+    }
+    
+    /**
+     * Allow to check if the ... exist in the DATABASE.
+     * @param string $table
+     * @param class $object
+     * @param class $mapper
+     * @param string $condition
+     * @param boolean $multiple
+     * @return boolean True if exist | false
+     */
+    public 
+    function exist($table, $object, $mapper, $condition = null, $multiple = false) {
+        try {
+            $mapper = new $mapper();
+            $object = new $object();
+            
+            $object = $this->select($table, $condition, $object, $multiple);
+            $array = extractData($object);
+            
+            if(!empty($array)) {
+                return true;
+            }
+            
+            return false;
+        } catch(Exeception $e) {
+            
+        }
     }
 }

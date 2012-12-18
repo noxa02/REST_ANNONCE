@@ -9,7 +9,7 @@ class UserMapper extends Mapper {
     }
     
     /**
-     * 
+     * Allow to create a user.
      * @param User $user_
      * @throws InvalidArgumentException
      */
@@ -28,9 +28,9 @@ class UserMapper extends Mapper {
     } 
     
     /**
-     * 
+     * Allow to modify a user.
      * @param User $user_
-     * @param string $where_
+     * @param string $where_ Query condition.
      * @throws InvalidArgumentException
      */
     public 
@@ -41,14 +41,13 @@ class UserMapper extends Mapper {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
+            if(isset($this->id) && !is_null($this->id) && !is_null($where_)) {
                 $where = $where_;
-            } elseif(isset($where_) && empty($where_)) {
-                $where = 'id = '.$user_->getId();
+            } elseif(is_null($where_)) {
+                $where = 'id = '.$this->getFirstId();
             }
-            $userObject = $this->selectUser($where_);
-            $userArray = extractData($userObject);
-            if(!empty($userArray)) {
+            
+            if(parent::exist('USER', 'User', 'userMapper', $where)) {
                 parent::update($this->table, $user_, $where);
             } else {
                 throw new Exception('User does not exist !');
@@ -74,7 +73,6 @@ class UserMapper extends Mapper {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-
             if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
                 $where = 'id = '.$this->id;
             } elseif(isset($where_) && !is_null($where_)) {
@@ -98,7 +96,6 @@ class UserMapper extends Mapper {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-
             if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
                 $where = 'id = '.$this->id;
             } elseif(isset($where_) && !empty ($where_)) {
@@ -127,7 +124,14 @@ class UserMapper extends Mapper {
         
         return $this->selectUser(true, $where);
     }
-    
+   
+    /**
+     * Allow a user to follow a other user.
+     * @param string $id_followed_ User followed
+     * @param string $id_follower_ User follower
+     * @return boolean True the query is executed | False
+     * @throws Exception
+     */
     public 
     function goFollow($id_followed_, $id_follower_) {
         try {
@@ -146,6 +150,12 @@ class UserMapper extends Mapper {
         }
     }
     
+    /**
+     * Allow a user to stop follower another user.
+     * @param string $id_followed_ User followed
+     * @param string $id_follower_ User follower
+     * @return boolean True the query is executed | False
+     */
     public
     function stopFollow($id_followed_, $id_follower_) {
         $where = 'id_user_followed = '.$id_followed_.' AND '.

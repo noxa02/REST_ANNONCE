@@ -9,13 +9,6 @@ class MessageMapper extends Mapper {
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $url->getIdFirstPart();
-        
-        if(func_num_args() == 1 && is_object(func_get_arg(0))) {
-            $object_ = func_get_arg(0);
-            $this->foreignTable =  $object_;
-        }
     }
     
    /**
