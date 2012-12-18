@@ -44,7 +44,6 @@
                     $tag = new \Tag();
                     $data_tag = $http->getRequestVars();
                     $tagObject = initObject($data_tag, $tag, true);
-
                     if(!emptyObject($tagObject)) {
                         $tagMapper = new \TagMapper();
                         if($tagMapper->updateTag($tagObject)) {

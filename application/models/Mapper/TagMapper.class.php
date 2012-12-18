@@ -47,7 +47,7 @@ class TagMapper extends Mapper {
             }
             
             $tagMapper = new TagMapper();
-            $tagMapper->setId($message_->getIdSender());
+            $tagMapper->setId($this->getFirstId());
             $tag = $tagMapper->selectTag();
             
             if(!is_null($tag->getId())) {
