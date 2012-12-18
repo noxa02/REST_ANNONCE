@@ -42,9 +42,9 @@ class UserMapper extends Mapper {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
             if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-                $where = $where_;
-            } elseif(isset($where_) && empty($where_)) {
                 $where = 'id = '.$user_->getId();
+            } elseif(isset($where_) && !empty($where_)) {
+                $where = $where_;
             }
             $userObject = $this->selectUser($where_);
             $userArray = extractData($userObject);

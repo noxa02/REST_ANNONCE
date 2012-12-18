@@ -4,7 +4,7 @@ class Comment {
     
      private $_id;
      private $_content; 
-     private $_date_post;
+     private $_post_date;
      private $_id_user;
      private $_id_announcement;
     
@@ -26,9 +26,9 @@ class Comment {
 	}
 
 	public 
-    function getDatePost()
+    function getPostDate()
 	{
-		return $this->_date_post;
+		return $this->_post_date;
 	}
 
 	public 
@@ -58,9 +58,9 @@ class Comment {
 	}
 
 	public 
-    function setDatePost($date_post_)
+    function setPostDate($post_date)
 	{
-		$this->_date_post = $date_post_;
+		$this->_post_date = $post_date;
 	}
 
 	public 
