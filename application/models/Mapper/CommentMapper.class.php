@@ -57,7 +57,7 @@ class CommentMapper extends Mapper {
             }
             
             $comment = $this->selectComment();
-            if(!emptyObjectMethod($object_)) {
+            if(!emptyObjectMethod($comment)) {
                 return parent::update($this->table, $comment_, $where);   
             } else {
                 throw new Exception('Comment doesn\'t exist !');
@@ -65,7 +65,7 @@ class CommentMapper extends Mapper {
         
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
-        } catch(Exception $e) {
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
@@ -90,7 +90,8 @@ class CommentMapper extends Mapper {
                 $where = 'id = '.$this->id;
             }
 
-            return parent::select($this->table, $where, $object = new Comment(), $all_);        
+            return parent::select($this->table, $where, $object = new Comment(), $all_);     
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }

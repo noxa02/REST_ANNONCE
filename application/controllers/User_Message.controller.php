@@ -9,7 +9,7 @@
         case 'get':
             $userMapper = new UserMapper();
             $userMessageObject = $userMapper->getMessage();
-            $userMessageArray = extractData($userMessageObject);
+            $userMessageArray = extractData($userMessageObject, array(), true);
             
             if(!empty($userMessageArray)) {
 

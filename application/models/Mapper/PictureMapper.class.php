@@ -88,6 +88,8 @@ class PictureMapper extends Mapper {
             
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         }
     } 
     

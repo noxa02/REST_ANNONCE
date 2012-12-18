@@ -189,9 +189,9 @@ class UserMapper extends Mapper {
     public 
     function getMessage() {
         $messageMapper = new MessageMapper();
-        $where = 'id_sender = '.$this->getFirstId();
-        $messagesObjects = $messageMapper->selectMessage(false, $where);
-        
+        $where = 'id_sender = '.$this->getFirstId(). ' AND id_receiver = '.$this->getSecondId();
+        $messagesObjects = $messageMapper->selectMessage(true, $where);
+
         return $messagesObjects;
     }  
     
