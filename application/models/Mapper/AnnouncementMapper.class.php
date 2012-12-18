@@ -39,24 +39,31 @@ class AnnouncementMapper extends Mapper {
                 $announcement_->setPictures($pictures);
                 if(!is_null($announcement_->getPictures())) {
                     foreach ($announcement_->getPictures() as $key => $value) {
+                        
                         $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
                         $value->setIdAnnouncement($idAnnouncement);
                         $value->setPath('/announcement/original/');
                         $value->setTitle(uniqid());
                         $value->setExtension($pictureExt);
-                        move_uploaded_file(
+                        
+                        if(move_uploaded_file(
                             $value->getTmpName(), 
                             UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
-                        );
-
-                        $pictureMapper = new PictureMapper();
-                        $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);      
+                        )) {
+                            
+                            $pictureMapper = new PictureMapper();
+                            $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);                    
+                        } else {
+                            throw new Exception('A problem occurred during the picture upload');
+                        }
                     }
                 }   
                 
                 return true;
             }
         } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
