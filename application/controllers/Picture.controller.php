@@ -45,7 +45,6 @@
                     $picture_ = new Picture();
                     $data_picture_ = $http->getRequestVars();
                     $pictureObject = initObject($data_picture_, $picture_, true);
-
                     if(!emptyObject($pictureObject)) {
                         $pictureMapper = new \PictureMapper();
                         if($pictureMapper->updatePicture($pictureObject)) {

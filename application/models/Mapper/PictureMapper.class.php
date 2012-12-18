@@ -2,18 +2,9 @@
 class PictureMapper extends Mapper {
     
     protected $table = 'PICTURE';
-    protected $id;
-    protected $foreignTable;
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $url->getIdFirstPart();
-        
-        if(func_num_args() == 1 && is_object(func_get_arg(0))) {
-            $object_ = func_get_arg(0);
-            $this->foreignTable =  $object_;
-        }
     }
     
    /**
@@ -23,13 +14,35 @@ class PictureMapper extends Mapper {
     * @throws InvalidArgumentException
     */
     public 
-    function insertPicture(Picture $picture_, array $arrayFilter = array()) 
+    function insertPicture(Picture $picture_, array $arrayFilter = array(), $unitary = false) 
     {
         try {
+            
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            return parent::insert($this->table, $picture_, $arrayFilter);      
+            
+            if(isset($unitary) && $unitary) {
+                if(isset($this->files) && !empty($this->files) && count($this->files) == 1) {
+                    foreach($this->files as $file) {
+                        $picture = initObject($file, $picture_, true, false);
+                        $pictureExt = substr(strrchr($picture->getType(), "/"), 1); 
+                        $picture->setPath('/announcement/original/');
+                        $picture->setTitle(uniqid()); 
+                        $picture->setExtension($pictureExt);
+                        
+                        if($this->insertPicture($picture, array('tmp_name', 'size', 'type'))) {
+                            move_uploaded_file(
+                                $picture->getTmpName(), 
+                                UPLOAD_PATH .'/announcement/original/'.$picture_->getTitle().'.'.$picture->getExtension()
+                            );
+                        }
+                    }
+                }                  
+            }
+
+            return parent::insert($this->table, $picture_, $arrayFilter);   
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -43,39 +56,67 @@ class PictureMapper extends Mapper {
     public 
     function updatePicture(Picture $picture_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            
+            if(isset($this->table) && is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+            
+            //Existance test
+            $picture = $this->selectPicture();
+            if(!emptyObjectMethod($picture)) { 
+                $picture = $this->selectPicture();
+                $path = $picture->getPath(); 
+                $title = $picture->getTitle();
+                $ext = $picture->getExtension();
+            
+                if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
+                    if(!is_null($picture_->getTitle()) && $title !== $picture_->getTitle()) {
+                        if(!rename(UPLOAD_PATH.$path.$title.'.'.$ext, UPLOAD_PATH.$path.$picture_->getTitle().'.'.$ext)) {
+                            throw new Exception('A problem occurred when renaming !');
+                        }
+                    }
+                } 
+            } else {
+                throw new Exception('Picture doesn\'t exist !');
+            }
+            
+            return parent::update($this->table, $picture_, $where); 
+            
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        parent::update($this->table, $picture_, $where);
     } 
     
     /**
      * 
      * @param boolean $all_
+     * @param null $where_ String WHERE for the query
      * @return stdClass
      * @throws InvalidArgumentException
      */
     public
-    function selectPicture($all_ = false) 
+    function selectPicture($all_ = false, $where_ = null) 
     {
         try {
-        $where = null;
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
-        
-        if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
-            $fkName = 'id_'.strtolower($this->foreignTable->getTable());
-            $where  = $fkName.' = '.$this->foreignTable->getId();
-        } elseif(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        return parent::select($this->table, $where, $object = new Picture(), $all_);   
+            $where = null;
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
+                $fkName = 'id_'.strtolower($this->foreignTable->getTable());
+                $where  = $fkName.' = '.$this->foreignTable->getId();
+            } elseif(isset($this->id) && !is_null($this->id) && is_null($where_)) {
+                $where = 'id = '.$this->id;
+            } elseif(isset($where_) && !empty ($where_)) {
+                $where = $where_;
+            }
+            
+            return parent::select($this->table, $where, $object = new Picture(), $all_);   
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -89,27 +130,34 @@ class PictureMapper extends Mapper {
     public
     function deletePicture() 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            
+            if(isset($this->table) && is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            //Init a object of picture to delete the picture in the folder.
+            //Needed to reconsitued the path.
+            $picture = $this->selectPicture();
+            $path = $picture->getPath(); 
+            $title = $picture->getTitle();
+            $ext = $picture->getExtension();
+            
+            //Remove to the pictures folders
+            if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
+                unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+            }
+            
+            return parent::delete($this->table, $where);     
+            
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        $picture = $this->selectPicture();
-        $path = $picture->getPath(); 
-        $title = $picture->getTitle();
-        $ext = $picture->getExtension();
-        //Remove to the pictures folders
-        if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-            unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
-        }
-        
-        return parent::delete($this->table, $where);
     }    
 }
-
-
 
 //	if(!empty($file)):
 //	  	if ($file['error'] <= 0):

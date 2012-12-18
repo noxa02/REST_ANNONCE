@@ -103,20 +103,40 @@ function is_admin() {
  * @return array
  * Extract object data to return an array
  */
-function extractData($object_, array $arrayFilter = array()) {
-    $data = null;
-    foreach (get_class_methods($object_) as $key => $value) {
-            if(strpos($value, 'get') !== false) {
-                if(method_exists($object_, $value)) {
-                    $method = $object_->$value();
-                    if(!is_null($method)) {
-                        $key = strtolower(str_replace_limit('_','',preg_replace('/([A-Z])/', '_$1', 
-                                                 str_replace('get', '', $value)), 1));
-                        $data[$key] = $object_->$value(); 
+function extractData($object_, array $arrayFilter = array(), $multiple = false) {
+$data = null;
+    if(!$multiple) {
+        foreach (get_class_methods($object_) as $key => $value) {
+                if(strpos($value, 'get') !== false) {
+                    if(method_exists($object_, $value)) {
+                        $method = $object_->$value();
+                        if(!is_null($method)) {
+                            $key = strtolower(str_replace_limit('_','',preg_replace('/([A-Z])/', '_$1', 
+                                                     str_replace('get', '', $value)), 1));
+                            $data[$key] = $object_->$value(); 
+                        }
                     }
                 }
-            }
+        }
+    } elseif($multiple) {
+        $temp = null;
+        foreach ($object_ as $object) {
+            foreach (get_class_methods($object) as $key => $value) {
+                    if(strpos($value, 'get') !== false) {
+                        if(method_exists($object, $value)) {
+                            $method = $object->$value();
+                            if(!is_null($method)) {
+                                $key = strtolower(str_replace_limit('_','',preg_replace('/([A-Z])/', '_$1', 
+                                                         str_replace('get', '', $value)), 1));
+                                $temp[$key] = $object->$value(); 
+                            }
+                        }
+                    }
+            }     
+            $data[] = $temp;
+        }
     }
+        
     
         return $data;
 }
@@ -128,7 +148,7 @@ function extractData($object_, array $arrayFilter = array()) {
  * @return object $object_
  * Extract array values to return an initialized object
  */
-function initObject($data_, $object_, $return = false, $opts_ = array()) {
+function initObject($data_, $object_, $return = false, $initObject = true, $opts_ = array()) {
     if(is_a($object_, 'stdClass')) {
         $object_ = new stdClass();
         if(isset($data_) && !empty($data_)) {
@@ -137,7 +157,9 @@ function initObject($data_, $object_, $return = false, $opts_ = array()) {
            }
         }
     } else {
-    $object_ = new $object_();
+        if($initObject) {
+            $object_ = new $object_(); 
+        }
         if(isset($data_) && !empty($data_)) {
            foreach ($data_ as $key => $value) {
                $_methodName = ucfirst($key);
@@ -157,7 +179,7 @@ function initObject($data_, $object_, $return = false, $opts_ = array()) {
            }
         }     
     }
-
+    
     if($return) {
         return $object_;
     }
@@ -188,4 +210,20 @@ function emptyObject($object_) {
             return false;
     }
     return true;
+}
+
+
+function emptyObjectMethod($object_) {
+    $ref = new ReflectionObject($object_);
+    $properties = $ref->getProperties();
+    
+    $temp = true;
+    foreach ($properties as $propertie) {
+        $propertie->setAccessible(true);
+        if(!is_null($propertie->getValue($object_))) {
+                $temp = false;
+        }
+    }
+    
+    return $temp;
 }

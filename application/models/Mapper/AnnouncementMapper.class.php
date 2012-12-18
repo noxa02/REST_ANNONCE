@@ -2,15 +2,9 @@
 class AnnouncementMapper extends Mapper {
     
     protected $table = 'ANNOUNCEMENT';
-    protected $id;
-    protected $files;
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $url->getIdFirstPart();
-        global $http;
-        $this->files = $http->getFiles();
     }
     
     /**
@@ -24,6 +18,7 @@ class AnnouncementMapper extends Mapper {
     function insertAnnouncement(Announcement $announcement_) 
     {
         try {
+            
             $pictures = array();
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
@@ -47,7 +42,7 @@ class AnnouncementMapper extends Mapper {
                         $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
                         $value->setIdAnnouncement($idAnnouncement);
                         $value->setPath('/announcement/original/');
-                        $value->setTitle('announcement_'.$announcement_->getId().'_'.$key);
+                        $value->setTitle(uniqid());
                         $value->setExtension($pictureExt);
                         move_uploaded_file(
                             $value->getTmpName(), 
@@ -55,7 +50,7 @@ class AnnouncementMapper extends Mapper {
                         );
 
                         $pictureMapper = new PictureMapper();
-                        $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'));      
+                        $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);      
                     }
                 }   
                 
@@ -126,18 +121,19 @@ class AnnouncementMapper extends Mapper {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
             if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+                $where = 'id = '.$this->getId();
             }
-
-            $pictureMapper = new PictureMapper($this);
-            $pictures = $pictureMapper->selectPicture(true);
             
-            if(isset($pictures) && !empty($pictures) && is_array($pictures)) {
+            $pictureMapper = new PictureMapper($this);
+            $pictures = $pictureMapper->selectPicture(true, 'id_announcement = '.$this->getId());
+            
+            if(isset($pictures) && !empty($pictures)) {
                 foreach ($pictures as $key => $value) {
                     $idPicture = $value->getId();
                     $path = $value->getPath(); 
                     $title = $value->getTitle();
                     $ext = $value->getExtension();
+                    
                     //Remove to the pictures folders
                     if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
                         unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
@@ -145,13 +141,20 @@ class AnnouncementMapper extends Mapper {
                     //Remove to database
                     $pictureMapper = new PictureMapper();
                     $pictureMapper->setId($idPicture);
-                    $pictureMapper->deletePicture();
+                    if($pictureMapper->deletePicture()) {
+                        continue;
+                    } else {
+                        throw new Exception('Problem on the delete picture query !');
+                    }
                 }
             }
-
-            return parent::delete($this->table, $where);      
+            
+            return parent::delete($this->table, $where);   
+            
         } catch(InvalidArgumentException $e) {
-            $e->getMessage(); exit;
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         }
     } 
     

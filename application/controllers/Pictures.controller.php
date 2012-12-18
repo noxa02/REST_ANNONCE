@@ -40,10 +40,10 @@
                     $picture = new Picture();
                     $data_picture = $http->getRequestVars();
                     $pictureObject = initObject($data_picture, $picture, true);
-
+                    
                     if(!emptyObject($pictureObject)) {
                        $pictureMapper = new PictureMapper();
-                       if($pictureMapper->insertPicture($pictureObject)) {
+                       if($pictureMapper->insertPicture($pictureObject, array(), true)) {
                            Rest::sendResponse(200);   
                        }            
                     } else {

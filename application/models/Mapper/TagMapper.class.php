@@ -3,15 +3,9 @@
 class TagMapper extends Mapper {
     
     protected $table = 'TAG';
-    protected $id;
-    protected $id_sender;
-    protected $id_receiver;
-    protected $foreignTable;
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $url->getIdFirstPart();
     }
     
    /**
@@ -24,11 +18,13 @@ class TagMapper extends Mapper {
     function insertTag(Tag $tag_, array $arrayFilter = array()) 
     {
         try {
+            
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
 
             return parent::insert($this->table, $tag_, $arrayFilter);
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -49,9 +45,20 @@ class TagMapper extends Mapper {
             if(isset($this->id) && !is_null($this->id)) {
                 $where = 'id = '.$this->id;
             }
-
-            return parent::update($this->table, $tag_, $where);
+            
+            $tagMapper = new TagMapper();
+            $tagMapper->setId($message_->getIdSender());
+            $tag = $tagMapper->selectTag();
+            
+            if(!is_null($tag->getId())) {
+                return parent::update($this->table, $tag_, $where);
+            } elseif(is_null($tag->getId())) {
+                throw new Exception('Tag does not exist !');
+            }
+            
         } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
@@ -75,6 +82,7 @@ class TagMapper extends Mapper {
             }
 
             return parent::select($this->table, $where, $object = new Tag(), $all_);        
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -97,7 +105,8 @@ class TagMapper extends Mapper {
                 $where = 'id = '.$this->id;
             }
 
-            return parent::delete($this->table, $where);        
+            return parent::delete($this->table, $where);  
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }

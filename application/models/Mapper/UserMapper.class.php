@@ -2,19 +2,10 @@
 class UserMapper extends Mapper {
     
     protected $table = 'USER';
-    protected $id;
-    protected $id_user_follower;
-    protected $id_user_followed;
-    protected $id_user_sender;
-    protected $id_user_receiver;
     
     function __construct() 
     {
-        global $url;
         parent::__construct();
-        $this->id = $url->getIdFirstPart();
-        $this->id_user_followed = $this->id_user_sender = $url->getIdFirstPart();
-        $this->id_user_follower = $this->id_user_receiver = $url->getIdSecondPart();
     }
     
     /**
@@ -60,7 +51,7 @@ class UserMapper extends Mapper {
             if(!empty($userArray)) {
                 parent::update($this->table, $user_, $where);
             } else {
-                throw new Exception('Inexistant user !');
+                throw new Exception('User does not exist !');
             }          
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
@@ -123,8 +114,8 @@ class UserMapper extends Mapper {
     public
     function getFollower() {
         $where = 'id = (SELECT id_user_follower '.
-                       'FROM TO_FOLLOW WHERE id_user_followed = '.$this->id_user_followed.' '.
-                       'AND id_user_follower = '.$this->id_user_follower.')';
+                       'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().' '.
+                       'AND id_user_follower = '.$this->getSecondId().')';
         
         return $this->selectUser(false, $where);
     }
@@ -132,7 +123,7 @@ class UserMapper extends Mapper {
     public
     function getFollowers() {
         $where = 'id IN (SELECT id_user_follower '.
-                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->id_user_followed.')';
+                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
         
         return $this->selectUser(true, $where);
     }

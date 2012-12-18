@@ -28,9 +28,11 @@ class MessageMapper extends Mapper {
     function insertMessage(Message $message_, array $arrayFilter = array()) 
     {
         try {
+            
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
+            
             $userMapper = new UserMapper();
             $userMapper->setId($message_->getIdSender());
             $user_sender = $userMapper->selectUser();
@@ -40,10 +42,11 @@ class MessageMapper extends Mapper {
             if(!is_null($user_sender->getId()) && !is_null($user_receiver->getId())) {
                 return parent::insert($this->table, $message_, $arrayFilter);
             } elseif(is_null($user_sender->getId())) {
-                throw new Exception('User sender is inexistant !');
+                throw new Exception('User sender does not exist !');
             } elseif(is_null($user_receiver->getId())) {
-                throw new Exception('User receiver is inexistant !');
+                throw new Exception('User receiver does not exist !');
             }
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         } catch(Exception $e) {

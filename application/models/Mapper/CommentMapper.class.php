@@ -2,16 +2,9 @@
 class CommentMapper extends Mapper {
     
     protected $table = 'COMMENT';
-    protected $id;
-    protected $id_user;
-    protected $id_announcement;
-    protected $foreignTable;
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $this->id_user = $url->getIdFirstPart();
-        $this->id_announcement = $url->getIdSecondPart();
     }
     
    /**

@@ -3,15 +3,25 @@
 class Mapper
 {
     protected $statement;
+    protected $id;
     protected $firstId; 
     protected $secondId;
+    protected $foreignTable;
+    protected $files;
     
     function __construct() 
     {
         global $url;
+        $this->id = $url->getIdFirstPart();
         $this->firstId = $url->getIdFirstPart();
         $this->secondId = $url->getIdSecondPart();
         $this->statement = PDO_Mysql::getInstance();
+        global $http;
+        $this->files = $http->getFiles();
+        if(func_num_args() == 1 && is_object(func_get_arg(0))) {
+            $object_ = func_get_arg(0);
+            $this->foreignTable =  $object_;
+        }
     }
 
     /**
@@ -91,15 +101,17 @@ class Mapper
             } else {
                 $data = extractData($object_, $arrayFilter);
             }
-
+            
             $stmt = $this->connect();
             foreach($data as $key => $value) {
                 if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
                     unset($data[$key]);
                 }
             }
+            
             $columns = implode(', ', array_keys($data));
             $values  = implode(', :', array_keys($data));
+
             foreach ($data as $column => $value) {
                 unset($data[$column]);
                     $data[":" . $column] = $value;
@@ -167,18 +179,18 @@ class Mapper
         try {
             $query = 'SELECT * FROM '.$table_.
                       (($where_) ? ' WHERE '. $where_  : '');
-
+            
             $q = $this->statement->prepare($query);
             $q->execute();
             
-            $object = null;
+            $object = array();
              if(!$all_) {
                  $data = $q->fetch(PDO::FETCH_ASSOC);
                  $object = initObject($data, $object_, true);
             } else {
                  $datas = $q->fetchAll(PDO::FETCH_ASSOC);
                  foreach ($datas as $data) {
-                    $object[] = initObject($data, $object_, true);
+                     array_push($object, initObject($data, $object_, true)); 
                  }
             }
             

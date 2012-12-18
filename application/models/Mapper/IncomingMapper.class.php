@@ -3,13 +3,9 @@ class IncomingMapper extends Mapper {
     
     protected $table = 'INCOMING';
     protected $id;
-    protected $id_user;
-    protected $id_announcement;
 
     function __construct() {
         parent::__construct();
-        global $url;
-        $this->id = $url->getIdFirstPart();
     }
     
    /**
@@ -21,18 +17,21 @@ class IncomingMapper extends Mapper {
     public 
     function insertIncoming(Incoming $incoming_, array $arrayFilter = array()) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-        }
-        $userMapper = new UserMapper();
-        $userMapper->setId($incoming_->getIdUser());
-        $user = $userMapper->selectUser();
-        $announcementMapper = new AnnouncementMapper();
-        $announcementMapper->setId($incoming_->getIdAnnouncement());
-        $announcement = $announcementMapper->selectAnnouncement();
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            $userMapper = new UserMapper();
+            $userMapper->setId($incoming_->getIdUser());
+            $user = $userMapper->selectUser();
 
-        if(!is_null($user->getId()) && !is_null($announcement->getId())) {
-            return parent::insert($this->table, $incoming_, $arrayFilter);
+            if(!is_null($user->getId())) {
+                return parent::insert($this->table, $incoming_, $arrayFilter);
+            } elseif(isset($user) && is_null($user->getId())) {
+                throw new Exception('User does not exist !');
+            }
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         }
     } 
     
@@ -44,14 +43,18 @@ class IncomingMapper extends Mapper {
     public 
     function updateIncoming(Incoming $incoming_) 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::update($this->table, $incoming_, $where);    
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        parent::update($this->table, $incoming_, $where);
     } 
     
     /**
@@ -63,19 +66,23 @@ class IncomingMapper extends Mapper {
     public
     function selectIncoming($all_ = false) 
     {
-        $where = null;
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            $where = null;
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+
+            if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
+                $fkName = 'id_'.strtolower($this->foreignTable->getTable());
+                $where  = $fkName.' = '.$this->foreignTable->getId();
+            } elseif(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::select($this->table, $where, $object = new Incoming(), $all_);    
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->foreignTable) && !is_null($this->foreignTable)) {
-            $fkName = 'id_'.strtolower($this->foreignTable->getTable());
-            $where  = $fkName.' = '.$this->foreignTable->getId();
-        } elseif(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-        
-        return parent::select($this->table, $where, $object = new Incoming(), $all_);
     }
     
     /**
@@ -86,14 +93,18 @@ class IncomingMapper extends Mapper {
     public
     function deleteIncoming() 
     {
-        if(is_null($this->table)) {
-            throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+        try {
+            if(is_null($this->table)) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }
+
+            if(isset($this->id) && !is_null($this->id)) {
+                $where = 'id = '.$this->id;
+            }
+
+            return parent::delete($this->table, $where);      
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
         }
-        
-        if(isset($this->id) && !is_null($this->id)) {
-            $where = 'id = '.$this->id;
-        }
-       
-        return parent::delete($this->table, $where);
     }    
 }
