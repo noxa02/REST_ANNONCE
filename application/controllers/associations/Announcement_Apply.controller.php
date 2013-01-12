@@ -1,8 +1,9 @@
 <?php 
-    /**
-     * Get the HTTP method and differents data.
-     */
+try 
+{
     $http = Rest::initProcess();
+    $mapper = getMapper($model);
+    $class = getNameByMapper($mapper);
 
     switch($http->getMethod())
     {
@@ -11,16 +12,17 @@
             if($userMapper->stopFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
                 Rest::sendResponse(200);
             }
-               break;
-         case 'post':
-            try {
+        break;
+        case 'post':
+            try 
+            {
                 $stdClass = new stdClass();
                 $data = $http->getRequestVars();
                 $objectApply = initObject($data, $stdClass, true);
                
                 if(!emptyObject($objectApply)) {
-                    $announcementMapper = new AnnouncementMapper();
-                    if($announcementMapper->goApply($objectApply)) {
+                    $mapperInstancied = new $mapper();
+                    if($mapperInstancied->goApply($objectApply)) {
                         Rest::sendResponse(200);   
                     }       
                 } else {
@@ -29,8 +31,13 @@
             } catch(InvalidArgumentException $e) {
                 print $e->getMessage(); exit;
             }
-                break;
+         break;
          default :
             Rest::sendResponse(501);
                 break;
     }
+} catch (Exception $e) {
+    print $e->getMessage(); exit;
+} catch(InvalidArgumentException $e) {
+    print $e->getMessage(); exit;
+}         

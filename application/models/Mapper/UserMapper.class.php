@@ -78,8 +78,9 @@ class UserMapper extends Mapper {
             } elseif(isset($where_) && !is_null($where_)) {
                 $where = $where_;
             }
-
-            return parent::select($this->table, $where, $object = new User(), $all_);        
+            
+            return parent::select($this->table, $where, $object = new User(), $all_);
+            
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
         }
@@ -109,18 +110,28 @@ class UserMapper extends Mapper {
     }
     
     public
-    function getFollower() {
-        $where = 'id = (SELECT id_user_follower '.
-                       'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().' '.
-                       'AND id_user_follower = '.$this->getSecondId().')';
+    function getFollower(stdClass $objectToFollow) {
+        try 
+        {
+            if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectToFollow->id_user_follower)) {
+                throw new Exception('User follower doesn\'t exist !');
+            }
+            
+            $where = 'WHERE id = (SELECT id_user_follower '.
+                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().' '.
+                        'AND id_user_follower = '.$objectToFollow->id_user_follower.')';
         
-        return $this->selectUser(false, $where);
+            return $this->selectUser(false, $where); 
+        
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
     }
     
     public
     function getFollowers() {
-        $where = 'id IN (SELECT id_user_follower '.
-                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
+        $where = 'WHERE id IN (SELECT id_user_follower '.
+                    'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
         
         return $this->selectUser(true, $where);
     }
@@ -133,18 +144,27 @@ class UserMapper extends Mapper {
      * @throws Exception
      */
     public 
-    function goFollow($id_followed_, $id_follower_) {
-        try {
-            $userFollow = new stdClass();
-            $userFollow->id_user_followed = $id_followed_;
-            $userFollow->id_user_follower = $id_follower_;
-          
-            $user = $this->getFollower();
-            if(is_null($user->getId())) {
-                 return parent::insert('TO_FOLLOW', $userFollow);
-            } else {
-                throw new Exception('The user is already followed by this user !');
-            }     
+    function goFollow(stdClass $objectFollow) {
+        try 
+        {
+            $requiered = array('id_user_follower');
+            if(isRequired($requiered, $objectFollow)) {
+                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectFollow->id_user_follower)) {
+                    throw new Exception('User follower doesn\'t exist !');
+                }
+                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$this->getFirstId())) {
+                    throw new Exception('User follewed doesn\'t exist !');
+                }        
+
+                $objectFollow->id_user_followed = $this->getFirstId();
+                $user = $this->getFollower($objectFollow);
+
+                if(is_null($user->getId())) {
+                     return parent::insert('TO_FOLLOW', $objectFollow);
+                } else {
+                    throw new Exception('User is already followed by this user !');
+                }   
+            }
         } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
@@ -184,10 +204,9 @@ class UserMapper extends Mapper {
     }
     
     public 
-    function getMessages() {
+    function getMessages($conditions = null) {
         $messageMapper = new MessageMapper();
-        $where = 'id_sender = '.$this->getFirstId();
-        $messagesObjects = $messageMapper->selectMessage(true, $where);
+        $messagesObjects = $messageMapper->selectMessage(true, $conditions);
         
         return $messagesObjects;
     }
@@ -206,10 +225,10 @@ class UserMapper extends Mapper {
     }  
     
     public
-    function getComments() {
+    function getComments($conditions = null) {
         $commentMapper = new CommentMapper();
-        $where = 'id_user = '.$this->getFirstId();
-        $commentsObjects = $commentMapper->selectComment(true, $where);
+        $commentsObjects = $commentMapper->selectComment(true, $conditions);
+        
         return $commentsObjects;
     }
     

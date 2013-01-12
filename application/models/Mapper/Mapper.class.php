@@ -11,10 +11,10 @@ class Mapper
     
     function __construct() 
     {
-        global $url;
-        $this->id = $url->getIdFirstPart();
-        $this->firstId = $url->getIdFirstPart();
-        $this->secondId = $url->getIdSecondPart();
+        global $urlObject;
+        $this->id = $urlObject->getIdFirstPart();
+        $this->firstId = $urlObject->getIdFirstPart();
+        $this->secondId = $urlObject->getIdSecondPart();
         $this->statement = PDO_Mysql::getInstance();
         global $http;
         $this->files = $http->getFiles();
@@ -130,7 +130,7 @@ class Mapper
             
             $query = 'INSERT INTO '.$table_.' '.
                    '('.$columns.')  VALUES (:'.$values.')';
-
+            
             return $this->statement->prepare($query)
                                    ->execute($data);
             
@@ -188,15 +188,19 @@ class Mapper
     public 
     function select($table_, $where_ = null, $object_, $all_ = false) 
     {
-        try {
-            $query = 'SELECT * FROM '.$table_.
-                      (($where_) ? ' WHERE '. $where_  : '');
+        try 
+        {   
             
+            $limit = (strpos($where_, 'LIMIT')) ? strstr($where_, 'LIMIT') : null;
+            $where = (strpos($where_, 'LIMIT')) ? strstr($where_, 'LIMIT', true) : $where_;
+            $query = 'SELECT * FROM '.$table_.
+                      (($where) ? ' '. $where  : '') . ((!is_null($limit)) ? $limit : '');
+
             $q = $this->statement->prepare($query);
             $q->execute();
             
             $object = array();
-             if(!$all_) {
+            if(!$all_) {
                  $data = $q->fetch(PDO::FETCH_ASSOC);
                  $object = initObject($data, $object_, true);
             } else {
@@ -208,7 +212,7 @@ class Mapper
             
             return $object;            
         } catch(PDOException $e) {
-            $e->getMessage(); exit;
+            print $e->getMessage(); exit;
         }
     }
     
@@ -221,7 +225,8 @@ class Mapper
     public 
     function delete($table_, $where_ = null) 
     {
-        try {
+        try 
+        {
             $query = 'DELETE FROM '.$table_. 
                       (($where_) ? ' WHERE '. $where_  : '');
             
@@ -235,13 +240,33 @@ class Mapper
     
     /**
      * 
+     * @param string $table
+     */
+    public 
+    function getColumns() {
+        try
+        {
+            $query = 'SHOW COLUMNS FROM '.$this->getTable();
+            
+            $q = $this->statement->prepare($query);
+            $q->execute();     
+            
+            return $q->fetchAll(PDO::FETCH_ASSOC);
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit; 
+        } 
+    }
+
+    /**
+     * 
      * @return string
      * @throws Exception
      */
     public  
     function getTable() 
     {
-        try {
+        try 
+        {
             if(!property_exists($this, 'table')) {
                 throw new Exception('Missing attribut "table" to the Mapper !');
             }
@@ -260,7 +285,8 @@ class Mapper
     public  
     function getId() 
     {
-        try {
+        try 
+        {
             if(!property_exists($this, 'id')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
@@ -278,7 +304,8 @@ class Mapper
      */
     public
     function getFirstId() {
-        try {
+        try 
+        {
             if(!property_exists($this, 'firstId')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
@@ -296,7 +323,8 @@ class Mapper
      */
     public
     function getSecondId() {
-        try {
+        try 
+        {
             if(!property_exists($this, 'secondId')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
@@ -315,7 +343,8 @@ class Mapper
     public  
     function getFiles() 
     {
-        try {
+        try 
+        {
             if(!property_exists($this, 'files')) {
                 throw new Exception('Missing attribut "files" to the Mapper !');
             }
@@ -334,7 +363,8 @@ class Mapper
    public  
    function setTable($table_) 
    {
-        try {
+        try 
+       {
             if(!property_exists($this, 'table')) {
                 throw new Exception('Missing attribut "table" to the Mapper !');
             }
@@ -353,7 +383,8 @@ class Mapper
     public  
     function setId($id_) 
     {
-        try {
+        try 
+        {
             if(!property_exists($this, 'id')) {
                 throw new Exception('Missing attribut "id" to the Mapper !');
             }
@@ -372,7 +403,8 @@ class Mapper
     public  
     function setFiles($files_) 
     {
-        try {
+        try 
+        {
             if(!property_exists($this, 'files')) {
                 throw new Exception('Missing attribut "files" to the Mapper !');
             }
@@ -411,10 +443,11 @@ class Mapper
      */
     public 
     function exist($table, $object, $mapper, $condition = null, $multiple = false) {
-        try {
+        try 
+        {
             $mapper = new $mapper();
             $object = new $object();
-            
+
             $object = $this->select($table, $condition, $object, $multiple);
             $array = extractData($object);
             

@@ -55,33 +55,56 @@ function existController($model) {
 }
 /**
  * 
+ * @param strign $model
+ * @return boolean
+ * Check if the model exist
+ */
+function existMapper($name) {
+    try {
+        if(is_null($name)) throw new Exception('Mapper name doesn\'t be null !');
+        if(is_readable(APPLICATION_PATH . '/models/Mapper/' . $name.'.class.php')) {
+            return true;
+        }
+        return false;
+    } catch(Exception $e) {
+        print $e->getMessage(); exit;
+    }
+
+}
+/**
+ * 
  * @param string $url_
  * @return string
  * Parse the URL to return the model to use.
  */
-function constructRoute($url_) {
-    
+function constructRoute($url) {
     $model = '';
-    if($url_->getModelFirstPart() != null) {
+
+    $firstModel = $url->getModelFirstPart();  
+    $secondModel = $url->getModelSecondPart();
+    $firstId = $url->getIdFirstPart();
+    $secondId = $url->getIdSecondPart();
+    
+    if(!is_null($firstModel)) {
         
-        if($url_->getIdFirstPart() != null) {
-            $model .= ucfirst(substr_replace($url_->getModelFirstPart() , '', -1));
+        if(!is_null($firstId)) {
+            $model .= ucfirst(substr_replace($firstModel , '', -1));
         } else {
-            $model .= ucfirst($url_->getModelFirstPart()); 
+            $model .= ucfirst($firstModel); 
         }
     }
 
-    if($url_->getModelSecondPart() != null) {
+    if(!is_null($secondModel)) {
 
-        if($url_->getIdSecondPart() != null) {
-            if(strrchr($url_->getModelSecondPart(), 's')) {
-                $model .= '_'.ucfirst(substr_replace($url_->getModelSecondPart() , '', -1));
+        if(!is_null($secondId)) {
+            if(strrchr($secondModel, 's')) {
+                $model .= '_'.ucfirst(substr_replace($secondModel , '', -1));
             } else { 
-                $model .= '_'.ucfirst($url_->getModelSecondPart());
+                $model .= '_'.ucfirst($secondModel);
             }
             
         } else {
-            $model .= '_'.ucfirst($url_->getModelSecondPart()); 
+            $model .= '_'.ucfirst($secondModel); 
         }
     }
     
@@ -110,7 +133,7 @@ function is_admin() {
  */
 function extractData($object_, array $arrayFilter = array(), $multiple = false) {
 $data = null;
-    if(!$multiple) {
+    if(!$multiple && is_object($object_) && !is_a($object_, 'stdClass')) {
         foreach (get_class_methods($object_) as $key => $value) {
                 if(strpos($value, 'get') !== false) {
                     if(method_exists($object_, $value)) {
@@ -123,7 +146,7 @@ $data = null;
                     }
                 }
         }
-    } elseif($multiple) {
+    } elseif($multiple && is_object($object_) && !is_a($object_, 'stdClass')) {
         $temp = null;
         foreach ($object_ as $object) {
             foreach (get_class_methods($object) as $key => $value) {
@@ -139,6 +162,10 @@ $data = null;
                     }
             }     
             $data[] = $temp;
+        }
+    } elseif(is_a($object_, 'stdClass')) {
+        foreach ($object_ as $key => $value) {
+            $data[$key] = $value; 
         }
     }
         
@@ -206,6 +233,11 @@ function str_replace_limit($search,$replace,$subject,$limit,&$count = null)
     return substr_replace($subject,$substring,0,$position+1);
 }
 
+/**
+ * 
+ * @param object $object_
+ * @return boolean Empty object return TRUE | FALSE
+ */
 function emptyObject($object_) {
     $ref = new ReflectionObject($object_);
     $properties = $ref->getProperties();
@@ -216,7 +248,11 @@ function emptyObject($object_) {
     return true;
 }
 
-
+/**
+ * 
+ * @param object $object_
+ * @return boolean Empty object return TRUE | FALSE
+ */
 function emptyObjectMethod($object_) {
     $ref = new ReflectionObject($object_);
     $properties = $ref->getProperties();
@@ -271,4 +307,344 @@ function resizeAvatar($file, $_user) {
 			endif;
 		endif;
 	endif;
+}
+
+function getControllerByModel($modelName_) {
+    try {
+        
+        if(is_null($modelName_)) throw new Exception('Model name doesn\'t be null !');
+        $folderAssociation = 'associations/';
+        
+        switch ($modelName_) {
+         case 'Users':
+         case 'Announcements' :
+         case 'Tags' :
+         case 'Messages' :
+         case 'Pictures' :
+         case 'Comments' :
+                return 'pluraly';
+             break;
+         case 'User' :
+         case 'Announcement'  : 
+         case 'Tag'  :
+         case 'Message'  :
+         case 'Picture'  :
+         case 'Comment'  :
+                return 'singular';
+             break;
+         default:
+             return $folderAssociation.$modelName_;
+             break;
+        }
+    } catch (Exception $e) {
+        print $e->getMessage(); exit;
+    }
+}
+
+function getMapper($modelName_) {
+    try {
+        
+        if(is_null($modelName_)) throw new Exception('Model name doesn\'t be null !');
+        
+        switch ($modelName_) {
+         case 'Users':
+         case 'User' :
+         case 'User_Messages' :  
+         case 'User_Followers' :
+         case 'User_Comments' :
+                return 'UserMapper';
+             break;
+         case 'Announcements' :
+         case 'Announcement'  : 
+         case 'Announcement_Tags' :
+         case 'Announcement_Apply' :
+                return 'AnnouncementMapper';
+             break;
+         case 'Tags' :
+         case 'Tag'  :
+                return 'TagMapper';
+             break;
+         case 'Messages' :
+         case 'Message'  :
+                return 'MessageMapper';  
+             break;
+         case 'Pictures' :
+         case 'Picture'  :
+                return 'PictureMapper';
+             break;
+         case 'Comments' :
+         case 'Comment'  :
+                return 'CommentMapper';
+             break;       
+         default:
+             break;
+        }
+    } catch (Exception $e) {
+        print $e->getMessage(); exit;
+    }
+}
+
+function parserUrl() {
+    try {
+
+        $uri = (($uri = prepareRequestUri()) && !empty($uri)) ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
+        $url = (($url = prepareBaseUrl()) && !empty($url)) ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
+
+        $uri_filtered = str_replace($url, '', $uri);
+        $uri_args = explode('/', $uri_filtered);
+
+        (is_array($uri_args)) ? cleanArray($uri_args, '') : throwException('URL arguments doesn\'t be null !');
+        
+        return $uri_args;
+        
+    } catch (Exception $e) {
+        print $e->getMessage();
+    }
+}
+
+function getUri() {
+        $uri = (($uri = prepareRequestUri()) && !empty($uri)) ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
+        $url = (($url = prepareBaseUrl()) && !empty($url)) ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
+
+        $uri_filtered = str_replace($url, '', $uri);
+        
+        return (isset($uri_filtered) && !empty($uri_filtered)) ? $uri_filtered : throwException('URI doesn\'t be null ! A problem has occured.');
+}
+function throwException($message_) {
+    throw new Exception($message_); exit;
+}
+
+function cleanArray(&$array_, $value_) {
+    
+    if(is_array($array_)) {
+        foreach($array_ as $key=>&$arrayElement) {
+            if(is_array($arrayElement)) {
+                cleanArray($arrayElement, $value_);
+            } else {
+                if($arrayElement == $value_) {
+                    unset($array_[$key]);
+                }
+            }
+        }
+    }
+}
+
+function initUrlClass($uri_filtered_, $uri_parts_) {
+    try {
+        
+        $url = new Url;
+        if(strpos($uri_filtered_, '?')) {
+            $args = explode('?', $uri_filtered_);
+
+            if(isset($args) && is_array($args) && count($args) > 1) {
+                if(strpos($args[1], '&')) {
+                    $temp = explode('&', $args[1]);
+                    if(isset($temp) && is_array($temp) && !empty($temp)) {
+                        $url->setUrlArguments($temp);            
+                    }
+                }
+            }         
+        }
+        
+        $uri_parts_  = refreshArrayKeys($uri_parts_);
+        foreach ($uri_parts_ as $key => $value) {
+            /**
+             * Check if url contains some arguments 
+             * Example : /path/to/web/model/?order=DESC
+             */
+            if(strpos($value, '?') !== false) {
+                $value = strstr($value, '?', true);
+            }
+            /**
+             * Use the object URL and set the different parts of the URL 
+             * to associate attributes.
+             */
+            if(!is_string($value) && is_numeric($value) || !is_string($value)) {
+              throw new InvalidArgumentException('First Argument must be a string !');  
+            } elseif($key === 0 && !is_numeric($value) && is_string($value)) { 
+                $url->setModelFirstPart($value);
+            } elseif($key % 2 != 0) { 
+                if(!empty($value) && !is_numeric($value)) {
+                    throw new InvalidArgumentException('Second Argument must be an integer !');
+                } elseif($key === 1 && is_numeric($value)) {
+                    $url->setIdFirstPart($value);
+                } elseif(is_numeric($value)) {
+                    $url->setIdSecondPart($value);
+                }
+            } elseif($key % 2 == 0) {
+                if($key === 2 && !is_numeric($value)) {
+                    $url->setModelSecondPart($value);
+                }
+            }
+        }
+        
+        return $url;
+    } catch (InvalidArgumentException $e) {
+        print $e->getMessage(); exit;
+    }
+}
+
+function refreshArrayKeys(Array $array_) {
+    return array_values($array_);
+}
+
+function getNameByMapper($mapper_) {
+    try {
+        return  strstr($mapper_, 'Mapper', true);
+    } catch(Exception $e) {
+        print $e->getMessage(); exit;
+    }
+}
+
+function initCondition(Url $url, Pager $pager = null, $mapper, $skipColumns = false) {
+    try 
+    {
+        $urlKeys = array_values($url->getUrlArguments()); 
+        $filters = array('page');
+        
+        if(!$skipColumns) {
+            $tableColumns = $mapper->getColumns();
+            $columns = array();
+            foreach ($tableColumns as $tableColumn) {
+                if(isset($tableColumn['Field'])) {
+                    $columns[] = $tableColumn['Field']; 
+                }
+            }       
+        }
+        
+        foreach($urlKeys as $key => $value) {
+            $temp[] = explode('=', $value, 2);
+            $conditions[$temp[$key][0]] = $temp[$key][1];
+        }
+        
+        if(isset($conditions) && is_array($conditions) && !empty($conditions)) {
+            $i = 0;
+            $filters = array('limit', 'page', 'order', 'operator', 'main_key');
+            foreach ($conditions as $condition => $value) {
+                if(!in_array($condition, $filters)) { 
+                        if(isset($columns) && !empty($columns)) {
+                            if(!in_array($condition, $columns)) throwException ('Column '.$condition.' doesn\'t exist in the table '.$mapper->getTable().'!');
+                        }
+                        $value = (isset($conditions['operator']) && $conditions['operator'] == 'LIKE') 
+                            ? '%'.urldecode($value).'%' : urldecode($value);
+                        $value = (is_numeric($value)) ? $value : '"'.$value.'"';
+                        if(isset($conditions['operator']) && $conditions['operator'] == 'LIKE') {
+                            $set[$condition] = $condition.' LIKE '.$value;   
+                        } else {
+                            $set[$condition] = $condition.' = '.$value;   
+                        }     
+                        $i++; 
+                }
+            }
+         
+            $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
+            $where = (isset($conditions['limit']) && isset($set) && count($set) > 0) ? ' WHERE ' : '';
+            $where .= (isset($set) && !empty($set)) ? implode($operator, $set) : null;
+            if(isset($conditions['page']) && !empty($conditions['page']) && !is_null($pager)) {
+                (is_numeric($conditions['page'])) ? $pager->setCurrentPage($conditions['page']) : throwException('Page value must be an numeric value !');
+            }
+            if(isset($conditions['order']) && !empty($conditions['order'])) {
+                $where .= ' ORDER BY '.urldecode($conditions['order']);
+            }            
+            if(isset($conditions['limit']) && !empty($conditions['limit']) && !is_null($pager)) {
+                $total = (!is_null($pager->getTotalItems())) ? $pager->getTotalItems() : 0;
+                if($total > 0) {
+                    $limit = (is_numeric($conditions['limit'])) ? $conditions['limit'] : throwException('Limit value must be an numeric value !');
+                    $pager->setNbPages(ceil($total / $limit));
+                    if(!is_null($pager->getCurrentPage()) && !is_null($pager->getLimit())) {
+                        $where .= ' LIMIT '.($pager->getCurrentPage() * $pager->getLimit()).', '.$pager->getLimit();
+                    }
+                }
+            }
+        }
+        
+    return $where;
+    
+    } catch(Exception $e) {
+        print $e->getMessage(); exit;
+    }
+}
+
+function returnXML($urlObject, $mapper, $class, $method, $array, $http) {
+    try 
+        { 
+            $arguments = $http->getRequestVars();
+            $pager = new Pager();
+            $result = true;
+            
+            if(isset($arguments['limit']) && !empty($arguments['limit'])
+                && is_numeric($arguments['limit'])) {
+                $pager->setLimit($arguments['limit']);
+            }
+            if(isset($arguments['page']) && !empty($arguments['page'])
+                && is_numeric($arguments['page'])) {
+                $pager->setCurrentPage($arguments['page']);
+            }
+
+            $totalItems = (isset($arguments['main_key']) && !empty($arguments['main_key'])) 
+                ? 
+                $mapper->$method('WHERE '.$arguments['main_key'].' = '.$urlObject->getIdFirstPart()) 
+                    : 
+                throwException('Argument main_key must be defined');
+
+            (isset($totalItems) && count($totalItems) > 0) 
+                ? $pager->setTotalItems(count($totalItems)): Rest::sendResponse(204);
+            $conditions = (isset($array) && !empty($array)) ? initCondition($urlObject, $pager, $mapper, true) : null;
+            $arrayObjects = $mapper->$method($conditions);
+
+            if(is_array($arrayObjects) && !is_null($arrayObjects)) {
+                foreach($arrayObjects as $arrayObject) {
+                    $result = emptyObject($arrayObject);
+                }     
+            }
+
+            if(!$result) {
+
+                foreach($arrayObjects as $arrayObject) {
+                    $dataArray[] = extractData($arrayObject);
+                }
+
+                if($http->getHttpAccept() == 'json')  {  
+                    Rest::sendResponse(200, json_encode($dataArray), 'application/json');  
+                } else if ($http->getHttpAccept() == 'xml')  { 
+
+                    $options = array (  
+                        'indent' => '     ',  
+                        'addDecl' => false,  
+                        XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+                        "defaultTagName"     => strtolower($class),
+                    );  
+
+                    $serializer = new XML_Serializer($options);  
+                    Rest::sendResponse(200, $serializer->serialize($dataArray), 'application/xml');  
+
+                }         
+            } else {
+             Rest::sendResponse(204);
+            }
+   } catch (Exception $e) {
+       print $e->getMessage(); exit;
+   } catch(InvalidArgumentException $e) {
+       print $e->getMessage(); exit;
+   }  
+}
+
+function isRequired($requiered, $haystack) {
+    try 
+    {
+        if(isset($haystack) && !emptyObjectMethod($haystack)
+                    && isset($requiered) && !empty($requiered)) {
+            $array = extractData($haystack);
+            
+            foreach ($requiered as $key => $value) {
+                if(!array_key_exists($value, $array)) {
+                    throwException($value. ' argument is requiered !');
+                }
+            }
+            
+            return true;
+        } 
+    } catch(Exception $e) {
+        print $e->getMessage(); exit;
+    }
 }

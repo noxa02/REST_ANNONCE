@@ -98,18 +98,22 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function selectAnnouncement($all_ = false) 
+    function selectAnnouncement($all_ = false, $condition = null) 
     {
-        try {
+        try 
+        {
             $where = null;
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+            if(isset($this->id) && !is_null($this->id) && is_null($condition)) {
+                $where = 'id = '.$this->getId();
+            } elseif(isset($condition) && !is_null($condition)) {
+                $where = $condition;
             }
 
             return parent::select($this->table, $where, $object = new Announcement(), $all_);
+            
         } catch(InvalidArgumentException $e) {
             $e->getMessage(); exit;
         }
@@ -203,25 +207,44 @@ class AnnouncementMapper extends Mapper {
         }
     }
     
+    public
+    function getApply($object) {
+        $condition = 'WHERE id IN (SELECT id_announcement '.
+                        'FROM TO_APPLY WHERE id_announcement = '.$this->getFirstId().'
+                            AND id_user = '.$object->id_user.')';
+        
+        return $this->selectAnnouncement(false, $condition);
+    }
+    
     /**
      * Allows to apply an ad
      * @param stdClass $object_
      * @throws Exception
      */
     public
-    function goApply(stdClass $object_) {
+    function goApply(stdClass $objectApply) {
         try {
-            
-            if(!parent::exist('USER', 'User', 'userMapper', 'id = '.$object_->id_user)) {
-                throw new Exception('User doesn\'t exist !');
+            $requiered = array('id_user');
+            if(isRequired($requiered, $objectApply)) {
+                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectApply->id_user)) {
+                    throw new Exception('User doesn\'t exist !');
+                }
+                if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 'WHERE id = '.$this->getFirstId())) {
+                    throw new Exception('Announcement doesn\'t exist !');
+                }
+                if(!parent::exist('TO_APPLY', 'stdClass', 'announcementMapper', 
+                        'WHERE id_user = '.$objectApply->id_user.' AND id_announcement = '.$this->getFirstId())) {
+                    throw new Exception('A apply is already existing !');
+                }         
+                $objectApply->id_announcement = $this->getFirstId();
+                $user = $this->getApply($objectApply);
+               
+                if(is_null($user->getId())) {
+                     return parent::insert('TO_APPLY', $objectApply);
+                } else {
+                    throw new Exception('User have already apply for this announcement !');
+                }  
             }
-            
-            if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 'id = '.$this->getFirstId())) {
-                throw new Exception('Announcement doesn\'t exist !');
-            }
-            
-            $object_->id_announcement = $this->getFirstId();
-            return parent::insert('TO_APPLY', $object_);
             
         } catch(Exception $e) {
             print $e->getMessage(); exit;
