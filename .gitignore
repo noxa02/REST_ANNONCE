@@ -2,7 +2,9 @@
 .AppleDouble
 .LSOverride
 Icon
-
+nbproject
+nbproject*
+nbproject/*
 
 # Thumbnails
 ._*
