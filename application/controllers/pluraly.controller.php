@@ -32,13 +32,15 @@ try
             break;
                     
             case 'post':
-                    $classInstancied = new $class();
-                    $method = 'insert'.$class;
-                    $data = $http->getRequestVars();
-                    $object = initObject($data, $classInstancied, true);
-
-                    if(!emptyObject($object)) {
-                        $mapper = new $mapper();
+                
+                $mapper = new $mapper();
+                $query  = new Query();
+                $classInstancied = new $class();
+                $method = 'insert'.$class;
+                $args = $http->getRequestVars();
+                $object = initObject($args, $classInstancied, true);
+                
+                    if(!emptyObject($object) && method_exists($mapper, $method)) {
                         if($mapper->$method($object)) {
                             Rest::sendResponse(201);   
                         }             

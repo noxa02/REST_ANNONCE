@@ -193,7 +193,7 @@ class Mapper
             $conditions = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT', true) : $conditions;
             $query = 'SELECT * FROM '.$table.
                       (($conditions) ? ' '. $conditions  : '') . ((!is_null($limit)) ? $limit : '');
-              print_log($query);
+            
             $q = $this->statement->prepare($query);
             $q->execute();
             

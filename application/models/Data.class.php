@@ -41,16 +41,19 @@ class Data {
     
     public 
     function sendData() {
-
-        if($this->getFormat() == 'json')  {
+        
+        $data = (method_exists($this, 'getData')) ? $this->getData() : array();
+        if(empty($data)) 
+            Rest::sendResponse(204);
+        
+        if($this->getFormat() == 'json') {
             
-             Rest::sendResponse(200, json_encode($this->getData()), 'application/json');  
+             Rest::sendResponse(200, json_encode($data), 'application/json');  
              
-         } elseif($this->getFormat()== 'xml')  { 
+         } elseif($this->getFormat()== 'xml') { 
              
              $serializer = new XML_Serializer($this->getOptions());  
-             Rest::sendResponse(200, $serializer->serialize($this->getData()), 'application/xml');  
-
+             Rest::sendResponse(200, $serializer->serialize($data), 'application/xml');  
          }            
     }
 }

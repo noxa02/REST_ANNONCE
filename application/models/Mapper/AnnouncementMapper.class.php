@@ -14,30 +14,32 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function insertAnnouncement(Announcement $announcement_) 
+    function insertAnnouncement(Announcement $announcement) 
     {
-        try {
-            
+        try 
+        {
             $pictures = array();
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
 
-            if(parent::insert($this->table, $announcement_, array(), true)) {
+            if(parent::insert($this->getTable(), $announcement, array(), true)) {
+                
                 $idAnnouncement = parent::getlastInsertId(); 
-                $announcement_->setId($idAnnouncement);
-
-                if(isset($this->files) && !empty($this->files)) {
-                    foreach($this->files as $file) {
+                $announcement->setId($idAnnouncement);
+                $files = $this->getFiles();
+                if(isset($files) && is_array($files) && !empty($files)) {
+                    foreach($files as $file) {
                         $picture = new Picture();
                         $picture = initObject($file, $picture, true);
                         $pictures[] = $picture;
                     }
                 }
 
-                $announcement_->setPictures($pictures);
-                if(!is_null($announcement_->getPictures())) {
-                    foreach ($announcement_->getPictures() as $key => $value) {
+                $announcement->setPictures($pictures);
+                if(isset($pictures) && !empty($pictures)) {
+                    
+                    foreach ($pictures as $key => $value) {
                         
                         $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
                         $value->setIdAnnouncement($idAnnouncement);

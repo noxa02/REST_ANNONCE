@@ -3,8 +3,9 @@
     /**
      * Parse the URL and clean it.
      */
-     $uri_parts = parserUrl(); 
-     $urlObject = (($uri = getUri()) && !empty($uri))  
+     $url = new Url();
+     $uri_parts = $url->parserUrl(); 
+     $urlObject = (($uri = $url->getUri()) && !empty($uri))  
         ? initUrlClass($uri, $uri_parts) : throwException('A problem has occured during the initizialition Url Class');
      
     /**

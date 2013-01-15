@@ -386,32 +386,7 @@ function getMapper($modelName_) {
     }
 }
 
-function parserUrl() {
-    try {
 
-        $uri = (($uri = prepareRequestUri()) && !empty($uri)) ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
-        $url = (($url = prepareBaseUrl()) && !empty($url)) ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
-
-        $uri_filtered = str_replace($url, '', $uri);
-        $uri_args = explode('/', $uri_filtered);
-
-        (is_array($uri_args)) ? cleanArray($uri_args, '') : throwException('URL arguments doesn\'t be null !');
-        
-        return $uri_args;
-        
-    } catch (Exception $e) {
-        print $e->getMessage();
-    }
-}
-
-function getUri() {
-        $uri = (($uri = prepareRequestUri()) && !empty($uri)) ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
-        $url = (($url = prepareBaseUrl()) && !empty($url)) ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
-
-        $uri_filtered = str_replace($url, '', $uri);
-        
-        return (isset($uri_filtered) && !empty($uri_filtered)) ? $uri_filtered : throwException('URI doesn\'t be null ! A problem has occured.');
-}
 function throwException($message_) {
     throw new Exception($message_); exit;
 }
@@ -493,75 +468,6 @@ function refreshArrayKeys(Array $array_) {
 function getNameByMapper($mapper_) {
     try {
         return  strstr($mapper_, 'Mapper', true);
-    } catch(Exception $e) {
-        print $e->getMessage(); exit;
-    }
-}
-
-function initCondition(Url $url, Pager $pager = null, $mapper, $skipColumns = false) {
-    try 
-    {
-        $urlKeys = array_values($url->getUrlArguments()); 
-        $filters = array('page');
-        
-        if(!$skipColumns) {
-            $tableColumns = $mapper->getColumns();
-            $columns = array();
-            foreach ($tableColumns as $tableColumn) {
-                if(isset($tableColumn['Field'])) {
-                    $columns[] = $tableColumn['Field']; 
-                }
-            }       
-        }
-        
-        foreach($urlKeys as $key => $value) {
-            $temp[] = explode('=', $value, 2);
-            $conditions[$temp[$key][0]] = $temp[$key][1];
-        }
-        
-        if(isset($conditions) && is_array($conditions) && !empty($conditions)) {
-            $i = 0;
-            $filters = array('limit', 'page', 'order', 'operator', 'main_key');
-            foreach ($conditions as $condition => $value) {
-                if(!in_array($condition, $filters)) { 
-                        if(isset($columns) && !empty($columns)) {
-                            if(!in_array($condition, $columns)) throwException ('Column '.$condition.' doesn\'t exist in the table '.$mapper->getTable().'!');
-                        }
-                        $value = (isset($conditions['operator']) && $conditions['operator'] == 'LIKE') 
-                            ? '%'.urldecode($value).'%' : urldecode($value);
-                        $value = (is_numeric($value)) ? $value : '"'.$value.'"';
-                        if(isset($conditions['operator']) && $conditions['operator'] == 'LIKE') {
-                            $set[$condition] = $condition.' LIKE '.$value;   
-                        } else {
-                            $set[$condition] = $condition.' = '.$value;   
-                        }     
-                        $i++; 
-                }
-            }
-         
-            $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
-            $where = (isset($conditions['limit']) && isset($set) && count($set) > 0) ? ' WHERE ' : '';
-            $where .= (isset($set) && !empty($set)) ? implode($operator, $set) : null;
-            if(isset($conditions['page']) && !empty($conditions['page']) && !is_null($pager)) {
-                (is_numeric($conditions['page'])) ? $pager->setCurrentPage($conditions['page']) : throwException('Page value must be an numeric value !');
-            }
-            if(isset($conditions['order']) && !empty($conditions['order'])) {
-                $where .= ' ORDER BY '.urldecode($conditions['order']);
-            }            
-            if(isset($conditions['limit']) && !empty($conditions['limit']) && !is_null($pager)) {
-                $total = (!is_null($pager->getTotalItems())) ? $pager->getTotalItems() : 0;
-                if($total > 0) {
-                    $limit = (is_numeric($conditions['limit'])) ? $conditions['limit'] : throwException('Limit value must be an numeric value !');
-                    $pager->setNbPages(ceil($total / $limit));
-                    if(!is_null($pager->getCurrentPage()) && !is_null($pager->getLimit())) {
-                        $where .= ' LIMIT '.($pager->getCurrentPage() * $pager->getLimit()).', '.$pager->getLimit();
-                    }
-                }
-            }
-        }
-        
-    return $where;
-    
     } catch(Exception $e) {
         print $e->getMessage(); exit;
     }

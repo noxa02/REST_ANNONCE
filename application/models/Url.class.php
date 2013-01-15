@@ -60,6 +60,40 @@ class Url {
     function setUrlArguments($urlArguments_) {
         $this->urlArguments = $urlArguments_;
     }
+    
+    public
+    function parserUrl() {
+        try 
+        {
+            $uri = (($uri = prepareRequestUri()) && !empty($uri)) 
+                ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
+            $url = (($url = prepareBaseUrl()) && !empty($url)) 
+                ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
+
+            $uri_filtered = str_replace($url, '', $uri);
+            $uri_args = explode('/', $uri_filtered);
+
+            (is_array($uri_args)) ? cleanArray($uri_args, '') : throwException('URL arguments doesn\'t be null !');
+
+            return $uri_args;
+
+        } catch (Exception $e) {
+            print $e->getMessage();
+        }
+    }
+
+    public
+    function getUri() {
+        $uri = (($uri = prepareRequestUri()) && !empty($uri)) 
+            ? prepareRequestUri() : throwException('URI doesn\'t be null ! A problem has occured.');
+        $url = (($url = prepareBaseUrl()) && !empty($url)) 
+            ? prepareBaseUrl() : throwException('URL doesn\'t be null ! A problem has occured.');
+
+        $uri_filtered = str_replace($url, '', $uri);
+
+        return (isset($uri_filtered) && !empty($uri_filtered)) 
+            ? $uri_filtered : throwException('URI doesn\'t be null ! A problem has occured.');
+    }
 }
 
 ?>
