@@ -14,15 +14,24 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function insertUser(User $user_) 
+    function insertUser(User $user) 
     {
-        try {
+        try 
+        {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-
-            return parent::insert($this->table, $user_);            
+            $conditions = ' WHERE login = "'.$user->getLogin().'"';
+            if(!parent::exist('USER', 'User', 'userMapper', $conditions)) {
+                return parent::insert($this->getTable(), $user);
+            } else {
+                throw new Exception('User already exist with login : '.$user->getLogin());
+            }
+              
+            
         } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
@@ -34,23 +43,24 @@ class UserMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function updateUser(User $user_, $where_ = null) 
+    function updateUser(User $user_, $conditions = null) 
     {
         try {
             $where = null;
-            if(is_null($this->table)) {
+            if(function_exists($this->getTable()) && is_null($this->getTable())) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id) && !is_null($where_)) {
-                $where = $where_;
-            } elseif(is_null($where_)) {
-                $where = 'id = '.$this->getFirstId();
+            if(function_exists($this->getId()) && !is_null($this->getId()) 
+                    && isset($conditions) && is_null($conditions)) {
+                $where = ' WHERE id = '.$this->getFirstId();
+            } elseif(isset($conditions) && !is_null($conditions)) {
+                $where = $conditions;
             }
             
-            if(parent::exist('USER', 'User', 'userMapper', $where)) {
-                parent::update($this->table, $user_, $where);
+            if(!is_null($where) && parent::exist('USER', 'User', 'userMapper', $where)) {
+                parent::update($this->getTable(), $user, $where);
             } else {
-                throw new Exception('User does not exist !');
+                Rest::sendResponse(204, 'User does not exist !');
             }          
         } catch(InvalidArgumentException $e) {
             print $e->getMessage(); exit;
@@ -61,46 +71,21 @@ class UserMapper extends Mapper {
     
     /**
      * 
-     * @param string $all_
-     * @return boolean
-     * @throws InvalidArgumentException
-     */
-    public
-    function selectUser($all_ = false, $where_ = null) 
-    {
-        try {
-            $where = null;
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-                $where = 'id = '.$this->id;
-            } elseif(isset($where_) && !is_null($where_)) {
-                $where = $where_;
-            }
-            
-            return parent::select($this->table, $where, $object = new User(), $all_);
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        }
-    }
-    
-    /**
-     * 
      * @return boolean
      * @throws InvalidArgumentException
      */
     public 
-    function deleteUser($where_ = null) {
+    function deleteUser($conditions = null) {
         try {
-            if(is_null($this->table)) {
+            $where = null;
+            if(function_exists($this->getTable()) && is_null($this->getTable())) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }
-            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-                $where = 'id = '.$this->id;
-            } elseif(isset($where_) && !empty ($where_)) {
-                $where = $where_;
+            if(function_exists($this->getId()) && !is_null($this->getId()) 
+                    && isset($conditions) && is_null($conditions)) {
+                $where = ' WHERE id = '.$this->getFirstId();
+            } elseif(isset($conditions) && !is_null($conditions)) {
+                $where = $conditions;
             }
 
             return parent::delete($this->table, $where);     
@@ -116,12 +101,18 @@ class UserMapper extends Mapper {
             if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectToFollow->id_user_follower)) {
                 throw new Exception('User follower doesn\'t exist !');
             }
+            $id_user_followed = (isset($objectToFollow->id_user_followed) 
+                                    && !empty($objectToFollow->id_user_followed)) 
+            ? $objectToFollow->id_user_followed :  $this->getFirstId();
             
-            $where = 'WHERE id = (SELECT id_user_follower '.
-                        'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().' '.
-                        'AND id_user_follower = '.$objectToFollow->id_user_follower.')';
-        
-            return $this->selectUser(false, $where); 
+            if(isset($id_user_followed) && !empty($id_user_followed) 
+                    && isset($objectToFollow->id_user_follower) && !empty($objectToFollow->id_user_follower)) {
+                $where = ' WHERE id = (SELECT id_user_follower '.
+                             'FROM TO_FOLLOW WHERE id_user_followed = '.$id_user_followed.' '.
+                             'AND id_user_follower = '.$objectToFollow->id_user_follower.')';
+
+                return $this->selectUser(false, $where); 
+            }
         
         } catch(Exception $e) {
             print $e->getMessage(); exit;
@@ -129,11 +120,12 @@ class UserMapper extends Mapper {
     }
     
     public
-    function getFollowers() {
-        $where = 'WHERE id IN (SELECT id_user_follower '.
-                    'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
-        
-        return $this->selectUser(true, $where);
+    function getFollowers($conditions = null) {
+        $conditions = (isset($conditions) && !is_null($conditions)) ? $conditions : 
+                        ' WHERE id IN (SELECT id_user_follower '.
+                                      'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
+                                      
+        return parent::select('USER', $conditions, new User(), true);
     }
    
     /**
@@ -177,9 +169,31 @@ class UserMapper extends Mapper {
      * @return boolean True the query is executed | False
      */
     public
-    function stopFollow($id_followed_, $id_follower_) {
-        $where = 'id_user_followed = '.$id_followed_.' AND '.
-                 'id_user_follower = '.$id_follower_;
+    function stopFollow($id_followed, $id_follower) {
+        try 
+        {
+                if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_follower)) {
+                    throw new Exception('User follower doesn\'t exist !');
+                }
+                if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_followed)) {
+                    throw new Exception('User follewed doesn\'t exist !');
+                }        
+                $objectFollow = new stdClass();
+                $objectFollow->id_user_followed = $id_followed;
+                $objectFollow->id_user_follower = $id_follower;
+                $user = $this->getFollower($objectFollow);
+
+                if(isset($user) && is_null($user->getId())) {
+                    $conditions = 'id_user_followed = '.$id_followed_.' AND '.
+                                  'id_user_follower = '.$id_follower_;
+                    return parent::delete('TO_FOLLOW', $conditions);
+                } else {
+                    Rest::sendResponse(404, 'Ressource does not exist !');
+                }   
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
+        }
+
         
         return parent::delete('TO_FOLLOW', $where);
     }
@@ -191,15 +205,32 @@ class UserMapper extends Mapper {
      */
     public
     function sendMessage(Message $messageObject_) {
+        try 
+        {
+            if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$messageObject->getIdReceiver())) {
+                throw new Exception('User receiver doesn\'t exist !');
+            }
+            if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$this->getFirstId())) {
+                throw new Exception('User sender doesn\'t exist !');
+            }        
 
-        if(!emptyObject($messageObject_)) {
-            new UserMapper;
-            $messageMapper = new MessageMapper();
-            $messageObject_->setIdSender($this->getFirstId());
-            $messageObject_->setIdReceiver($this->getSecondId());
-            if($messageMapper->insertMessage($messageObject_)) {
-                return true;
-            } 
+            $messageObject->setIdSender($this->getFirstId())   ;
+            $currentDate = date("Y-m-d H:i:s"); 
+            $condition = ' WHERE id_sender = '.$messageObject->getIdSender().
+                            ' AND id_receiver = '.$messageObject->getIdReceiver().
+                            ' AND date_post = "'.$currentDate.'"';
+            $message = $this->getMessage($condition);
+
+            if(!emptyObjectMethod($messageObject) && emptyObjectMethod($message)) {
+                $messageMapper = new MessageMapper();
+
+                return $messageMapper->insertMessage($messageObject);
+            } else {
+                throw new Exception('Message is already existant for this user !');
+            }   
+            
+        } catch(Exception $e) {
+            print $e->getMessage(); exit;
         } 
     }
     
@@ -233,9 +264,14 @@ class UserMapper extends Mapper {
     }
     
     public
-    function getComment() {
-        $commentMapper = new CommentMapper();
-        $where = 'id_user = '.$this->getFirstId().' AND id = '.$this->getSecondId();
+    function getComment($conditions = null) {
+        $commentMapper = new CommentMapper(); 
+        if(isset($conditions) && !is_null($conditions)) {
+            $where = $conditions;
+        } else {
+            $where = ' WHERE id_user = '.$this->getFirstId().' AND id = '.$this->getSecondId();
+        }
+        
         $commentsObjects = $commentMapper->selectComment(false, $where);
         return $commentsObjects;
     }

@@ -11,8 +11,10 @@ try
         case 'get':
             $mapper = new $mapper();
             $method = 'getFollowers';
+            $conditions = ' WHERE id IN (SELECT id_user_follower '.
+                                'FROM TO_FOLLOW WHERE id_user_followed = '.$urlObject->getIdFirstPart().')';
+            returnXML($urlObject, $mapper, $class, $method, $array, $http, $conditions);
             
-            returnXML($urlObject, $mapper, $class, $method, $array, $http);
         case 'post':
             try 
             {

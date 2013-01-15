@@ -9,7 +9,7 @@ try
     {
         case 'delete':
             $userMapper = new UserMapper();
-            if($userMapper->stopFollow($url->getIdFirstPart(), $url->getIdSecondPart())) {
+            if($userMapper->removeApply($url->getIdFirstPart(), $url->getIdSecondPart())) {
                 Rest::sendResponse(200);
             }
         break;
@@ -22,7 +22,7 @@ try
                
                 if(!emptyObject($objectApply)) {
                     $mapperInstancied = new $mapper();
-                    if($mapperInstancied->goApply($objectApply)) {
+                    if($mapper->goApply($objectApply)) {
                         Rest::sendResponse(200);   
                     }       
                 } else {
@@ -34,7 +34,7 @@ try
          break;
          default :
             Rest::sendResponse(501);
-                break;
+         break;
     }
 } catch (Exception $e) {
     print $e->getMessage(); exit;

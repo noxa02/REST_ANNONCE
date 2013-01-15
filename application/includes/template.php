@@ -179,20 +179,20 @@ $data = null;
  * @return object $object_
  * Extract array values to return an initialized object
  */
-function initObject($data_, $object_, $return = false, $initObject = true, $opts_ = array()) {
-    if(is_a($object_, 'stdClass')) {
-        $object_ = new stdClass();
-        if(isset($data_) && !empty($data_)) {
-           foreach ($data_ as $key => $value) { 
-               $object_->$key = $value;
+function initObject($data, $object, $return = false, $initObject = true, $opts = array()) {
+    if(is_a($object, 'stdClass')) {
+        $object = new stdClass();
+        if(isset($data) && !empty($data)) {
+           foreach ($data as $key => $value) { 
+               $object->$key = $value;
            }
         }
     } else {
         if($initObject) {
-            $object_ = new $object_(); 
+            $object = new $object(); 
         }
-        if(isset($data_) && !empty($data_)) {
-           foreach ($data_ as $key => $value) {
+        if(isset($data) && !empty($data)) {
+           foreach ($data as $key => $value) {
                $_methodName = ucfirst($key);
                if(strpos($key, '_')) {
                    $beginMethod = ucfirst(strstr($key, '_', true));
@@ -201,18 +201,20 @@ function initObject($data_, $object_, $return = false, $initObject = true, $opts
                }
 
                $_method = 'set'.$_methodName;
-               if(method_exists($object_, $_method)) {
-                   if(in_array('password', $opts_)) {
-                       $object_->$_method($value, true);
+               if(method_exists($object, $_method)) {
+                   if($_method == 'setPassword') {
+                       $object->$_method($value, true);
+                   } else {
+                       $object->$_method($value);
                    }
-                   $object_->$_method($value);
+                   
                }
            }
         }     
     }
     
     if($return) {
-        return $object_;
+        return $object;
     }
 }
 
@@ -342,8 +344,8 @@ function getControllerByModel($modelName_) {
 }
 
 function getMapper($modelName_) {
-    try {
-        
+    try 
+    {
         if(is_null($modelName_)) throw new Exception('Model name doesn\'t be null !');
         
         switch ($modelName_) {
@@ -563,70 +565,6 @@ function initCondition(Url $url, Pager $pager = null, $mapper, $skipColumns = fa
     } catch(Exception $e) {
         print $e->getMessage(); exit;
     }
-}
-
-function returnXML($urlObject, $mapper, $class, $method, $array, $http) {
-    try 
-        { 
-            $arguments = $http->getRequestVars();
-            $pager = new Pager();
-            $result = true;
-            
-            if(isset($arguments['limit']) && !empty($arguments['limit'])
-                && is_numeric($arguments['limit'])) {
-                $pager->setLimit($arguments['limit']);
-            }
-            if(isset($arguments['page']) && !empty($arguments['page'])
-                && is_numeric($arguments['page'])) {
-                $pager->setCurrentPage($arguments['page']);
-            }
-
-            $totalItems = (isset($arguments['main_key']) && !empty($arguments['main_key'])) 
-                ? 
-                $mapper->$method('WHERE '.$arguments['main_key'].' = '.$urlObject->getIdFirstPart()) 
-                    : 
-                throwException('Argument main_key must be defined');
-
-            (isset($totalItems) && count($totalItems) > 0) 
-                ? $pager->setTotalItems(count($totalItems)): Rest::sendResponse(204);
-            $conditions = (isset($array) && !empty($array)) ? initCondition($urlObject, $pager, $mapper, true) : null;
-            $arrayObjects = $mapper->$method($conditions);
-
-            if(is_array($arrayObjects) && !is_null($arrayObjects)) {
-                foreach($arrayObjects as $arrayObject) {
-                    $result = emptyObject($arrayObject);
-                }     
-            }
-
-            if(!$result) {
-
-                foreach($arrayObjects as $arrayObject) {
-                    $dataArray[] = extractData($arrayObject);
-                }
-
-                if($http->getHttpAccept() == 'json')  {  
-                    Rest::sendResponse(200, json_encode($dataArray), 'application/json');  
-                } else if ($http->getHttpAccept() == 'xml')  { 
-
-                    $options = array (  
-                        'indent' => '     ',  
-                        'addDecl' => false,  
-                        XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => strtolower($class),
-                    );  
-
-                    $serializer = new XML_Serializer($options);  
-                    Rest::sendResponse(200, $serializer->serialize($dataArray), 'application/xml');  
-
-                }         
-            } else {
-             Rest::sendResponse(204);
-            }
-   } catch (Exception $e) {
-       print $e->getMessage(); exit;
-   } catch(InvalidArgumentException $e) {
-       print $e->getMessage(); exit;
-   }  
 }
 
 function isRequired($requiered, $haystack) {

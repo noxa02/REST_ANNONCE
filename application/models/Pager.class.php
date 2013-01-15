@@ -6,8 +6,13 @@ class Pager {
      private $_limit;
      private $_nbPages; 
      private $_currentPage;
-    
-    /**
+     
+     function __construct() {
+         global $http;
+         Hydrate::init($http->getRequestVars()); 
+     }
+
+     /**
      * 
      * Méthodes GET
      */
@@ -36,30 +41,38 @@ class Pager {
 		return $this->_currentPage;
 	}
     
-/**
- * Méthodes SET
- */
+    /**
+     * Méthodes SET
+     */
 
 	public 
-    function setTotalItems($totalItems_) {
-		$this->_totalItems = $totalItems_;
+    function setTotalItems($totalItems) {
+		$this->_totalItems = $totalItems;
 	}
 
 	public 
-    function setLimit($limit_)
+    function setLimit($limit)
 	{
-		$this->_limit = $limit_;
+        if(is_numeric($limit)) {
+            $this->_limit = $limit;
+        } else {
+            throwException('Limit value must be an numeric value !');
+        }
 	}
 
 	public 
-    function setNbPages($nbPages_)
+    function setNbPages($nbPages)
 	{
-		$this->_nbPages = $nbPages_;
+		$this->_nbPages = $nbPages;
 	}
 
-	public 
-    function setCurrentPage($currentPage_)
+    public 
+    function setCurrentPage($currentPage)
 	{
-        $this->_currentPage = ($currentPage_ == 1) ? 0 : $currentPage_ - 1;  
+        if(is_numeric($currentPage)) {
+            $this->_currentPage = ($currentPage == 1) ? 0 : $currentPage - 1;
+        } else {
+            throwException('Page value must be an numeric value !');
+        }
 	}
 }

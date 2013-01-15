@@ -5,6 +5,7 @@
  * @author Hait
  */
 class Url {
+    
     private $modelFirstPart;
     private $modelSecondPart;
     private $idFirstpart;

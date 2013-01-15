@@ -1,69 +1,35 @@
 <?php 
-try {
-    /**
-     * Get HTTP informations to define the targeted method.
-     */
-    $http = Rest::initProcess();
-    $mapper = getMapper($model);
-    $class = getNameByMapper($mapper);
-    
+try 
+{   
     if(!existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
 
     switch($http->getMethod())
     {
             case 'get':
+                
                 $mapper = new $mapper();
-                $method = 'select'.$class;
-                $result = true;
-                $arguments = $http->getRequestVars();
-                $pager = new Pager();
+                $query  = new Query();
+                $data   = new Data();
+                $options = array (  
+                    'indent' => '     ',  
+                    'addDecl' => false,  
+                    XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+                    "defaultTagName"     => strtolower($class),
+                );
                 
-                if(isset($arguments['limit']) && !empty($arguments['limit'])
-                    && is_numeric($arguments['limit'])) {
-                    $pager->setLimit($arguments['limit']);
-                }
-                if(isset($arguments['page']) && !empty($arguments['page'])
-                    && is_numeric($arguments['page'])) {
-                    $pager->setCurrentPage($arguments['page']);
-                }
-                $totalItems = $mapper->$method(true);
-                (isset($totalItems) && count($totalItems) > 0) 
-                    ? $pager->setTotalItems(count($totalItems)): Rest::sendResponse(204);
-
-                $conditions = (isset($array) && !empty($array)) ? initCondition($urlObject, $pager, $mapper) : null;
-                $arrayObjects = $mapper->$method(true, $conditions);
+                $pager->setTotalItems(count($query->getAllItems($mapper->getTable())));
+                $pager->setNbPages(ceil($pager->getTotalItems() / $pager->getLimit()));
                 
-                if(is_array($arrayObjects) && !is_null($arrayObjects)) {
-                    foreach($arrayObjects as $arrayObject) {
-                        $result = emptyObject($arrayObject);
-                    }     
-                }
+                $args = $http->getRequestVars();
+                $conditions = (isset($args) && !empty($args)) 
+                    ? $query->initCondition($urlObject, $pager, $mapper, true) : null;
                 
-                if(!$result) {
-                    
-                    foreach($arrayObjects as $arrayObject) {
-                        $dataArray[] = extractData($arrayObject);
-                    }
-                    
-                    if($http->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($dataArray), 'application/json');  
-                    } else if ($http->getHttpAccept() == 'xml')  { 
-
-                        $options = array (  
-                            'indent' => '     ',  
-                            'addDecl' => false,  
-                            XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                            "defaultTagName"     => strtolower($class),
-                        );  
-
-                        $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($dataArray), 'application/xml');  
-                        
-                    }     
-                } else {
-                    Rest::sendResponse(204);
-                }
-                    break;
+                $items = $mapper->select($mapper->getTable(), true, $conditions);
+                $data->setData($items);
+                $data->setFormat($http->getHttpAccept());
+                $data->setOptions($options);
+                $data->sendData();               
+            break;
                     
             case 'post':
                     $classInstancied = new $class();
@@ -74,7 +40,7 @@ try {
                     if(!emptyObject($object)) {
                         $mapper = new $mapper();
                         if($mapper->$method($object)) {
-                            Rest::sendResponse(200);   
+                            Rest::sendResponse(201);   
                         }             
                     } else {
                         throw new InvalidArgumentException('Need arguments to POST data !');

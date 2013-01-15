@@ -103,14 +103,14 @@ class Mapper
      * @return boolean
      */
     public
-    function insert($table_, $object_, array $arrayFilter = array(), $return = false) 
+    function insert($table, $object, array $arrayFilter = array(), $return = false) 
     {
-        try {
-            
-            if(is_a($object_, 'stdClass')) {
-                $data = (array) $object_;
+        try 
+        {
+            if(is_a($object, 'stdClass')) {
+                $data = (array) $object;
             } else {
-                $data = extractData($object_, $arrayFilter);
+                $data = extractData($object, $arrayFilter);
             }
             
             $stmt = $this->connect();
@@ -128,7 +128,7 @@ class Mapper
                     $data[":" . $column] = $value;
             }
             
-            $query = 'INSERT INTO '.$table_.' '.
+            $query = 'INSERT INTO '.$table.' '.
                    '('.$columns.')  VALUES (:'.$values.')';
             
             return $this->statement->prepare($query)
@@ -179,38 +179,26 @@ class Mapper
     
     /**
      * 
-     * @param string $table_
-     * @param string $where_
-     * @param stdClass $object_
-     * @param boolean $all_
+     * @param string $table
+     * @param boolean $all
+     * @param string $conditions
      * @return stdClass
      */
     public 
-    function select($table_, $where_ = null, $object_, $all_ = false) 
+    function select($table, $all = false, $conditions = null) 
     {
         try 
         {   
-            
-            $limit = (strpos($where_, 'LIMIT')) ? strstr($where_, 'LIMIT') : null;
-            $where = (strpos($where_, 'LIMIT')) ? strstr($where_, 'LIMIT', true) : $where_;
-            $query = 'SELECT * FROM '.$table_.
-                      (($where) ? ' '. $where  : '') . ((!is_null($limit)) ? $limit : '');
-
+            $limit = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT') : null;
+            $conditions = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT', true) : $conditions;
+            $query = 'SELECT * FROM '.$table.
+                      (($conditions) ? ' '. $conditions  : '') . ((!is_null($limit)) ? $limit : '');
+              print_log($query);
             $q = $this->statement->prepare($query);
             $q->execute();
             
-            $object = array();
-            if(!$all_) {
-                 $data = $q->fetch(PDO::FETCH_ASSOC);
-                 $object = initObject($data, $object_, true);
-            } else {
-                 $datas = $q->fetchAll(PDO::FETCH_ASSOC);
-                 foreach ($datas as $data) {
-                     array_push($object, initObject($data, $object_, true)); 
-                 }
-            }
+            return ($all) ? $q->fetchAll(PDO::FETCH_ASSOC) : $q->fetch(PDO::FETCH_ASSOC);
             
-            return $object;            
         } catch(PDOException $e) {
             print $e->getMessage(); exit;
         }

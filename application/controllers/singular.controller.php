@@ -15,35 +15,8 @@ try {
             case 'get':
                 $mapper = new $mapper();
                 $method = 'select'.$class;
-                $result = true;
-                $arguments = $http->getRequestVars();
                 
-                $conditions = (isset($array) && !empty($array)) ? initCondition($urlObject, null, $mapper) : null;
-                $arrayObject = $mapper->$method(false, $conditions);
-                if(!emptyObject($arrayObject)) {
-                    $dataArray = extractData($arrayObject);
-                }
-                
-                if(!empty($dataArray)) {
-                    
-                    if($http->getHttpAccept() == 'json')  {  
-                        Rest::sendResponse(200, json_encode($dataArray), 'application/json');  
-                    }  
-                    else if ($http->getHttpAccept() == 'xml')  {  
-
-                        $options = array (  
-                            'indent'         => '     ',  
-                            'addDecl'        => false,  
-                            "defaultTagName" => strtolower($class),
-                            XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-
-                        );  
-                        $serializer = new XML_Serializer($options);  
-                        Rest::sendResponse(200, $serializer->serialize($dataArray), 'application/xml');   
-                    }               
-                } else {
-                    Rest::sendResponse(204);
-                }
+                returnXML($urlObject, $mapper, $class, $method, $array, $http);
                     break;
             case 'delete':
                 $mapper = new $mapper();
