@@ -50,7 +50,7 @@ class Query {
                 $i = 0;
                 $filters = array('limit', 'current_page', 'order', 'operator', 'main_key');
                 $where = null;
-                
+                $set = array();
                 foreach ($conditions as $condition => $value) {
                     if(!in_array($condition, $filters)) { 
                             if(isset($columns) && !empty($columns)) {
@@ -67,7 +67,11 @@ class Query {
                             $i++; 
                     }
                 }
-
+                
+                if(isset($set) && is_array($set) && empty($set)) {
+                   $mapper->getPrimaryKey();
+                }
+                
                 $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
                 $where = (isset($conditions['limit']) && isset($set) && count($set) > 0) ? ' WHERE ' : '';
                 $where .= (isset($set) && !empty($set)) ? implode($operator, $set) : null;

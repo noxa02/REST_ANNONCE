@@ -448,4 +448,16 @@ class Mapper
             
         }
     }
+    
+    public
+    function getPrimaryKey() 
+    {
+        $query = 'SHOW KEYS FROM '.$this->getTable().' WHERE Key_name = "PRIMARY"';
+        $q = $this->statement->prepare($query);
+        $q->execute();
+        $data = $q->fetch(PDO::FETCH_ASSOC);
+        
+        return (isset($data['Column_name']) && !empty($data['Column_name'])) 
+            ? $data['Column_name'] : null;
+    }
 }

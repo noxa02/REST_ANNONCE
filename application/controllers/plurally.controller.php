@@ -1,7 +1,7 @@
 <?php 
 try 
 {   
-    if(!existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
+    if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
 
     switch($http->getMethod())
     {
@@ -29,6 +29,7 @@ try
                 $data->setFormat($http->getHttpAccept());
                 $data->setOptions($options);
                 $data->sendData();               
+                
             break;
                     
             case 'post':

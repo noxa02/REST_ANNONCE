@@ -122,4 +122,50 @@ class Picture {
     function setExtension($extension_) {
         $this->_extension = $extension_;
     }
+    
+    /**
+     * TODO 
+     * @param type $file
+     * @param type $user
+     */
+    public
+    function resizeAvatar($file, $user) {
+        if(!empty($file)):
+            if ($file['error'] <= 0):
+                if ($file['size'] <= 2097152):
+                $avatar = $file['name'];
+                $extensionList = array('jpg' => 'image/jpeg', 
+                                       'jpeg' => 'image/jpeg', 
+                                       'png' => 'image/png', 
+                                       'gif' => 'image/gif');
+                $extensionListIE = array('jpg' => 'image/pjpg', 
+                                         'jpeg'=>'image/pjpeg'); 
+
+                $extension = explode('.', $avatar);
+                $extension = strtolower($extension[1]);
+                    if ($extension == 'jpg' 
+                        || $extension == 'jpeg' 
+                            || $extension == 'pjpg' 
+                                || $extension == 'pjpeg' 
+                                    || $extension == 'gif' 
+                                        || $extension == 'png'):
+                        $_avatar = getimagesize($file['tmp_name']);
+                        if($_avatar['mime'] == $extensionList[$extension]  
+                            || $_avatar['mime'] == $extensionListIE[$extension]):
+                            $_avatarR = imagecreatefrompng($file['tmp_name']);
+                            $widthAvatar = getimagesize($file['tmp_name']);
+                            $newWidth = 100;
+                            $newHeigth = 100;
+                            $reduce = (($newWidth * 100) / $widthAvatar[0] );
+                            $newWidth = (($widthAvatar[1] * $reduce)/100 );
+                            $newAvatar = imagecreatetruecolor($newWidth , $newHeigth);
+                            imagecopyresampled($newAvatar , $_avatarR, 0, 0, 0, 0, $newWidth, $newHeigth, $widthAvatar[0],$widthAvatar[1]);
+                            imagedestroy($_avatarR);
+                            imagepng($newAvatar , UPLOAD_FILES.'/avatar/'.strtolower($user->getLogin()).'.'.$extension, 9);
+                        endif;
+                    endif;
+                endif;
+            endif;
+        endif;
+    }
 }

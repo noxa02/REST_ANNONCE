@@ -1,23 +1,31 @@
 <?php 
 
-try {
-    /**
-     * Get HTTP informations to define the targeted method.
-     */
-    $http = Rest::initProcess();
-    $mapper = getMapper($model);
-    $class = getNameByMapper($mapper);
-
-    if(!existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
+try 
+{
+    if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
 
     switch($http->getMethod())
     {
             case 'get':
-                $mapper = new $mapper();
-                $method = 'select'.$class;
                 
-                returnXML($urlObject, $mapper, $class, $method, $array, $http);
-                    break;
+                $mapper = new $mapper();
+                $query  = new Query();
+                $data   = new Data();
+                $options = array (  
+                    'indent' => '     ',  
+                    'addDecl' => false,  
+                     XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+                    "defaultTagName"     => strtolower($class),
+                );
+                
+                $conditions = ' WHERE '.$mapper->getPrimaryKey().' = '.$urlObject->getIdFirstPart();
+                $items = $mapper->select($mapper->getTable(), false, $conditions);
+                $data->setData($items);
+                $data->setFormat($http->getHttpAccept());
+                $data->setOptions($options);
+                $data->sendData();               
+                
+            break;
             case 'delete':
                 $mapper = new $mapper();
                 $method = 'delete'.$class;
