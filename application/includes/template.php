@@ -27,7 +27,6 @@ function sha1_password($password)
     
     return sha1(sha1($password.$GDS_2).sha1($GDS_1.$GDS_2));
 }
-
 /**
  * @todo Check if the request had the right
  * @return type

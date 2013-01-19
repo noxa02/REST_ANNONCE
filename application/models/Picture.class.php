@@ -3,6 +3,7 @@
 class Picture {
     
      private $_id;
+     private $_file_title;
      private $_title;
      private $_alternative;
      private $_path;
@@ -23,6 +24,12 @@ class Picture {
 		return $this->_id;
 	}
 
+	public 
+    function getFileTitle()
+	{
+		return $this->_file_title;
+	}
+    
 	public 
     function getTitle()
 	{
@@ -77,6 +84,12 @@ class Picture {
 		$this->_id = $_id;
 	}
 
+	public 
+    function setFileTitle($_file_title)
+	{
+		$this->_file_title = $_file_title;
+	}
+    
 	public 
     function setTitle($_title)
 	{

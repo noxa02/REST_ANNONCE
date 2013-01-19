@@ -29,6 +29,7 @@ try
             case 'delete':
                 $mapper = new $mapper();
                 $method = 'delete'.$class;
+
                 if($mapper->$method()) {
                     Rest::sendResponse(200);
                 }

@@ -28,6 +28,7 @@ class AnnouncementMapper extends Mapper {
                 $idAnnouncement = parent::getlastInsertId(); 
                 $announcement->setId($idAnnouncement);
                 $files = $this->getFiles();
+                
                 if(isset($files) && is_array($files) && !empty($files)) {
                     foreach($files as $file) {
                         $picture = new Picture();
@@ -42,22 +43,15 @@ class AnnouncementMapper extends Mapper {
                     foreach ($pictures as $key => $value) {
                         
                         $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
+                        $value->setFileTitle($key);
                         $value->setIdAnnouncement($idAnnouncement);
                         $value->setPath('/announcement/original/');
                         $value->setTitle(uniqid());
                         $value->setExtension($pictureExt);
-                        
-                        if(move_uploaded_file(
-                            $value->getTmpName(), 
-                            UPLOAD_PATH .'/announcement/original/'.$value->getTitle().'.'.$pictureExt
-                        )) {
                             
-                            $pictureMapper = new PictureMapper();
-                            $pictureMapper->insertPicture($value, array('tmp_name', 'size', 'type'), false);          
+                        $pictureMapper = new PictureMapper();
+                        $pictureMapper->insertPicture($value, array(), true);          
                             
-                        } else {
-                            throw new Exception('A problem occurred during the picture upload');
-                        }
                     }
                 }   
                 

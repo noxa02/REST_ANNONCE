@@ -206,18 +206,18 @@ class Mapper
     
     /**
      * 
-     * @param string $table_
-     * @param string $where_
+     * @param string $table
+     * @param string $where
      * @return boolean 
      */
     public 
-    function delete($table_, $where_ = null) 
+    function delete($table, $conditions = null) 
     {
         try 
         {
-            $query = 'DELETE FROM '.$table_. 
-                      (($where_) ? ' WHERE '. $where_  : '');
-            
+            $query = 'DELETE FROM '.$table. 
+                      (($conditions) ? $conditions  : '');
+              
             return $this->statement->prepare($query)
                                    ->execute();     
         } catch(PDOException $e) {
