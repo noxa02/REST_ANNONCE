@@ -68,33 +68,6 @@ class MessageMapper extends Mapper {
     
     /**
      * 
-     * @param boolean $all_
-     * @throws InvalidArgumentException
-     */
-    public
-    function selectMessage($all_ = false, $where_ = '') 
-    {
-        try 
-        {
-            $where = null;
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id) && is_null($where_)) {
-                $where = 'id = '.$this->id;
-            } elseif(isset($where_) && !is_null($where_)) {
-                $where = $where_;
-            }
-            
-            return parent::select($this->table, $where, $object = new Message(), $all_);         
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        }
-    }
-    
-    /**
-     * 
      * @return boolean
      * @throws InvalidArgumentException
      */

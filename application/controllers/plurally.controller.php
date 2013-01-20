@@ -1,8 +1,5 @@
 <?php 
-try 
-{   
-    if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
-
+  
     switch($http->getMethod())
     {
             case 'get':
@@ -11,18 +8,20 @@ try
                 $query  = new Query();
                 $data   = new Data();
                 $options = array (  
-                    'indent' => '     ',  
-                    'addDecl' => false,  
-                    XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                    "defaultTagName"     => strtolower($class),
+                    'indent'         => '     ',  
+                    'addDecl'        => false,  
+                    "defaultTagName" => strtolower($class),
+                     XML_SERIALIZER_OPTION_RETURN_RESULT => true,
                 );
                 
                 $pager->setTotalItems(count($query->getAllItems($mapper->getTable())));
-                $pager->setNbPages(ceil($pager->getTotalItems() / $pager->getLimit()));
+                $limit =  $pager->getLimit();
+                $nbPages = (isset($limit) && $limit > 0) ? ceil($pager->getTotalItems() / $pager->getLimit()) : 1;
+                $pager->setNbPages($nbPages);
                 
                 $args = $http->getRequestVars();
                 $conditions = (isset($args) && !empty($args)) 
-                    ? $query->initCondition($urlObject, $pager, $mapper, true) : null;
+                    ? $query->initCondition($url, $pager, $mapper, true) : null;
                 
                 $items = $mapper->select($mapper->getTable(), true, $conditions);
                 $data->setData($items);
@@ -41,19 +40,16 @@ try
                 $args = $http->getRequestVars();
                 $object = initObject($args, $classInstancied, true);
                 
-                    if(!emptyObject($object) && method_exists($mapper, $method)) {
-                        if($mapper->$method($object)) {
-                            Rest::sendResponse(201);   
-                        }             
-                    } else {
-                        throw new InvalidArgumentException('Need arguments to POST data !');
-                    }
+                if(!emptyObject($object) && method_exists($mapper, $method)) {
+                    if($mapper->$method($object)) {
+                        Rest::sendResponse(201);   
+                    }             
+                } else {
+                    Rest::sendResponse(400, 'Need arguments to POST data !');
+                }
+                
+            break;
             default :
                 Rest::sendResponse(501);
-                    break;
+            break;
     }
-} catch (Exception $e) {
-    print $e->getMessage(); exit;
-} catch(InvalidArgumentException $e) {
-    print $e->getMessage(); exit;
-}  

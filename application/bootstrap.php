@@ -19,6 +19,6 @@ include_once APPLICATION_PATH.'/includes/autoloader.php';
 
 if(UNITARY_TEST === false) {
     include_once APPLICATION_PATH.'/library/symphony/functions.php';
-    include_once APPLICATION_PATH.'/includes/dispatcher_mvc.php';
+    include_once APPLICATION_PATH.'/includes/dispatcher.php';
 }
 

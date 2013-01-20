@@ -1,39 +1,44 @@
 <?php 
 try 
 {
-    $http = Rest::initProcess();
-    $mapper = getMapper($model);
-    $class = getNameByMapper($mapper);
-
-    if(!existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
     switch($http->getMethod())
     {
         case 'get':
             $mapper = new $mapper();
+            $query  = new Query();
+            $data   = new Data();
             $method = 'getFollowers';
-            $conditions = ' WHERE id IN (SELECT id_user_follower '.
-                                'FROM TO_FOLLOW WHERE id_user_followed = '.$urlObject->getIdFirstPart().')';
-            returnXML($urlObject, $mapper, $class, $method, $array, $http, $conditions);
+            $options = array (  
+                'indent'         => '     ',  
+                'addDecl'        => false,  
+                "defaultTagName" => strtolower($class),
+                 XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+            );
             
+            $items = $mapper->$method();
+            $data->setData($items);
+            $data->setFormat($http->getHttpAccept());
+            $data->setOptions($options);
+            $data->sendData();      
+        break;
         case 'post':
-            try 
-            {
-                $stdClass = new stdClass();
-                $data = $http->getRequestVars();
-                $objectFollow = initObject($data, $stdClass, true);
 
-                if(!emptyObject($objectFollow)) {
-                    $mapperInstancied = new $mapper();
-                    if($mapperInstancied->goFollow($objectFollow)) {
-                        Rest::sendResponse(200);   
-                    }       
-                } else {
-                    throw new InvalidArgumentException('Need arguments to POST data !');
-                }
-            } catch(InvalidArgumentException $e) {
-                print $e->getMessage(); exit;
+            $mapper = new $mapper();
+            $query  = new Query();
+            $classInstancied = new $class();
+            $method = 'goFollow';
+            $args = $http->getRequestVars();
+            $object = initObject($args, new stdClass(), true);
+
+            if(!emptyObject($object) && method_exists($mapper, $method)) {
+                if($mapper->$method($object)) {
+                    Rest::sendResponse(201);   
+                }             
+            } else {
+                Rest::sendResponse(400, 'Need arguments to POST data !');
             }
-         break;
+
+        break;
         default :
             Rest::sendResponse(501);
             break;

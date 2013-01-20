@@ -1,25 +1,37 @@
 <?php 
-try 
-{
-    $http = Rest::initProcess();
-    $mapper = getMapper($model);
-    $class = getNameByMapper($mapper);
-    
-    if(!existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
+
     switch($http->getMethod())
     {
         case 'get':
-            $mapper = new $mapper();
-            $method = 'getMessages';
             
-            returnXML($urlObject, $mapper, $class, $method, $array, $http);
-            break;
+            $mapper = new $mapper();
+            $query  = new Query();
+            $data   = new Data();
+            $options = array (  
+                'indent'         => '     ',  
+                'addDecl'        => false,  
+                "defaultTagName" => strtolower($class),
+                 XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+            );
+            
+            $pager->setTotalItems(count($query->getAllItems($mapper->getTable())));
+            $limit =  $pager->getLimit();
+            $nbPages = (isset($limit) && $limit > 0) ? ceil($pager->getTotalItems() / $pager->getLimit()) : 1;
+            $pager->setNbPages($nbPages);
+
+            $args = $url->getUrlArguments();
+            $args[] = 'id_receiver='.$mapper->getId();
+            $url->setUrlArguments($args);
+            $conditions =  $query->initCondition($url, $pager, $mapper, true);
+
+            $items = $mapper->select($mapper->getTable(), true, $conditions);
+            $data->setData($items);
+            $data->setFormat($http->getHttpAccept());
+            $data->setOptions($options);
+            $data->sendData(); 
+            
+        break;
         default :
             Rest::sendResponse(501);
-            break;
+        break;
     }
-} catch (Exception $e) {
-    print $e->getMessage(); exit;
-} catch(InvalidArgumentException $e) {
-    print $e->getMessage(); exit;
-} 

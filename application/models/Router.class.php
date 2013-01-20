@@ -16,6 +16,7 @@ class Router {
              case 'Messages' :
              case 'Pictures' :
              case 'Comments' :
+             case 'Incomings' :
                     return 'plurally';
                  break;
              case 'User' :
@@ -24,6 +25,7 @@ class Router {
              case 'Message'  :
              case 'Picture'  :
              case 'Comment'  :
+             case 'Incoming' :
                     return 'singular';
                  break;
              default:
@@ -43,37 +45,42 @@ class Router {
             if(is_null($modelName)) throw new Exception('Model name doesn\'t be null !');
 
             switch ($modelName) {
-             case 'Users':
-             case 'User' :
-             case 'User_Messages' :  
-             case 'User_Followers' :
-             case 'User_Comments' :
-                    return 'UserMapper';
+                case 'Users':
+                case 'User' :
+                case 'User_Followers' :
+                case 'User_Follower' :
+                       return 'UserMapper';
+                    break;
+                case 'Announcements' :
+                case 'Announcement'  : 
+                case 'Announcement_Tags' :
+                case 'Announcement_Apply' :
+                       return 'AnnouncementMapper';
+                    break;
+                case 'Tags' :
+                case 'Tag'  :
+                       return 'TagMapper';
+                    break;
+                case 'Messages' :
+                case 'Message'  :
+                case 'User_Messages' :  
+                       return 'MessageMapper';  
                  break;
-             case 'Announcements' :
-             case 'Announcement'  : 
-             case 'Announcement_Tags' :
-             case 'Announcement_Apply' :
-                    return 'AnnouncementMapper';
-                 break;
-             case 'Tags' :
-             case 'Tag'  :
-                    return 'TagMapper';
-                 break;
-             case 'Messages' :
-             case 'Message'  :
-                    return 'MessageMapper';  
-                 break;
-             case 'Pictures' :
-             case 'Picture'  :
-                    return 'PictureMapper';
-                 break;
-             case 'Comments' :
-             case 'Comment'  :
-                    return 'CommentMapper';
-                 break;       
-             default:
-                 break;
+                case 'Pictures' :
+                case 'Picture'  :
+                       return 'PictureMapper';
+                    break;
+                case 'Comments' :
+                case 'Comment'  :
+                case 'User_Comments' :
+                       return 'CommentMapper';
+                    break;       
+                case 'Incomings' :
+                case 'Incoming'  :
+                       return 'IncomingMapper';
+                    break;    
+                default:
+                    break;
             }
         } catch (Exception $e) {
             print $e->getMessage(); exit;

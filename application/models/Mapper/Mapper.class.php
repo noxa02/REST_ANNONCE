@@ -11,11 +11,21 @@ class Mapper
     
     function __construct() 
     {
-        global $urlObject;
-        $this->id = $urlObject->getIdFirstPart();
-        $this->firstId = $urlObject->getIdFirstPart();
-        $this->secondId = $urlObject->getIdSecondPart();
-        $this->statement = PDO_Mysql::getInstance();
+        try
+        {
+            if(isset($this->table) && is_null($this->getTable())) {
+                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
+            }      
+        } catch(InvalidArgumentException $e) {
+            print $e->getMessage(); exit;
+        }
+
+        global $url;
+        $this->setId($url->getIdFirstPart());
+        $this->firstId = $url->getIdFirstPart();
+        $this->secondId = $url->getIdSecondPart();
+        $this->statement =PDO_Mysql::getInstance();
+        
         global $http;
         $this->files = $http->getFiles();
         if(func_num_args() == 1 && is_object(func_get_arg(0))) {
@@ -96,14 +106,14 @@ class Mapper
     
     /**
      * 
-     * @param string $table_
-     * @param stdClass $object_
+     * @param string $table
+     * @param stdClass $object
      * @param array $arrayFilter
      * @param boolean $return
      * @return boolean
      */
     public
-    function insert($table, $object, array $arrayFilter = array(), $return = false) 
+    function insert($table, $object, array $arrayFilter = array()) 
     {
         try 
         {
@@ -147,34 +157,26 @@ class Mapper
      * @throws InvalidArgumentException
      */
     public 
-    function update($table_, $object_, $where_ = null) 
+    function update($table, $object, $conditions = null) 
     {
-        try {
-            
-            $set = array();
-            $data = extractData($object_);
+        $set = array();
+        $data = extractData($object);
 
-            if(isset($data) && empty($data) || is_null($data)) {
-                throw new InvalidArgumentException('Must 1 or more arguments to execute an update query !');
-            }
-            
-            foreach ($data as $column => $value) {
-                unset($data[$column]);
-                $data[":" . $column] = $value;
-                $set[] = $column . " = :" . $column;
-            }
-          
-            $query = 'UPDATE '.$table_.' SET '. implode(', ', $set).' '.
-                   (($where_) ? ' WHERE '.$where_ : ' ');
-
-            return $this->statement->prepare($query)
-                                   ->execute($data); 
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        } catch(PDOException $e) {
-            print $e->getMessage(); exit;
+        if(isset($data) && empty($data) || is_null($data)) {
+            Rest::sendResponse(400, 'Must 1 or more arguments to execute an update query !');
         }
+
+        foreach ($data as $column => $value) {
+            unset($data[$column]);
+            $data[":" . $column] = $value;
+            $set[] = $column . " = :" . $column;
+        }
+
+        $query = 'UPDATE '.$table.' SET '. implode(', ', $set).' '.
+               (($conditions) ? ' WHERE '.$conditions : '');
+        
+        return $this->statement->prepare($query)
+                               ->execute($data); 
     }
     
     /**
@@ -193,7 +195,7 @@ class Mapper
             $conditions = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT', true) : $conditions;
             $query = 'SELECT * FROM '.$table.
                       (($conditions) ? ' '. $conditions  : '') . ((!is_null($limit)) ? $limit : '');
-            
+
             $q = $this->statement->prepare($query);
             $q->execute();
             
@@ -433,10 +435,10 @@ class Mapper
     function exist($table, $object, $mapper, $condition = null, $multiple = false) {
         try 
         {
-            $mapper = new $mapper();
             $object = new $object();
 
-            $object = $this->select($table, $condition, $object, $multiple);
+            $array = $this->select($table, $multiple, $condition);
+            $object = initObject($array, new $object(), true);
             $array = extractData($object);
             
             if(!empty($array)) {

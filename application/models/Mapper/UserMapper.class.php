@@ -9,270 +9,192 @@ class UserMapper extends Mapper {
     }
     
     /**
-     * Allow to create a user.
-     * @param User $user_
-     * @throws InvalidArgumentException
+     * Allow to create an user.
+     * @param User $user
      */
     public 
     function insertUser(User $user) 
     {
-        try 
-        {
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            $conditions = ' WHERE login = "'.$user->getLogin().'"';
-            if(!parent::exist('USER', 'User', 'userMapper', $conditions)) {
-                return parent::insert($this->getTable(), $user);
-            } else {
-                throw new Exception('User already exist with login : '.$user->getLogin());
-            }
-              
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        }
-    } 
-    
-    /**
-     * Allow to modify a user.
-     * @param User $user_
-     * @param string $where_ Query condition.
-     * @throws InvalidArgumentException
-     */
-    public 
-    function updateUser(User $user_, $conditions = null) 
-    {
-        try {
-            $where = null;
-            if(function_exists($this->getTable()) && is_null($this->getTable())) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(function_exists($this->getId()) && !is_null($this->getId()) 
-                    && isset($conditions) && is_null($conditions)) {
-                $where = ' WHERE id = '.$this->getFirstId();
-            } elseif(isset($conditions) && !is_null($conditions)) {
-                $where = $conditions;
-            }
-            
-            if(!is_null($where) && parent::exist('USER', 'User', 'userMapper', $where)) {
-                parent::update($this->getTable(), $user, $where);
-            } else {
-                Rest::sendResponse(204, 'User does not exist !');
-            }          
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
+        $conditions = ' WHERE login = "'.$user->getLogin().'"';
+        if(!parent::exist('USER', 'User', 'userMapper', $conditions)) {
+            return parent::insert($this->getTable(), $user);
+        } else {
+            Rest::sendResponse(409, 'User already exist with login : '.$user->getLogin());
         }
     } 
     
     /**
      * 
-     * @return boolean
-     * @throws InvalidArgumentException
+     * @param User $user
+     * @param string $conditions
+     * @return bool
      */
     public 
-    function deleteUser($conditions = null) {
-        try {
-            $where = null;
-            if(function_exists($this->getTable()) && is_null($this->getTable())) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(function_exists($this->getId()) && !is_null($this->getId()) 
-                    && isset($conditions) && is_null($conditions)) {
-                $where = ' WHERE id = '.$this->getFirstId();
-            } elseif(isset($conditions) && !is_null($conditions)) {
-                $where = $conditions;
-            }
+    function updateUser(User $user, $conditions = null) 
+    {
+        if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+            $conditions = ' WHERE id = '.$this->getId();
+        }
 
-            return parent::delete($this->table, $where);     
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
+        if(!is_null($conditions) && parent::exist('USER', 'User', 'userMapper', $conditions)) {
+            return parent::update($this->getTable(), $user, $conditions);
+        } else {
+            Rest::sendResponse(204, 'User does not exist !');
+        }          
+    } 
+    
+    /**
+     * 
+     * @param string $conditions
+     * @return bool
+     */
+    public 
+    function deleteUser($conditions = null) 
+    {
+        if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+            $conditions = ' WHERE id = '.$this->getId();
+        }
+
+        $user = ($user = $this->select($this->getTable(), false, $conditions)) 
+                ? initObject($user, new User(), true, false) : null;   
+
+        if(!is_null($user) && !emptyObjectMethod($user)) {
+            return parent::delete($this->getTable(), $conditions);  
+        } else {
+            Rest::sendResponse(204, 'User doesn\'t exist !');
+        }
+    }
+    
+    /**
+     * 
+     * @param stdClass $objectToFollow
+     * @return bool
+     */
+    public
+    function getFollower(stdClass $objectToFollow) 
+    {
+        if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectToFollow->id_user_follower)) {
+            Rest::sendResponse(204, 'User follower doesn\'t exist !');
+        }
+
+        $id_user_followed = (isset($objectToFollow->id_user_followed) 
+                                && !empty($objectToFollow->id_user_followed)) 
+                            ? $objectToFollow->id_user_followed :  $this->getFirstId();
+
+        if(isset($id_user_followed) && !empty($id_user_followed) 
+                && isset($objectToFollow->id_user_follower) && !empty($objectToFollow->id_user_follower)) {
+
+            $conditions = ' WHERE id = (SELECT id_user_follower '.
+                            'FROM TO_FOLLOW WHERE id_user_followed = '.$id_user_followed.' '.
+                                                 'AND id_user_follower = '.$objectToFollow->id_user_follower.')';
+
+            return $this->select($this->getTable(), false, $conditions); 
         }
     }
     
     public
-    function getFollower(stdClass $objectToFollow) {
-        try 
-        {
-            if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectToFollow->id_user_follower)) {
-                throw new Exception('User follower doesn\'t exist !');
-            }
-            $id_user_followed = (isset($objectToFollow->id_user_followed) 
-                                    && !empty($objectToFollow->id_user_followed)) 
-            ? $objectToFollow->id_user_followed :  $this->getFirstId();
-            
-            if(isset($id_user_followed) && !empty($id_user_followed) 
-                    && isset($objectToFollow->id_user_follower) && !empty($objectToFollow->id_user_follower)) {
-                $where = ' WHERE id = (SELECT id_user_follower '.
-                             'FROM TO_FOLLOW WHERE id_user_followed = '.$id_user_followed.' '.
-                             'AND id_user_follower = '.$objectToFollow->id_user_follower.')';
-
-                return $this->selectUser(false, $where); 
-            }
-        
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        }
-    }
-    
-    public
-    function getFollowers($conditions = null) {
+    function getFollowers($conditions = null) 
+    {
         $conditions = (isset($conditions) && !is_null($conditions)) ? $conditions : 
                         ' WHERE id IN (SELECT id_user_follower '.
                                       'FROM TO_FOLLOW WHERE id_user_followed = '.$this->getFirstId().')';
                                       
-        return parent::select('USER', $conditions, new User(), true);
+        return parent::select($this->getTable(), true, $conditions);
     }
    
     /**
-     * Allow a user to follow a other user.
-     * @param string $id_followed_ User followed
-     * @param string $id_follower_ User follower
-     * @return boolean True the query is executed | False
-     * @throws Exception
+     * 
+     * @param stdClass $objectFollow
+     * @return bool
      */
     public 
-    function goFollow(stdClass $objectFollow) {
-        try 
-        {
-            $requiered = array('id_user_follower');
-            if(isRequired($requiered, $objectFollow)) {
-                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectFollow->id_user_follower)) {
-                    throw new Exception('User follower doesn\'t exist !');
-                }
-                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$this->getFirstId())) {
-                    throw new Exception('User follewed doesn\'t exist !');
-                }        
-
-                $objectFollow->id_user_followed = $this->getFirstId();
-                $user = $this->getFollower($objectFollow);
-
-                if(is_null($user->getId())) {
-                     return parent::insert('TO_FOLLOW', $objectFollow);
-                } else {
-                    throw new Exception('User is already followed by this user !');
-                }   
+    function goFollow(stdClass $objectFollow) 
+    {
+        $requiered = array('id_user_follower');
+        if(isRequired($requiered, $objectFollow)) {
+            if(!parent::exist('USER', 'User', 'userMapper', 
+                    ' WHERE id = '.$objectFollow->id_user_follower)) {
+                Rest::sendResponse(204, 'User follower doesn\'t exist !');
             }
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        }
-    }
-    
-    /**
-     * Allow a user to stop follower another user.
-     * @param string $id_followed_ User followed
-     * @param string $id_follower_ User follower
-     * @return boolean True the query is executed | False
-     */
-    public
-    function stopFollow($id_followed, $id_follower) {
-        try 
-        {
-                if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_follower)) {
-                    throw new Exception('User follower doesn\'t exist !');
-                }
-                if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_followed)) {
-                    throw new Exception('User follewed doesn\'t exist !');
-                }        
-                $objectFollow = new stdClass();
-                $objectFollow->id_user_followed = $id_followed;
-                $objectFollow->id_user_follower = $id_follower;
-                $user = $this->getFollower($objectFollow);
-
-                if(isset($user) && is_null($user->getId())) {
-                    $conditions = 'id_user_followed = '.$id_followed_.' AND '.
-                                  'id_user_follower = '.$id_follower_;
-                    return parent::delete('TO_FOLLOW', $conditions);
-                } else {
-                    Rest::sendResponse(404, 'Ressource does not exist !');
-                }   
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        }
-
-        
-        return parent::delete('TO_FOLLOW', $where);
-    }
-    
-    /**
-     * POST a User Message
-     * @param Message $messageObject_
-     * @return boolean
-     */
-    public
-    function sendMessage(Message $messageObject_) {
-        try 
-        {
-            if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$messageObject->getIdReceiver())) {
-                throw new Exception('User receiver doesn\'t exist !');
-            }
-            if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$this->getFirstId())) {
-                throw new Exception('User sender doesn\'t exist !');
+            if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$this->getFirstId())) {
+                Rest::sendResponse(204, 'User follewed doesn\'t exist !');
             }        
 
-            $messageObject->setIdSender($this->getFirstId())   ;
-            $currentDate = date("Y-m-d H:i:s"); 
-            $condition = ' WHERE id_sender = '.$messageObject->getIdSender().
-                            ' AND id_receiver = '.$messageObject->getIdReceiver().
-                            ' AND date_post = "'.$currentDate.'"';
-            $message = $this->getMessage($condition);
+            $objectFollow->id_user_followed = $this->getFirstId();
+            $user = $this->getFollower($objectFollow);
 
-            if(!emptyObjectMethod($messageObject) && emptyObjectMethod($message)) {
-                $messageMapper = new MessageMapper();
-
-                return $messageMapper->insertMessage($messageObject);
+            if(!$user) {
+                 return parent::insert('TO_FOLLOW', $objectFollow);
             } else {
-                throw new Exception('Message is already existant for this user !');
+                Rest::sendResponse(409 ,'User is already followed by this user !');
             }   
-            
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        } 
-    }
-    
-    public 
-    function getMessages($conditions = null) {
-        $messageMapper = new MessageMapper();
-        $messagesObjects = $messageMapper->selectMessage(true, $conditions);
-        
-        return $messagesObjects;
+        }
     }
     
     /**
      * 
-     * @return array 
+     * @param string $id_followed
+     * @param string $id_follower
+     * @return bool
      */
-    public 
-    function getMessage() {
-        $messageMapper = new MessageMapper();
-        $where = 'id_sender = '.$this->getFirstId(). ' AND id_receiver = '.$this->getSecondId();
-        $messagesObjects = $messageMapper->selectMessage(true, $where);
-
-        return $messagesObjects;
-    }  
-    
     public
-    function getComments($conditions = null) {
-        $commentMapper = new CommentMapper();
-        $commentsObjects = $commentMapper->selectComment(true, $conditions);
+    function stopFollow($id_followed, $id_follower) 
+    {
+        if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_follower)) {
+            Rest::sendResponse(204, 'User follower doesn\'t exist !');
+        }
+        if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_followed)) {
+            Rest::sendResponse(204, 'User follewed doesn\'t exist !');
+        }        
+
+        $objectFollow = new stdClass();
+        $objectFollow->id_user_followed = $id_followed;
+        $objectFollow->id_user_follower = $id_follower;
+        $user = $this->getFollower($objectFollow);
+
+        if(isset($user) && !empty($user)) {
+
+            $conditions = ' WHERE id_user_followed = '.$id_followed.' AND '.
+                                 'id_user_follower = '.$id_follower;
+            
+            if(!parent::delete('TO_FOLLOW', $conditions)) {
+                return false;
+            }
+            
+        } else {
+            Rest::sendResponse(204, 'Ressource does not exist !');
+        }   
         
-        return $commentsObjects;
+        return true;
     }
     
+    /**
+     * 
+     * @param Message $messageObject
+     * @return bool
+     */
     public
-    function getComment($conditions = null) {
-        $commentMapper = new CommentMapper(); 
-        if(isset($conditions) && !is_null($conditions)) {
-            $where = $conditions;
-        } else {
-            $where = ' WHERE id_user = '.$this->getFirstId().' AND id = '.$this->getSecondId();
+    function sendMessage(Message $message) 
+    {
+        if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$message->getIdReceiver())) {
+            Rest::sendResponse(204, 'User receiver doesn\'t exist !');
         }
-        
-        $commentsObjects = $commentMapper->selectComment(false, $where);
-        return $commentsObjects;
+        if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$this->getFirstId())) {
+            Rest::sendResponse(204, 'User sender doesn\'t exist !');
+        }        
+
+        $message->setIdSender($this->getFirstId());
+        $currentDate = date("Y-m-d H:i:s"); 
+        $conditions = ' WHERE id_sender = '.$message->getIdSender().
+                        ' AND id_receiver = '.$message->getIdReceiver().
+                        ' AND date_post = "'.$currentDate.'"';
+        $messageArray = $this->getMessage($conditions);
+
+        if(!emptyObjectMethod($message) && empty($messageArray)) {
+            $messageMapper = new MessageMapper();
+            return $messageMapper->insertMessage($message);
+        } else {
+            Rest::sendResponse(409, 'Message is already existant for this user !');
+        }   
     }
 }

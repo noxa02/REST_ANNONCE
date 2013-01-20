@@ -10,110 +10,64 @@ class AnnouncementMapper extends Mapper {
     /**
      * Allow to create an announcement / if sereval pictures are upload, they're moved on 
      * the Upload/announcement/original/ folder.
-     * @param Announcement $announcement_
-     * @throws InvalidArgumentException
+     * @param Announcement $announcement
+     * @return boolean
      */
     public 
     function insertAnnouncement(Announcement $announcement) 
     {
-        try 
-        {
-            $pictures = array();
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
+        $pictures = array();
+        if(parent::insert($this->getTable(), $announcement, array(), true)) {
 
-            if(parent::insert($this->getTable(), $announcement, array(), true)) {
-                
-                $idAnnouncement = parent::getlastInsertId(); 
-                $announcement->setId($idAnnouncement);
-                $files = $this->getFiles();
-                
-                if(isset($files) && is_array($files) && !empty($files)) {
-                    foreach($files as $file) {
-                        $picture = new Picture();
-                        $picture = initObject($file, $picture, true);
-                        $pictures[] = $picture;
-                    }
+            $idAnnouncement = parent::getlastInsertId(); 
+            $announcement->setId($idAnnouncement);
+            $files = $this->getFiles();
+
+            if(isset($files) && is_array($files) && !empty($files)) {
+                foreach($files as $file) {
+                    $picture = new Picture();
+                    $picture = initObject($file, $picture, true);
+                    $pictures[] = $picture;
                 }
-
-                $announcement->setPictures($pictures);
-                if(isset($pictures) && !empty($pictures)) {
-                    
-                    foreach ($pictures as $key => $value) {
-                        
-                        $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
-                        $value->setFileTitle($key);
-                        $value->setIdAnnouncement($idAnnouncement);
-                        $value->setPath('/announcement/original/');
-                        $value->setTitle(uniqid());
-                        $value->setExtension($pictureExt);
-                            
-                        $pictureMapper = new PictureMapper();
-                        $pictureMapper->insertPicture($value, array(), true);          
-                            
-                    }
-                }   
-                
-                return true;
             }
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
+
+            $announcement->setPictures($pictures);
+            if(isset($pictures) && !empty($pictures)) {
+
+                foreach ($pictures as $key => $value) {
+
+                    $pictureExt = substr(strrchr($value->getType(), "/"), 1); 
+                    $value->setFileTitle($key);
+                    $value->setIdAnnouncement($idAnnouncement);
+                    $value->setPath('/announcement/original/');
+                    $value->setTitle(uniqid());
+                    $value->setExtension($pictureExt);
+
+                    $pictureMapper = new PictureMapper();
+                    $pictureMapper->insertPicture($value, array(), true);          
+
+                }
+            }   
+            
+            return true;
         }
     } 
     
     /**
-     * Allow to modify an announcement
-     * @param Announcement $announcement_
-     * @param string $where Query condition 
-     * @throws InvalidArgumentException
+     * 
+     * @param Announcement $announcement
+     * @param string $conditions
+     * @return bool
      */
     public 
-    function updateAnnouncement(Announcement $announcement_) 
+    function updateAnnouncement(Announcement $announcement, $conditions = null) 
     {
-        try {
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where_ = 'id = '.$this->id;
-            }
-
-            return parent::update($this->table, $announcement_, $where_);            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
+        if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+            $conditions = ' WHERE id = '.$this->getId();
         }
+
+        return parent::update($this->getTable(), $announcement, $conditions);  
     } 
-    
-    /**
-     * Allow to get an announcement or several announcements if defined true
-     * @param boolean $all Set TRUE to return all table values
-     * @return boolean True the query is executed | False
-     * @throws InvalidArgumentException
-     */
-    public
-    function selectAnnouncement($all_ = false, $condition = null) 
-    {
-        try 
-        {
-            $where = null;
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id) && is_null($condition)) {
-                $where = 'id = '.$this->getId();
-            } elseif(isset($condition) && !is_null($condition)) {
-                $where = $condition;
-            }
-
-            return parent::select($this->table, $where, $object = new Announcement(), $all_);
-            
-        } catch(InvalidArgumentException $e) {
-            $e->getMessage(); exit;
-        }
-    }
     
     /**
      * Allows to delete an announcement and images 
@@ -122,49 +76,41 @@ class AnnouncementMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function deleteAnnouncement() 
+    function deleteAnnouncement($conditions = null) 
     {
-        try {
-            
-            if(is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->getId();
-            }
-            
-            $pictureMapper = new PictureMapper($this);
-            $pictures = $pictureMapper->selectPicture(true, 'id_announcement = '.$this->getId());
-            
-            if(isset($pictures) && !empty($pictures)) {
-                foreach ($pictures as $key => $value) {
-                    $idPicture = $value->getId();
-                    $path = $value->getPath(); 
-                    $title = $value->getTitle();
-                    $ext = $value->getExtension();
-                    
-                    //Remove to the pictures folders
-                    if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-                        unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
-                    }
-                    //Remove to database
-                    $pictureMapper = new PictureMapper();
-                    $pictureMapper->setId($idPicture);
-                    if($pictureMapper->deletePicture()) {
-                        continue;
-                    } else {
-                        throw new Exception('Problem on the delete picture query !');
-                    }
+        if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+            $conditions = ' WHERE id = '.$this->getId();
+        }
+
+        $pictureMapper = new PictureMapper($this);
+        $pictures = $this->select('PICTURE', true, ' WHERE id_announcement = '.$this->getId());
+
+        if(isset($pictures) && !empty($pictures)) {
+
+            foreach ($pictures as $key => $value) {
+                $idPicture = $value->getId();
+                $path = $value->getPath(); 
+                $title = $value->getTitle();
+                $ext = $value->getExtension();
+
+                //Remove to the pictures folders
+                if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
+                    unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+                }
+                //Remove to database
+                $pictureMapper = new PictureMapper();
+                $pictureMapper->setId($idPicture);
+                if($pictureMapper->deletePicture()) {
+                    continue;
+                } else {
+                    Rest::sendResponse(409, 'Problem on the delete picture query !');
                 }
             }
-            
-            return parent::delete($this->table, $where);   
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
+        } else {
+            Rest::sendResponse(204, 'Announcement doesn\'t exist !');
         }
+        
+        return parent::delete($this->getTable(), $conditions);   
     } 
     
     /**
@@ -173,9 +119,9 @@ class AnnouncementMapper extends Mapper {
      * @return array Returns an array of objects
      */
     public
-    function getPictures(PictureMapper $pictureMapper_) {
+    function getPictures(PictureMapper $pictureMapper) {
         
-        $picturesObjects = $pictureMapper_->selectPicture(true);
+        $picturesObjects = $pictureMapper->selectPicture(true);
         
         return $picturesObjects;
     }
@@ -183,69 +129,69 @@ class AnnouncementMapper extends Mapper {
     /**
      * Allows to get all Tag
      * @return boolean True the query is executed | False
-     * @throws Exception
      */
     public 
-    function getTags() {
-        try {
-            
-            if(is_null($this->getFirstId())) {
-                throw new Exception('ID Announcement musn\'t be null !');
-            }
-            
-            $tag = new Tag();
-            $where = 'id_announcement = '.$this->getFirstId();
-            
-            return parent::select('TO_ASSOCIATE', $where, $tag);
-            
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
-        }
-    }
-    
-    public
-    function getApply($object) {
-        $condition = 'WHERE id IN (SELECT id_announcement '.
-                        'FROM TO_APPLY WHERE id_announcement = '.$this->getFirstId().'
-                            AND id_user = '.$object->id_user.')';
-        
-        return $this->selectAnnouncement(false, $condition);
+    function getAnnouncementTags($idAnnouncement) 
+    {
+        $conditions = ' WHERE id_announcement = '.$this->getFirstId();
+
+        return parent::select('TO_ASSOCIATE', true, $conditions);
     }
     
     /**
-     * Allows to apply an ad
-     * @param stdClass $object_
-     * @throws Exception
+     * 
+     * @param type $user
+     * @param type $announcement
+     * @return boolean
      */
     public
-    function goApply(stdClass $objectApply) {
-        try {
-            $requiered = array('id_user');
-            if(isRequired($requiered, $objectApply)) {
-                if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectApply->id_user)) {
-                    throw new Exception('User doesn\'t exist !');
-                }
-                if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 'WHERE id = '.$this->getFirstId())) {
-                    throw new Exception('Announcement doesn\'t exist !');
-                }
-                if(!parent::exist('TO_APPLY', 'stdClass', 'announcementMapper', 
-                        'WHERE id_user = '.$objectApply->id_user.' AND id_announcement = '.$this->getFirstId())) {
-                    throw new Exception('A apply is already existing !');
-                }         
-                $objectApply->id_announcement = $this->getFirstId();
-                $user = $this->getApply($objectApply);
-               
-                if(is_null($user->getId())) {
-                     return parent::insert('TO_APPLY', $objectApply);
-                } else {
-                    throw new Exception('User have already apply for this announcement !');
-                }  
+    function getApply($user, $announcement) 
+    {
+        $conditions = ' WHERE id IN (SELECT id_announcement '.
+                        'FROM TO_APPLY WHERE id_announcement = '.$announcement->getId().'
+                                             AND id_user = '.$user->getId().')';
+        
+        return $this->select($this->getTable(), false, $conditions);
+    }
+    
+    /**
+     * 
+     * @param stdClass $objectApply
+     * @return boolean
+     */
+    public
+    function goApply(stdClass $objectApply) 
+    {
+        $requiered = array('id_user');
+        if(isRequired($requiered, $objectApply)) {
+
+            if(!parent::exist('USER', 'User', 'userMapper', 
+                    ' WHERE id = '.$objectApply->id_user)) {
+                Rest::sendResponse(204, 'User doesn\'t exist !');
             }
-            
-        } catch(Exception $e) {
-            print $e->getMessage(); exit;
+            if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
+                    ' WHERE id = '.$this->getFirstId())) {
+                Rest::sendResponse(204, 'Announcement doesn\'t exist !');
+            }
+
+            $objectApply->id_announcement = $this->getFirstId();
+
+            if(!parent::exist('TO_APPLY', 'stdClass', 'announcementMapper', 
+                    ' WHERE id_user = '.$objectApply->id_user.
+                    ' AND id_announcement = '.$objectApply->id_announcement)) {
+                Rest::sendResponse(409, 'Apply is already existing !');
+            }         
+
+            $user = $this->getApply($objectApply);
+
+            if(isset($user) && is_null($user->getId())) {
+                 return parent::insert('TO_APPLY', $objectApply);
+            } else {
+                Rest::sendResponse(409, 'User have already apply for this announcement !');
+            }  
         }
     }
+    
 //    public
 //    function goAssociate(stdClass $object_) {
 //        try {

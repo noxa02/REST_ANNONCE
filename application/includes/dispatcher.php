@@ -5,20 +5,27 @@
      */
      $url = new Url();
      $uriParts = $url->parserUrl(); 
-     $urlObject = (($uri = $url->getUri()) && !empty($uri))  
-        ? $url->initUrlClass($uri, $uriParts) : throwException('A problem has occured during the initizialition Url Class');
+     $url = (($uri = $url->getUri()) && !empty($uri))  
+            ? $url->initUrlClass($uri, $uriParts) : throwException('A problem has occured during the initizialition Url Class');
      
     /**
      * Initializer object URL to get argument of the URL 
      * if their here.
      */
     $http = Rest::initProcess();
-    $model = $router->constructRoute($urlObject);
+    $model = $router->constructRoute($url);
     $controller = $router->getControllerByModel($model);
     $mapper = $router->getMapper($model);
     $class = $router->getNameByMapper($mapper);
     $pager = new Pager();
-
+    
+    try 
+    {
+        if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');
+        
+    } catch(Exception $e) {
+        print $e->getMessage(); exit;
+    }
     if($router->existController($controller)) {
         include_once APPLICATION_PATH . '/controllers/' . $controller.'.controller.php';
     } elseif($controller === '') {

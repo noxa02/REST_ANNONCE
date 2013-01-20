@@ -18,10 +18,6 @@ class PictureMapper extends Mapper {
     {
         try 
         {   
-            if(is_null($this->getTable())) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            
             $file = (method_exists('Mapper','getFiles')) ? $this->getFiles() : array();
 
             if(!$skipInit) {
@@ -51,7 +47,7 @@ class PictureMapper extends Mapper {
                 throw new Exception('A problem occurred during the picture upload');
             }     
             
-        } catch(InvalidArgumentException $e) {
+        } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
     } 
@@ -62,18 +58,14 @@ class PictureMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public 
-    function updatePicture(Picture $picture_) 
+    function updatePicture(Picture $picture, $conditions = null) 
     {
-        try {
-            
-            if(isset($this->table) && is_null($this->table)) {
-                throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
-            }
-            if(isset($this->id) && !is_null($this->id)) {
-                $where = 'id = '.$this->id;
+        try 
+        {
+            if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+                $conditions = ' WHERE id = '.$this->getId();
             }
             
-            //Existance test
             $picture = $this->selectPicture();
             if(!emptyObjectMethod($picture)) { 
                 $picture = $this->selectPicture();
@@ -88,14 +80,13 @@ class PictureMapper extends Mapper {
                         }
                     }
                 } 
+                
             } else {
                 throw new Exception('Picture doesn\'t exist !');
             }
             
-            return parent::update($this->table, $picture_, $where); 
+            return parent::update($this->getTable(), $picture, $conditions); 
             
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
         } catch(Exception $e) {
             print $e->getMessage(); exit;
         }
@@ -107,39 +98,32 @@ class PictureMapper extends Mapper {
      * @throws InvalidArgumentException
      */
     public
-    function deletePicture() 
+    function deletePicture($conditions = null) 
     {
-        try 
-        {
-            if(method_exists($this, 'getId') && !is_null($this->getId())) {
-                $conditions = ' WHERE id = '.$this->getId();
-            }
-            
-            //Init a object of picture to delete the picture in the folder.
-            //Needed to reconsitued the path.
-            $picture = ($picture = $this->select($this->getTable(), false, $conditions)) 
-                    ? initObject($picture, new Picture(), true, false) : null;
-            
-            if(!is_null($picture) && !emptyObjectMethod($picture)) {
-                
-                $path = $picture->getPath(); 
-                $title = $picture->getTitle();
-                $ext = $picture->getExtension();
+        if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
+            $conditions = ' WHERE id = '.$this->getId();
+        }
 
-                //Remove to the pictures folders
-                if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-                    unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
-                }
+        //Init a object of picture to delete the picture in the folder.
+        //Needed to reconsitued the path.
+        $picture = ($picture = $this->select($this->getTable(), false, $conditions)) 
+                ? initObject($picture, new Picture(), true, false) : null;
 
-                return parent::delete($this->getTable(), $conditions);
-                
-            } else {
-                Rest::sendResponse(204, 'Picture doesn\'t exist !');
+        if(!is_null($picture) && !emptyObjectMethod($picture)) {
+
+            $path = $picture->getPath(); 
+            $title = $picture->getTitle();
+            $ext = $picture->getExtension();
+
+            //Remove to the pictures folders
+            if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
+                unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
             }
-     
-            
-        } catch(InvalidArgumentException $e) {
-            print $e->getMessage(); exit;
+
+            return parent::delete($this->getTable(), $conditions);
+
+        } else {
+            Rest::sendResponse(204, 'Picture doesn\'t exist !');
         }
     }    
 }

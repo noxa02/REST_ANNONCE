@@ -103,7 +103,7 @@ class Rest {
         header($status_header);
         header('Content-type: ' . $content_type.'; charset="'.$charset.'";');
 
-        if($body != '' && $status == 200) {
+        if($body != '') {
             print $body;
             exit;
         } else {

@@ -17,8 +17,8 @@ class TagMapper extends Mapper {
     public 
     function insertTag(Tag $tag_, array $arrayFilter = array()) 
     {
-        try {
-            
+        try 
+        {
             if(is_null($this->table)) {
                 throw new InvalidArgumentException('Attribute "table" can\'t be NULL !');
             }

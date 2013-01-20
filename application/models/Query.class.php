@@ -1,19 +1,17 @@
 <?php
 
-class Query {
+class Query extends Mapper {
    
     public
     function getAllItems($table) {
-        $mapper = new Mapper();
-        $items = $mapper->select($table, true);
+        $items = $this->select($table, true);
         
         return $items;
     }
     
     public
     function getAllItemsWithConditions($table, $conditions) {
-        $mapper = new Mapper();
-        $items = $mapper->select($table, true, $conditions);
+        $items = $this->select($table, true, $conditions);
 
         return $items;  
     }
@@ -22,9 +20,12 @@ class Query {
     function initCondition(Url $url, Pager $pager = null, $mapper, $skipColumns = false) {
         try 
         {
-            $urlKeys = array_values($url->getUrlArguments()); 
-            $filters = array('current_page');
+            $where = null;
+            $args = $url->getUrlArguments();
+            $urlKeys = (isset($args) && !empty($args)) 
+                       ? array_values($args) : array(); 
             
+            $filters = array('current_page');
             if(!$skipColumns) {
                 $tableColumns = $mapper->getColumns();
                 $columns = array();
@@ -37,19 +38,18 @@ class Query {
                     }
                 }       
             }
-            
+
             if(isset($urlKeys) && is_array($urlKeys) && !empty($urlKeys)) {
                 foreach($urlKeys as $key => $value) {
                     $temp[] = explode('=', $value, 2);
                     $conditions[$temp[$key][0]] = $temp[$key][1];
                 }
             }
-            
+
             if(isset($conditions) && is_array($conditions) && !empty($conditions)) {
                 
                 $i = 0;
                 $filters = array('limit', 'current_page', 'order', 'operator', 'main_key');
-                $where = null;
                 $set = array();
                 foreach ($conditions as $condition => $value) {
                     if(!in_array($condition, $filters)) { 
@@ -67,9 +67,9 @@ class Query {
                             $i++; 
                     }
                 }
-                
+
                 if(isset($set) && is_array($set) && empty($set)) {
-                   $mapper->getPrimaryKey();
+                    $mapper->getPrimaryKey();
                 }
                 
                 $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
