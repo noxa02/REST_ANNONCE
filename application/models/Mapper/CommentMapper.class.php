@@ -18,11 +18,11 @@ class CommentMapper extends Mapper {
     {
         if(!parent::exist('USER', 'User', 'userMapper', 
                 ' WHERE id = '.$comment->getIdUser())) {
-            Rest::sendResponse(204, 'User doesn\'t exist !');
+            Rest::sendResponse(404, 'User doesn\'t exist !');
         }
         if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
                 ' WHERE id = '.$comment->getIdAnnouncement())) {
-            Rest::sendResponse(204, 'Announcement doesn\'t exist !');
+            Rest::sendResponse(404, 'Announcement doesn\'t exist !');
         }
         
         return parent::insert($this->getTable(), $comment, $arrayFilter);
@@ -44,7 +44,7 @@ class CommentMapper extends Mapper {
         if(!is_null($conditions) && parent::exist('COMMENT', 'Comment', 'commentMapper', $conditions)) {
             return parent::update($this->getTable(), $user, $conditions);
         } else {
-            Rest::sendResponse(204, 'Comment does not exist !');
+            Rest::sendResponse(404, 'Comment does not exist !');
         }
     } 
 
@@ -65,7 +65,7 @@ class CommentMapper extends Mapper {
         if(!is_null($comment) && !emptyObjectMethod($comment)) {
             return parent::delete($this->getTable(), $conditions);    
         } else {
-            Rest::sendResponse(204, 'Comment doesn\'t exist !');
+            Rest::sendResponse(404, 'Comment doesn\'t exist !');
         }
     }    
 }

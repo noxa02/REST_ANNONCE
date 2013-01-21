@@ -1,5 +1,5 @@
 <?php 
-    $mapper = new $mapper();
+
     switch($http->getMethod())
     {
             case 'get':

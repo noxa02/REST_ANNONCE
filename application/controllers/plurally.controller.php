@@ -3,8 +3,7 @@
     switch($http->getMethod())
     {
             case 'get':
-                
-                $mapper = new $mapper();
+
                 $query  = new Query();
                 $data   = new Data();
                 $options = array (  
@@ -21,8 +20,8 @@
                 
                 $args = $http->getRequestVars();
                 $conditions = (isset($args) && !empty($args)) 
-                    ? $query->initCondition($url, $pager, $mapper, true) : null;
-                
+                    ? $query->initCondition($url, $pager, $mapper) : null;
+
                 $items = $mapper->select($mapper->getTable(), true, $conditions);
                 $data->setData($items);
                 $data->setFormat($http->getHttpAccept());
@@ -33,7 +32,6 @@
                     
             case 'post':
                 
-                $mapper = new $mapper();
                 $query  = new Query();
                 $classInstancied = new $class();
                 $method = 'insert'.$class;

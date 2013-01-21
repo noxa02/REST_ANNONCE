@@ -55,6 +55,7 @@ class Router {
                 case 'Announcement'  : 
                 case 'Announcement_Tags' :
                 case 'Announcement_Apply' :
+                case 'Announcement_Evaluations' :
                        return 'AnnouncementMapper';
                     break;
                 case 'Tags' :

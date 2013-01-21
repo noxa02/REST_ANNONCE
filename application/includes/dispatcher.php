@@ -26,6 +26,16 @@
     } catch(Exception $e) {
         print $e->getMessage(); exit;
     }
+    
+    /**
+     * Check if the user is authorized to make DB request
+     */
+    $mapper = new $mapper();
+    if(!$mapper->exist('USER', 'User', 'userMapper', 
+            ' WHERE login = "'.$http->getUser().'" AND password = "'.$http->getPassword().'"')) {
+        Rest::sendResponse (401);
+    }
+
     if($router->existController($controller)) {
         include_once APPLICATION_PATH . '/controllers/' . $controller.'.controller.php';
     } elseif($controller === '') {

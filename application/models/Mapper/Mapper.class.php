@@ -90,7 +90,8 @@ class Mapper
     public 
     function getlastInsertId($name_ = null) 
     {
-        try {
+        try 
+        {
             
             if(!$this->statement instanceof PDO) {
                 throw new PDOException('$statement isn\'t a PDO Object !');
@@ -115,21 +116,21 @@ class Mapper
     public
     function insert($table, $object, array $arrayFilter = array()) 
     {
-        try 
+        try
         {
             if(is_a($object, 'stdClass')) {
                 $data = (array) $object;
             } else {
                 $data = extractData($object, $arrayFilter);
             }
-            
+
             $stmt = $this->connect();
             foreach($data as $key => $value) {
                 if(!empty($arrayFilter) && in_array($key, $arrayFilter)) {
                     unset($data[$key]);
                 }
             }
-            
+
             $columns = implode(', ', array_keys($data));
             $values  = implode(', :', array_keys($data));
 
@@ -137,13 +138,12 @@ class Mapper
                 unset($data[$column]);
                     $data[":" . $column] = $value;
             }
-            
+
             $query = 'INSERT INTO '.$table.' '.
                    '('.$columns.')  VALUES (:'.$values.')';
-            
+
             return $this->statement->prepare($query)
                                    ->execute($data);
-            
         } catch(PDOException $e) {
             print $e->getMessage(); exit;
         }
@@ -159,24 +159,29 @@ class Mapper
     public 
     function update($table, $object, $conditions = null) 
     {
-        $set = array();
-        $data = extractData($object);
+        try 
+        {
+            $set = array();
+            $data = extractData($object);
 
-        if(isset($data) && empty($data) || is_null($data)) {
-            Rest::sendResponse(400, 'Must 1 or more arguments to execute an update query !');
+            if(isset($data) && empty($data) || is_null($data)) {
+                Rest::sendResponse(400, 'Must 1 or more arguments to execute an update query !');
+            }
+
+            foreach ($data as $column => $value) {
+                unset($data[$column]);
+                $data[":" . $column] = $value;
+                $set[] = $column . " = :" . $column;
+            }
+
+            $query = 'UPDATE '.$table.' SET '. implode(', ', $set).' '.
+                   (($conditions) ? ' WHERE '.$conditions : '');
+
+            return $this->statement->prepare($query)
+                                   ->execute($data); 
+        } catch(PDOException $e) {
+            print $e->getMessage(); exit;
         }
-
-        foreach ($data as $column => $value) {
-            unset($data[$column]);
-            $data[":" . $column] = $value;
-            $set[] = $column . " = :" . $column;
-        }
-
-        $query = 'UPDATE '.$table.' SET '. implode(', ', $set).' '.
-               (($conditions) ? ' WHERE '.$conditions : '');
-        
-        return $this->statement->prepare($query)
-                               ->execute($data); 
     }
     
     /**
@@ -195,7 +200,6 @@ class Mapper
             $conditions = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT', true) : $conditions;
             $query = 'SELECT * FROM '.$table.
                       (($conditions) ? ' '. $conditions  : '') . ((!is_null($limit)) ? $limit : '');
-
             $q = $this->statement->prepare($query);
             $q->execute();
             

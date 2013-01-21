@@ -7,6 +7,8 @@ class RestRequest
     private $files; 
 	private $http_accept;
 	private $method;
+    private $user;
+    private $password;
 
 	public 
     function __construct()
@@ -16,6 +18,8 @@ class RestRequest
         $this->files        = '';
 		$this->http_accept  = (strpos($_SERVER['HTTP_ACCEPT'], 'json')) ? 'json' : 'xml';
 		$this->method       = '';
+        $this->user         = '';
+        $this->password     = ''; 
 	}
 
 	public 
@@ -42,6 +46,18 @@ class RestRequest
 		$this->request_vars = $request_vars;
 	}
 
+    public 
+    function setPassword($password)
+	{
+		$this->password = $password;
+	}
+
+    public 
+    function setUser($user)
+	{
+		$this->user = $user;
+	}
+    
 	public 
     function getData()
 	{
@@ -71,5 +87,17 @@ class RestRequest
 	{
 		return $this->request_vars;
 	}
+    
+	public 
+    function getPassword()
+	{
+		return $this->password;
+	}
+    
+	public 
+    function getUser()
+	{
+		return $this->user;
+	}    
 }
 

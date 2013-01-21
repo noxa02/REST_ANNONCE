@@ -4,7 +4,7 @@ try
     switch($http->getMethod())
     {
         case 'get':
-            $mapper = new $mapper();
+            
             $query  = new Query();
             $data   = new Data();
             $method = 'getFollowers';
@@ -19,11 +19,11 @@ try
             $data->setData($items);
             $data->setFormat($http->getHttpAccept());
             $data->setOptions($options);
-            $data->sendData();      
+            $data->sendData();     
+            
         break;
         case 'post':
 
-            $mapper = new $mapper();
             $query  = new Query();
             $classInstancied = new $class();
             $method = 'goFollow';

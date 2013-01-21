@@ -39,7 +39,7 @@ class UserMapper extends Mapper {
         if(!is_null($conditions) && parent::exist('USER', 'User', 'userMapper', $conditions)) {
             return parent::update($this->getTable(), $user, $conditions);
         } else {
-            Rest::sendResponse(204, 'User does not exist !');
+            Rest::sendResponse(404, 'User does not exist !');
         }          
     } 
     
@@ -61,7 +61,7 @@ class UserMapper extends Mapper {
         if(!is_null($user) && !emptyObjectMethod($user)) {
             return parent::delete($this->getTable(), $conditions);  
         } else {
-            Rest::sendResponse(204, 'User doesn\'t exist !');
+            Rest::sendResponse(404, 'User doesn\'t exist !');
         }
     }
     
@@ -74,7 +74,7 @@ class UserMapper extends Mapper {
     function getFollower(stdClass $objectToFollow) 
     {
         if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$objectToFollow->id_user_follower)) {
-            Rest::sendResponse(204, 'User follower doesn\'t exist !');
+            Rest::sendResponse(404, 'User follower doesn\'t exist !');
         }
 
         $id_user_followed = (isset($objectToFollow->id_user_followed) 
@@ -114,10 +114,10 @@ class UserMapper extends Mapper {
         if(isRequired($requiered, $objectFollow)) {
             if(!parent::exist('USER', 'User', 'userMapper', 
                     ' WHERE id = '.$objectFollow->id_user_follower)) {
-                Rest::sendResponse(204, 'User follower doesn\'t exist !');
+                Rest::sendResponse(404, 'User follower doesn\'t exist !');
             }
             if(!parent::exist('USER', 'User', 'userMapper', 'WHERE id = '.$this->getFirstId())) {
-                Rest::sendResponse(204, 'User follewed doesn\'t exist !');
+                Rest::sendResponse(404, 'User follewed doesn\'t exist !');
             }        
 
             $objectFollow->id_user_followed = $this->getFirstId();
@@ -141,10 +141,10 @@ class UserMapper extends Mapper {
     function stopFollow($id_followed, $id_follower) 
     {
         if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_follower)) {
-            Rest::sendResponse(204, 'User follower doesn\'t exist !');
+            Rest::sendResponse(404, 'User follower doesn\'t exist !');
         }
         if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_followed)) {
-            Rest::sendResponse(204, 'User follewed doesn\'t exist !');
+            Rest::sendResponse(404, 'User follewed doesn\'t exist !');
         }        
 
         $objectFollow = new stdClass();
@@ -162,7 +162,7 @@ class UserMapper extends Mapper {
             }
             
         } else {
-            Rest::sendResponse(204, 'Ressource does not exist !');
+            Rest::sendResponse(404, 'Ressource does not exist !');
         }   
         
         return true;
@@ -177,10 +177,10 @@ class UserMapper extends Mapper {
     function sendMessage(Message $message) 
     {
         if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$message->getIdReceiver())) {
-            Rest::sendResponse(204, 'User receiver doesn\'t exist !');
+            Rest::sendResponse(404, 'User receiver doesn\'t exist !');
         }
         if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$this->getFirstId())) {
-            Rest::sendResponse(204, 'User sender doesn\'t exist !');
+            Rest::sendResponse(404, 'User sender doesn\'t exist !');
         }        
 
         $message->setIdSender($this->getFirstId());

@@ -102,13 +102,14 @@ class Url {
         if(strpos($uriFiltered, '?')) {
 
             $args = explode('?', $uriFiltered);
-
             if(isset($args) && is_array($args) && count($args) > 1) {
                 if(strpos($args[1], '&')) {
                     $temp = explode('&', $args[1]);
                     if(isset($temp) && is_array($temp) && !empty($temp)) {
                         $url->setUrlArguments($temp);            
                     }
+                } else {
+                    $url->setUrlArguments($args[1]);     
                 }
             }         
         }
@@ -144,7 +145,7 @@ class Url {
                 }
             }
         }
-
+        
         return $url;
     }
 }

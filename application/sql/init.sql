@@ -24,7 +24,7 @@ subtitle VARCHAR(80),
 content TEXT NOT NULL,
 post_date TIMESTAMP NOT NULL DEFAULT NOW(),
 conclued BOOLEAN NOT NULL DEFAULT 0,
-type ENUM('Service', 'Logement', 'Objet') NOT NULL, 
+type ENUM('service', 'logement', 'objet') NOT NULL, 
 PRIMARY KEY(id)) ENGINE=InnoDB;
 
 CREATE TABLE PICTURE (

@@ -123,7 +123,7 @@ class PictureMapper extends Mapper {
             return parent::delete($this->getTable(), $conditions);
 
         } else {
-            Rest::sendResponse(204, 'Picture doesn\'t exist !');
+            Rest::sendResponse(404, 'Picture doesn\'t exist !');
         }
     }    
 }

@@ -53,13 +53,15 @@ class Rest {
     
     public static 
     function initProcess()
-    {
+    {   
         $requestMethod      = strtolower($_SERVER['REQUEST_METHOD']);
         $obj                = new RestRequest();
         $data               = array();
         $files              = array();
         $_PUT_VARS          = null;
-            
+        $user               = $_SERVER['PHP_AUTH_USER'];
+        $password           = $_SERVER['PHP_AUTH_PW'];
+        
         switch ($requestMethod) {
                 case 'get':
                         $data = $_GET;
@@ -78,6 +80,8 @@ class Rest {
             
         $obj->setMethod($requestMethod);
         $obj->setRequestVars($data);
+        $obj->setUser($user);
+        $obj->setPassword($password);
         
         if(isset($data['data'])) {
             $obj->setData(json_decode($data['data']));

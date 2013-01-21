@@ -4,7 +4,6 @@
     {
         case 'get':
             
-            $mapper = new $mapper();
             $query  = new Query();
             $data   = new Data();
             $options = array (  

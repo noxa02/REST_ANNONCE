@@ -22,8 +22,13 @@ class Query extends Mapper {
         {
             $where = null;
             $args = $url->getUrlArguments();
-            $urlKeys = (isset($args) && !empty($args)) 
-                       ? array_values($args) : array(); 
+            $args = (isset($args) && !is_array($args)) 
+                       ? array($args) : $args;
+            
+            if(isset($args) && (!empty($args) && !is_null($args))) {
+                $urlKeys = ( is_array($args)) 
+                           ? array_values($args) : array($args);     
+            }
             
             $filters = array('current_page');
             if(!$skipColumns) {
@@ -38,7 +43,7 @@ class Query extends Mapper {
                     }
                 }       
             }
-
+            
             if(isset($urlKeys) && is_array($urlKeys) && !empty($urlKeys)) {
                 foreach($urlKeys as $key => $value) {
                     $temp[] = explode('=', $value, 2);
@@ -69,11 +74,11 @@ class Query extends Mapper {
                 }
 
                 if(isset($set) && is_array($set) && empty($set)) {
-                    $mapper->getPrimaryKey();
+                   //$mapper->getPrimaryKey();
                 }
-                
+
                 $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
-                $where = (isset($conditions['limit']) && isset($set) && count($set) > 0) ? ' WHERE ' : '';
+                $where = (isset($set) && count($set) > 0) ? ' WHERE ' : '';
                 $where .= (isset($set) && !empty($set)) ? implode($operator, $set) : null;
                 
                 if(isset($conditions['order']) && !empty($conditions['order'])) {
@@ -83,16 +88,17 @@ class Query extends Mapper {
                 if(isset($conditions['limit']) && !empty($conditions['limit']) && !is_null($pager)) {
                     
                     $total = (!is_null($pager->getTotalItems())) ? $pager->getTotalItems() : 0;
-                    
                     if($total > 0) {
                         if(!is_null($pager->getCurrentPage()) && !is_null($pager->getLimit())) {
                             $where .= ' LIMIT '.($pager->getCurrentPage() * $pager->getLimit()).', '.$pager->getLimit();
+                        } else {
+                            Rest::sendResponse(400, 'Need "current_page" argument to set an LIMIT !');  
                         }
                     }
                     
                 }
             }
-
+            
             return $where;
 
         } catch(Exception $e) {

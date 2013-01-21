@@ -107,7 +107,7 @@ class AnnouncementMapper extends Mapper {
                 }
             }
         } else {
-            Rest::sendResponse(204, 'Announcement doesn\'t exist !');
+            Rest::sendResponse(404, 'Announcement doesn\'t exist !');
         }
         
         return parent::delete($this->getTable(), $conditions);   
@@ -131,9 +131,9 @@ class AnnouncementMapper extends Mapper {
      * @return boolean True the query is executed | False
      */
     public 
-    function getAnnouncementTags($idAnnouncement) 
+    function getAnnouncementTags($idAnnouncement, $conditions = null) 
     {
-        $conditions = ' WHERE id_announcement = '.$this->getFirstId();
+        $conditions = ' WHERE id_announcement = '.$idAnnouncement;
 
         return parent::select('TO_ASSOCIATE', true, $conditions);
     }
@@ -167,11 +167,11 @@ class AnnouncementMapper extends Mapper {
 
             if(!parent::exist('USER', 'User', 'userMapper', 
                     ' WHERE id = '.$objectApply->id_user)) {
-                Rest::sendResponse(204, 'User doesn\'t exist !');
+                Rest::sendResponse(404, 'User doesn\'t exist !');
             }
             if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
                     ' WHERE id = '.$this->getFirstId())) {
-                Rest::sendResponse(204, 'Announcement doesn\'t exist !');
+                Rest::sendResponse(404, 'Announcement doesn\'t exist !');
             }
 
             $objectApply->id_announcement = $this->getFirstId();
@@ -192,34 +192,60 @@ class AnnouncementMapper extends Mapper {
         }
     }
     
-//    public
-//    function goAssociate(stdClass $object_) {
-//        try {
-//            
-//            if(isset($object_) && !emptyObjectMethod($object_)) {
-//                
-//                $announcementMapper = new AnnouncementMapper();
-//                $announcementMapper->setId($object_->id_announcement);
-//                $announcement = $announcementMapper->selectAnnouncement();
-//                $tagMapper = new TagMapper();
-//                $tagMapper->setId($object_->id_tag);
-//                $tag = $tagMapper->selectTag();
-//
-//                if(!is_null($announcement->getId()) && !is_null($tag->getId())) {
-//                     parent::insert('TO_ASSOCIATE', $object_);
-//                } elseif(is_null($announcement->getId())) {
-//                    throw new Exception('Announcement is inexistant !');
-//                } elseif(is_null($tag->getId())) {
-//                    throw new Exception('Tag is inexistant !');
-//                } 
-//                
-//            } elseif(empty ($id_announcement_)) {
-//                throw new Exception('Id announcement is required !');
-//            } elseif(empty ($id_tag_)) {
-//                throw new Exception('Id tag is required !');
-//            }
-//        } catch(Exception $e) {
-//            print $e->getMessage(); exit;
-//        } 
-//    }
+    public
+    function goAssociate(stdClass $objectAssociate) 
+    {
+        $requiered = array('id_tag');
+        if(isRequired($requiered, $objectAssociate)) {
+
+            if(!parent::exist('TAG', 'Tag', 'tagMapper', 
+                    ' WHERE id = '.$objectAssociate->id_tag)) {
+                Rest::sendResponse(404, 'Tag doesn\'t exist !');
+            }
+            if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
+                    ' WHERE id = '.$this->getFirstId())) {
+                Rest::sendResponse(404, 'Announcement doesn\'t exist !');
+            }
+
+            $objectAssociate->id_announcement = $this->getFirstId();
+
+            if(!parent::exist('TO_ASSOCIATE', 'stdClass', 'announcementMapper', 
+                    ' WHERE id_tag = '.$objectAssociate->id_tag.
+                    ' AND id_announcement = '.$objectAssociate->id_announcement)) {
+                return parent::insert('TO_ASSOCIATE', $objectAssociate);
+            } else {
+                Rest::sendResponse(409, 'Announcement is already associate with this tag !');
+            }         
+        }
+    }
+    
+    public
+    function goEvaluate(stdClass $objectEvaluate) 
+    {
+        $requiered = array('id_user', 'mark');
+        if(isRequired($requiered, $objectEvaluate)) {
+
+            if(!parent::exist('USER', 'User', 'userMapper', 
+                    ' WHERE id = '.$objectEvaluate->id_user)) {
+                Rest::sendResponse(404, 'Tag doesn\'t exist !');
+            }
+            if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
+                    ' WHERE id = '.$this->getFirstId())) {
+                Rest::sendResponse(404, 'Announcement doesn\'t exist !');
+            }
+
+            $objectEvaluate->id_announcement = $this->getFirstId();
+
+            if(!parent::exist('TO_EVALUATE', 'stdClass', 'announcementMapper', 
+                    ' WHERE id_user = '.$objectEvaluate->id_user.
+                    ' AND id_announcement = '.$objectEvaluate->id_announcement)) {
+                return parent::insert('TO_EVALUATE', $objectEvaluate);
+            } else {
+                Rest::sendResponse(409, 
+                        'An mark already exist for : 
+                            announcement -> id = '.$objectEvaluate->id_announcement.'
+                            user -> id = '.$objectEvaluate->id_user.' !');
+            }         
+        }
+    }
 }
