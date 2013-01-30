@@ -54,13 +54,19 @@ class Rest {
     public static 
     function initProcess()
     {   
+        if (isset($_SERVER['HTTP_AUTHORIZATION']) && preg_match('/Basic\s+(.*)$/i', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+            list($name, $password) = explode(':', base64_decode($matches[1]));
+            $_SERVER['PHP_AUTH_USER'] = strip_tags($name);
+            $_SERVER['PHP_AUTH_PW'] = strip_tags($password);
+        }
+
         $requestMethod      = strtolower($_SERVER['REQUEST_METHOD']);
         $obj                = new RestRequest();
         $data               = array();
         $files              = array();
         $_PUT_VARS          = null;
-        $user               = $_SERVER['PHP_AUTH_USER'];
-        $password           = $_SERVER['PHP_AUTH_PW'];
+        $user               = (isset($_SERVER['PHP_AUTH_USER'])) ? $_SERVER['PHP_AUTH_USER'] : '';
+        $password           = (isset($_SERVER['PHP_AUTH_PW'])) ? sha1_password($_SERVER['PHP_AUTH_PW']) : '';
         
         switch ($requestMethod) {
                 case 'get':

@@ -31,7 +31,7 @@
             break;
                     
             case 'post':
-                
+
                 $query  = new Query();
                 $classInstancied = new $class();
                 $method = 'insert'.$class;

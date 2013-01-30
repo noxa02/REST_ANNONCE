@@ -1,12 +1,13 @@
 <?php
     $router = new Router();
+
     /**
      * Parse the URL and clean it.
      */
      $url = new Url();
      $uriParts = $url->parserUrl(); 
      $url = (($uri = $url->getUri()) && !empty($uri))  
-            ? $url->initUrlClass($uri, $uriParts) : throwException('A problem has occured during the initizialition Url Class');
+            ? $url->initUrl($uri, $uriParts) : throwException('A problem has occured during the initizialition Url Class');
      
     /**
      * Initializer object URL to get argument of the URL 
@@ -18,7 +19,7 @@
     $mapper = $router->getMapper($model);
     $class = $router->getNameByMapper($mapper);
     $pager = new Pager();
-    
+
     try 
     {
         if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');

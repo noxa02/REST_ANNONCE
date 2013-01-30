@@ -14,8 +14,8 @@
                 );
 
                 $conditions = ' WHERE '.$mapper->getPrimaryKey().' = '.$url->getIdFirstPart();
-                $items = $mapper->select($mapper->getTable(), false, $conditions);
-                $data->setData($items);
+                $item = $mapper->select($mapper->getTable(), false, $conditions);
+                $data->setData($item);
                 $data->setFormat($http->getHttpAccept());
                 $data->setOptions($options);
                 $data->sendData();               

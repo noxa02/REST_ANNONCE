@@ -248,4 +248,35 @@ class AnnouncementMapper extends Mapper {
             }         
         }
     }
+
+    public
+    function removeApply($id_announcement, $id_user) 
+    {
+        if(!parent::exist('ANNOUNCEMENT', 'Announcement', 'announcementMapper', 
+                ' WHERE id = '.$id_announcement)) {
+            Rest::sendResponse(404, 'Announcement doesn\'t exist !');
+        }
+        if(!parent::exist('USER', 'User', 'userMapper', ' WHERE id = '.$id_user)) {
+            Rest::sendResponse(404, 'User doesn\'t exist !');
+        }        
+
+        $apply = $this->getApply($id_announcement, $id_user);
+        print_log($apply); exit;
+        if(isset($apply) && !empty($apply)) {
+
+            $conditions = ' WHERE id_announcement = '.$id_announcement.' AND '.
+                                 'id_user = '.$id_user;
+            
+            if(!parent::delete('TO_FOLLOW', $conditions)) {
+                return false;
+            }
+            
+        } else {
+            Rest::sendResponse(404, 'Ressource does not exist !');
+        }   
+        
+        return true;
+    }
+       
 }
+

@@ -29,8 +29,8 @@ class Mapper
         global $http;
         $this->files = $http->getFiles();
         if(func_num_args() == 1 && is_object(func_get_arg(0))) {
-            $object_ = func_get_arg(0);
-            $this->foreignTable =  $object_;
+            $object = func_get_arg(0);
+            $this->foreignTable =  $object;
         }
     }
 
@@ -200,6 +200,7 @@ class Mapper
             $conditions = (strpos($conditions, 'LIMIT')) ? strstr($conditions, 'LIMIT', true) : $conditions;
             $query = 'SELECT * FROM '.$table.
                       (($conditions) ? ' '. $conditions  : '') . ((!is_null($limit)) ? $limit : '');
+            
             $q = $this->statement->prepare($query);
             $q->execute();
             

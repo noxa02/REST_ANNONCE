@@ -28,6 +28,9 @@ class Router {
              case 'Incoming' :
                     return 'singular';
                  break;
+             case '' :
+                 return '';
+                 break;
              default:
                  return $folderAssociation.$modelName;
                  break;
@@ -69,6 +72,7 @@ class Router {
                  break;
                 case 'Pictures' :
                 case 'Picture'  :
+                case 'Picture_Resize' :
                        return 'PictureMapper';
                     break;
                 case 'Comments' :
@@ -81,6 +85,7 @@ class Router {
                        return 'IncomingMapper';
                     break;    
                 default:
+                    return 'Mapper';
                     break;
             }
         } catch (Exception $e) {
@@ -125,7 +130,7 @@ class Router {
             }
         }
 
-        if(!is_null($secondModel)) {
+    if(!is_null($secondModel)) {
 
             if(!is_null($secondId)) {
                 if(strrchr($secondModel, 's')) {

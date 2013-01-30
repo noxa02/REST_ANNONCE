@@ -24,7 +24,7 @@ class Query extends Mapper {
             $args = $url->getUrlArguments();
             $args = (isset($args) && !is_array($args)) 
                        ? array($args) : $args;
-            
+
             if(isset($args) && (!empty($args) && !is_null($args))) {
                 $urlKeys = ( is_array($args)) 
                            ? array_values($args) : array($args);     
@@ -54,27 +54,33 @@ class Query extends Mapper {
             if(isset($conditions) && is_array($conditions) && !empty($conditions)) {
                 
                 $i = 0;
-                $filters = array('limit', 'current_page', 'order', 'operator', 'main_key');
+                $filters = array('limit', 'current_page', 'order', 'operator', 'main_key', 'date_operator', 'post_date_end');
+                $exceptions = array('post_date_begin');
                 $set = array();
                 foreach ($conditions as $condition => $value) {
-                    if(!in_array($condition, $filters)) { 
-                            if(isset($columns) && !empty($columns)) {
+                    if(!in_array($condition, $filters) && !in_array($conditions, $exceptions)) { 
+                            if(isset($columns) && !empty($columns) && !in_array($condition, $exceptions)) {
                                 if(!in_array($condition, $columns)) throwException ('Column '.$condition.' doesn\'t exist in the table '.$mapper->getTable().'!');
                             }
                             $value = (isset($conditions['operator']) && $conditions['operator'] == 'LIKE') 
                                 ? '%'.urldecode($value).'%' : urldecode($value);
                             $value = (is_numeric($value)) ? $value : '"'.$value.'"';
-                            if(isset($conditions['operator']) && $conditions['operator'] == 'LIKE') {
+                            if($condition == 'post_date' || $condition == 'post_date_begin') {
+                                if(isset($conditions['date_operator'])) {
+                                    $set[$condition] = $condition.' '.urldecode($conditions['date_operator']).' '.$value;
+                                } else if(isset($conditions['post_date_begin']) 
+                                        && isset($conditions['post_date_end']) && $condition == 'post_date_begin') {
+                                    $set[$condition] = 'post_date BETWEEN '.
+                                    'DATE_FORMAT('.$value.', "%Y-%m-%d-%H-%i-%s") AND '.
+                                    'DATE_FORMAT("'.urldecode($conditions['post_date_end']).'", "%Y-%m-%d-%H-%i-%s")';
+                                }
+                            } else if(isset($conditions['operator']) && $conditions['operator'] == 'LIKE') {
                                 $set[$condition] = $condition.' LIKE '.$value;   
                             } else {
                                 $set[$condition] = $condition.' = '.$value;   
                             }     
                             $i++; 
                     }
-                }
-
-                if(isset($set) && is_array($set) && empty($set)) {
-                   //$mapper->getPrimaryKey();
                 }
 
                 $operator = (isset($conditions['separator'])) ? $conditions['separator'] : ' AND '; 
@@ -92,7 +98,7 @@ class Query extends Mapper {
                         if(!is_null($pager->getCurrentPage()) && !is_null($pager->getLimit())) {
                             $where .= ' LIMIT '.($pager->getCurrentPage() * $pager->getLimit()).', '.$pager->getLimit();
                         } else {
-                            Rest::sendResponse(400, 'Need "current_page" argument to set an LIMIT !');  
+                            $where .= ' LIMIT '.(0 * $pager->getLimit()).', '.$pager->getLimit();
                         }
                     }
                     

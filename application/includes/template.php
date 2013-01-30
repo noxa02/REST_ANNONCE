@@ -27,23 +27,10 @@ function sha1_password($password)
     
     return sha1(sha1($password.$GDS_2).sha1($GDS_1.$GDS_2));
 }
-/**
- * @todo Check if the request had the right
- * @return type
- */
-function is_admin() {
-  $result = false;
-  
-  if (isset($_SERVER["PHP_AUTH_USER"])) {
-      
-    $result = $_SERVER["PHP_AUTH_USER"] == "admin" && $_SERVER["PHP_AUTH_PW"] == "admin";
-  }
-  
-  return $result;
-}
+
 /**
  * 
- * @param class $object_
+ * @param class $object
  * @param array $arrayFilter
  * @param boolean $multiple
  * @return array
@@ -90,10 +77,10 @@ $data = null;
 }
 /**
  * 
- * @param array $data_
- * @param object $object_
+ * @param array $data
+ * @param object $object
  * @param boolean $return (if we want a return = true)
- * @return object $object_
+ * @return object $object
  * Extract array values to return an initialized object
  */
 function initObject($data, $object, $return = false, $initObject = true, $opts = array()) {

@@ -96,11 +96,10 @@ class Url {
     }
     
     public
-    function initUrlClass($uriFiltered, $uriParts) 
+    function initUrl($uriFiltered, $uriParts) 
     {
         $url = new Url;
         if(strpos($uriFiltered, '?')) {
-
             $args = explode('?', $uriFiltered);
             if(isset($args) && is_array($args) && count($args) > 1) {
                 if(strpos($args[1], '&')) {
@@ -115,6 +114,7 @@ class Url {
         }
 
         $uriParts  = refreshArrayKeys($uriParts);
+        
         foreach ($uriParts as $key => $value) {
             /**
              * Check if url contains some arguments 
@@ -127,6 +127,7 @@ class Url {
              * Use the object URL and set the different parts of the URL 
              * to associate attributes.
              */
+
             if(!is_string($value) && is_numeric($value) || !is_string($value)) {
                 Rest::sendResponse(400, 'First Argument must be a string !');  
             } elseif($key === 0 && !is_numeric($value) && is_string($value)) { 

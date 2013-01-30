@@ -11,6 +11,8 @@ class Picture {
      private $_tmp_name;
      private $_size;
      private $_type;
+     private $_width;
+     private $_height;
      private $_id_announcement;
      
     /**
@@ -65,6 +67,18 @@ class Picture {
 	{
 		return $this->_type;
 	}
+
+	public 
+    function getWidth()
+	{
+		return $this->_width;
+	}
+    
+	public 
+    function getHeight()
+	{
+		return $this->_height;
+	}    
     
     public
     function getIdAnnouncement() {
@@ -124,6 +138,18 @@ class Picture {
     function setType($type_)
 	{
 		$this->_type = $type_;
+	}
+    
+	public 
+    function setWidth($width)
+	{
+		$this->_width = $width;
+	}
+    
+	public 
+    function setHeight($height)
+	{
+		$this->_height = $height;
 	}
     
     public

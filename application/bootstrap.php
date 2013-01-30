@@ -9,12 +9,14 @@
         ini_set('log_errors', 'On');
         ini_set('error_log', PATH_ROOT.'/tmp/logs/error.log');
     }  
+    
     require_once 'XML/Util.php';
     require_once 'XML/Serializer.php';
     require_once 'XML/Unserializer.php';
     require_once 'PHPUnit.php';
 
     include_once APPLICATION_PATH.'/includes/template.php';
+    include_once APPLICATION_PATH.'/library/Imagine/lib/bootstrap.php';
     include_once APPLICATION_PATH.'/includes/autoloader.php';
 
     if(UNITARY_TEST === false) {

@@ -19,15 +19,14 @@ class PictureMapper extends Mapper {
         try 
         {   
             $file = (method_exists('Mapper','getFiles')) ? $this->getFiles() : array();
-
             if(!$skipInit) {
-                
                 if(!empty($file)) {
-
                     $keys = array_keys($file);
                     $file = $file[$keys[0]];
-
+                    $dimension = getimagesize($file['tmp_name']);
                     $picture = initObject($file, $picture, true, false);
+                    $picture->setWidth($dimension[0]);
+                    $picture->setHeight($dimension[1]);
                     $pictureExt = substr(strrchr($picture->getType(), "/"), 1); 
                     $picture->setPath('/announcement/original/');
                     $picture->setTitle(uniqid()); 
@@ -40,7 +39,6 @@ class PictureMapper extends Mapper {
                 $picture->getTmpName(), 
                 UPLOAD_PATH .'/announcement/original/'.$picture->getTitle().'.'.$picture->getExtension()
             )) {
-                
                 return parent::insert($this->getTable(), $picture, array('tmp_name', 'size', 'type', 'file_title'));   
 
             } else {
@@ -125,43 +123,49 @@ class PictureMapper extends Mapper {
         } else {
             Rest::sendResponse(404, 'Picture doesn\'t exist !');
         }
-    }    
-}
+    }
+    
+    public
+    function resizePicture(Picture $picture, $height, $width) 
+    {
+        $conditions = ' WHERE id = '.$this->getFirstId();
+        $original_picture = $this->select($this->getTable(), false, $conditions);
+        $picture = initObject($original_picture, $picture, true, false);
+        
+        if(!empty($width) && !empty($height)) {
+            
+            $picture->setWidth($width);
+            $picture->setHeight($height);
+            $conditions = ' WHERE id_announcement = '.$picture->getIdAnnouncement().
+                            ' AND width = '.$picture->getWidth().' AND height = '.$picture->getHeight();
+            
+            if(!parent::exist('PICTURE', 'Picture', 'pictureMapper', $conditions)) {
+                
+                $extension = $picture->getExtension();
+                $title = $picture->getTitle();
+                $folder = $width.'x'.$height;
+                $path = $picture->getPath();
+                $path_resize = UPLOAD_PATH.'/announcement/'.$folder.'/'.$title.'.'.$extension;
+                
+                if(!file_exists(UPLOAD_PATH.'/announcement/'.$folder)) {
+                    mkdir(UPLOAD_PATH.'/announcement/'.$folder, 0755);
+                }
+                
+                $imagine = new Imagine\Gd\Imagine();
+                $size = new Imagine\Image\Box($width, $height);
+                $imagine->open(UPLOAD_PATH.$path.$title.'.'.$extension)
+                        ->resize($size)
+                        ->save(UPLOAD_PATH.'/announcement/'.$folder.'/'.$title.'.'.$extension, array('quality' => 72));
 
-//	if(!empty($file)):
-//	  	if ($file['error'] <= 0):
-//	    	if ($file['size'] <= 2097152):
-//	        $avatar = $file['name'];
-//			$extensionList = array('jpg' => 'image/jpeg', 
-//								   'jpeg' => 'image/jpeg', 
-//								   'png' => 'image/png', 
-//								   'gif' => 'image/gif');
-//			$extensionListIE = array('jpg' => 'image/pjpg', 
-//									 'jpeg'=>'image/pjpeg'); 
-//
-//			$extension = explode('.', $avatar);
-//			$extension = strtolower($extension[1]);
-//				if ($extension == 'jpg' 
-//					|| $extension == 'jpeg' 
-//						|| $extension == 'pjpg' 
-//							|| $extension == 'pjpeg' 
-//								|| $extension == 'gif' 
-//									|| $extension == 'png'):
-//					$_avatar = getimagesize($file['tmp_name']);
-//					if($_avatar['mime'] == $extensionList[$extension]  
-//						|| $_avatar['mime'] == $extensionListIE[$extension]):
-//						$_avatarR = imagecreatefrompng($file['tmp_name']);
-//						$widthAvatar = getimagesize($file['tmp_name']);
-//						$newWidth = 100;
-//						$newHeigth = 100;
-//						$reduce = (($newWidth * 100) / $widthAvatar[0] );
-//						$newWidth = (($widthAvatar[1] * $reduce)/100 );
-//
-//						$newAvatar = imagecreatetruecolor($newWidth , $newHeigth);
-//						imagecopyresampled($newAvatar , $_avatarR, 0, 0, 0, 0, $newWidth, $newHeigth, $widthAvatar[0],$widthAvatar[1]);
-//						imagedestroy($_avatarR);
-//						imagepng($newAvatar , UPLOAD_FILES.'/avatar/'.strtolower($_user->getLogin()).'.'.$extension, 9);
-//					endif;
-//				endif;
-//			endif;
-//		endif;
+                if(file_exists($path_resize)) {
+                    $picture->setPath('/announcement/'.$folder.'/');
+                    $picture->setId(NULL);
+                    return parent::insert($this->getTable(), $picture);   
+                }
+                
+            } else {
+                Rest::sendResponse(409, 'Picture already exist !');
+            }
+        }
+    }
+}

@@ -13,6 +13,8 @@ class User {
     private $_firstname;
     private $_mail;
     private $_address;
+    private $_city;
+    private $_zipcode;
     private $_phone;
     private $_portable;
     private $_subscriptionDate;
@@ -64,6 +66,18 @@ class User {
     function getAddress()
 	{
 		return $this->_address;
+	}
+
+    public 
+    function getCity()
+	{
+		return $this->_city;
+	}
+    
+    public 
+    function getZipcode()
+	{
+		return $this->_zipcode;
 	}
     
     public 
@@ -150,6 +164,18 @@ class User {
     function setAddress($address_)
     {
             $this->_address = $address_;
+    }
+    
+    public 
+    function setCity($city)
+    {
+            $this->_city = $city;
+    }
+    
+    public 
+    function setZipcode($zipcode)
+    {
+            $this->_zipcode = $zipcode;
     }
     
     public 
