@@ -11,7 +11,9 @@ class Announcement {
     private $_subtitle;
     private $_content;
     private $_post_date;
+    private $_type;
     private $_conclued;
+    private $_id_user;
     private $_pictures; 
     
 /**
@@ -54,6 +56,18 @@ class Announcement {
 		return $this->_conclued;
 	}
 
+	public 
+    function getType()
+	{
+		return $this->_type;
+	}
+    
+	public 
+    function getIdUser()
+	{
+		return $this->_id_user;
+	}
+    
     public 
     function getPictures()
 	{
@@ -92,6 +106,18 @@ class Announcement {
 		$this->_post_date = $postDate_;
 	}
 
+	public 
+    function setType($type)
+	{
+		$this->_type = $type;
+	}
+    
+	public 
+    function setIdUser($id_user)
+	{
+		$this->_id_user = $id_user;
+	}
+    
     public 
     function setConclued($conclued_)
 	{

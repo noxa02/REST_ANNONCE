@@ -24,7 +24,6 @@
             case 'delete':
                 
                 $method = 'delete'.$class;
-
                 if($mapper->$method()) {
                     Rest::sendResponse(200);
                 }

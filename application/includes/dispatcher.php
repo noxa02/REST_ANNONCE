@@ -19,7 +19,7 @@
     $mapper = $router->getMapper($model);
     $class = $router->getNameByMapper($mapper);
     $pager = new Pager();
-
+    
     try 
     {
         if(!$router->existMapper($mapper)) throw new Exception('Mapper doesn\'t exist !');

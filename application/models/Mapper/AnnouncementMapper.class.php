@@ -49,6 +49,7 @@ class AnnouncementMapper extends Mapper {
                 }
             }   
             
+            Rest::sendResponse(201, $announcement->getId());
             return true;
         }
     } 
@@ -261,7 +262,6 @@ class AnnouncementMapper extends Mapper {
         }        
 
         $apply = $this->getApply($id_announcement, $id_user);
-        print_log($apply); exit;
         if(isset($apply) && !empty($apply)) {
 
             $conditions = ' WHERE id_announcement = '.$id_announcement.' AND '.

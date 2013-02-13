@@ -3,7 +3,7 @@
     switch($http->getMethod())
     {
             case 'get':
-
+                
                 $query  = new Query();
                 $data   = new Data();
                 $options = array (  
@@ -21,7 +21,6 @@
                 $args = $http->getRequestVars();
                 $conditions = (isset($args) && !empty($args)) 
                     ? $query->initCondition($url, $pager, $mapper) : null;
-
                 $items = $mapper->select($mapper->getTable(), true, $conditions);
                 $data->setData($items);
                 $data->setFormat($http->getHttpAccept());
