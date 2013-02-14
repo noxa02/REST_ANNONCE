@@ -17,7 +17,7 @@
 
             if(!emptyObject($objectApply)) {
                 if($mapper->goApply($objectApply)) {
-                    Rest::sendResponse(200);   
+                    Rest::sendResponse(201);   
                 }       
             } else {
                 Rest::sendResponse(400, 'Need arguments to POST data !');

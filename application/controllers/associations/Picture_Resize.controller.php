@@ -12,6 +12,7 @@
                 'indent'         => '     ',  
                 'addDecl'        => false,  
                 "defaultTagName" => strtolower($class),
+                "encoding"        => "UTF-8",
                  XML_SERIALIZER_OPTION_RETURN_RESULT => true,
             );
             

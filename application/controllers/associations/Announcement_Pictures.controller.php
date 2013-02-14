@@ -28,11 +28,12 @@
                 else if ($http->getHttpAccept() == 'xml')  { 
 
                     $options = array (  
-                        'indent' => '     ',  
-                        'addDecl' => false,  
-                        XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                        "defaultTagName"     => "user",
-                    );  
+                        'indent'         => '     ',  
+                        'addDecl'        => false,  
+                        "defaultTagName" => strtolower($class),
+                        "encoding"        => "UTF-8",
+                         XML_SERIALIZER_OPTION_RETURN_RESULT => true,
+                    );
 
                     $serializer = new XML_Serializer($options);  
                     Rest::sendResponse(200, $serializer->serialize($picturesArray), 'application/xml');  

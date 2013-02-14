@@ -10,8 +10,9 @@
                     'indent'         => '     ',  
                     'addDecl'        => false,  
                     "defaultTagName" => strtolower($class),
+                    "encoding"        => "UTF-8",
                      XML_SERIALIZER_OPTION_RETURN_RESULT => true,
-                );
+                );  
 
                 $conditions = ' WHERE '.$mapper->getPrimaryKey().' = '.$url->getIdFirstPart();
                 $item = $mapper->select($mapper->getTable(), false, $conditions);
@@ -30,18 +31,18 @@
                 
             break;
             case 'put':
-
-               $classInstancied = new $class();
-               $args = $http->getRequestVars();
-               $object = initObject($args, $classInstancied, true);
-
-               if(!emptyObjectMethod($object)) {
-                   if($mapper->update($mapper->getTable(), $object)) {
-                       Rest::sendResponse(200);
-                   }
-               } else {
-                   Rest::sendResponse(400, 'Arguments are requiered to make a UPDATE !');
-               }
+                
+                $method = 'update'.$class;
+                $classInstancied = new $class();
+                $args = $http->getRequestVars();
+                $object = initObject($args, $classInstancied, true);
+                if(!emptyObjectMethod($object)) {
+                    if($mapper->$method($object)) {
+                        Rest::sendResponse(200);
+                    }
+                } else {
+                    Rest::sendResponse(400, 'Arguments are requiered to make a UPDATE !');
+                }
 
             break;
             default :

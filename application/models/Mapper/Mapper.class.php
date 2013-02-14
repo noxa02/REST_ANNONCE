@@ -175,7 +175,7 @@ class Mapper
             }
 
             $query = 'UPDATE '.$table.' SET '. implode(', ', $set).' '.
-                   (($conditions) ? ' WHERE '.$conditions : '');
+                   (($conditions) ? ' '.$conditions : '');
 
             return $this->statement->prepare($query)
                                    ->execute($data); 

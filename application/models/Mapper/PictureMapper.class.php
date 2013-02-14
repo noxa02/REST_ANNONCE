@@ -210,11 +210,11 @@ class PictureMapper extends Mapper {
 
         if(!is_null($picture) && !emptyObjectMethod($picture)) {
 
-            $path = $picture->getPath(); 
-            $title = $picture->getTitle();
-            $ext = $picture->getExtension();
+            $opath = $picture->getPath(); 
+            $otitle = $picture->getTitle();
+            $oext = $picture->getExtension();
              
-            $conditionsChilds = ' WHERE title = "'.$title.'" AND path != "'.$path.'"';
+            $conditionsChilds = ' WHERE title = "'.$otitle.'" AND path != "'.$opath.'"';
             $childs_picture = $this->select($this->getTable(), true, $conditionsChilds);
             if(isset($childs_picture) && !empty($childs_picture)) {
                 foreach ($childs_picture as $key => $picture) {
@@ -232,11 +232,10 @@ class PictureMapper extends Mapper {
                     }
                 }
             }
-            
+           
             if(parent::delete($this->getTable(), $conditions)) {
-                //Remove to the pictures folders
-                if(file_exists(UPLOAD_PATH.$path.$title.'.'.$ext)) {
-                    unlink(UPLOAD_PATH.$path.$title.'.'.$ext);
+                if(file_exists(UPLOAD_PATH.$opath.$otitle.'.'.$oext)) {
+                    unlink(UPLOAD_PATH.$opath.$otitle.'.'.$oext);
                 }
             }
 

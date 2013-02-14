@@ -66,7 +66,7 @@ class AnnouncementMapper extends Mapper {
         if(method_exists($this, 'getId') && !is_null($this->getId()) && is_null($conditions)) {
             $conditions = ' WHERE id = '.$this->getId();
         }
-
+   
         return parent::update($this->getTable(), $announcement, $conditions);  
     } 
     
@@ -146,11 +146,11 @@ class AnnouncementMapper extends Mapper {
      * @return boolean
      */
     public
-    function getApply($user, $announcement) 
+    function getApply($id_user, $id_announcement) 
     {
         $conditions = ' WHERE id IN (SELECT id_announcement '.
-                        'FROM TO_APPLY WHERE id_announcement = '.$announcement->getId().'
-                                             AND id_user = '.$user->getId().')';
+                        'FROM TO_APPLY WHERE id_announcement = '.$id_announcement.'
+                                             AND id_user = '.$id_user.')';
         
         return $this->select($this->getTable(), false, $conditions);
     }
@@ -177,19 +177,13 @@ class AnnouncementMapper extends Mapper {
 
             $objectApply->id_announcement = $this->getFirstId();
 
-            if(!parent::exist('TO_APPLY', 'stdClass', 'announcementMapper', 
+            if(parent::exist('TO_APPLY', 'stdClass', 'announcementMapper', 
                     ' WHERE id_user = '.$objectApply->id_user.
                     ' AND id_announcement = '.$objectApply->id_announcement)) {
                 Rest::sendResponse(409, 'Apply is already existing !');
             }         
 
-            $user = $this->getApply($objectApply);
-
-            if(isset($user) && is_null($user->getId())) {
-                 return parent::insert('TO_APPLY', $objectApply);
-            } else {
-                Rest::sendResponse(409, 'User have already apply for this announcement !');
-            }  
+            return parent::insert('TO_APPLY', $objectApply);
         }
     }
     
